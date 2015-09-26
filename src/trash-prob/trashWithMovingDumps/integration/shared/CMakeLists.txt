@@ -15,6 +15,13 @@ set(VRPTOOLS_VERSION_MAJOR 0)
 set(VRPTOOLS_VERSION_MINOR 1)
 set(VRPTOOLS_VERSION_PATCH 0)
 
+include_directories(
+    "../../../initTrash"
+    "../../../../baseClasses"
+    "../../solverTrash"
+    "../../../baseTrash"
+)
+
 #set(CMAKE_CPP_FLAGS "-Wall -ansi -pedantic -Wno-long-long -Wconversion -Wformat=2 -Wshadow -Wcast-qual -Wwrite-strings -fPIC")
 #set(CMAKE_CPP_FLAGS_DEBUG "-g")
 #set(CMAKE_CPP_FLAGS_RELEASE "-O2")

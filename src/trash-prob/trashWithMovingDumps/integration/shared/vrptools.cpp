@@ -1,5 +1,6 @@
 #include "vrptools.h"
 
+/*
 void VRPTools::setx(int newx) { 
     myx = newx; 
 }
@@ -7,3 +8,4 @@ void VRPTools::setx(int newx) {
 int  VRPTools::getx() { 
     return myx; 
 }
+*/
