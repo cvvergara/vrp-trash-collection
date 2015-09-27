@@ -7,17 +7,23 @@
 #include <math.h>
 #include <stdio.h>
 
-#ifdef DOSTATS
-#include "timer.h"
-#endif
-
 #ifdef DOVRPLOG
 #include "logger.h"
+#endif
+
+#ifdef DOSTATS
+#include "timer.h"
+#include "stats.h"
 #endif
 
 #ifdef OSRMCLIENT
 #include "osrmclient.h"
 #endif
+
+#include "logger.h"
+#include "timer.h"
+#include "stats.h"
+#include "osrmclient.h"
 
 #include "trashconfig.h"
 #include "truckManyVisitsDump.h"
