@@ -88,3 +88,5 @@ add_library (${VRPTOOLS_LIBRARY_NAME} SHARED ${VRPTOOLS_SOURCES})
 #set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CPP)
 set_target_properties(${VRPTOOLS_LIBRARY_NAME} PROPERTIES VERSION ${VRPTOOLS_VERSION_STRING})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${Threads_LIBRARIES} ${OSRM_LIBRARIES})
+
+add_subdirectory (tests)
