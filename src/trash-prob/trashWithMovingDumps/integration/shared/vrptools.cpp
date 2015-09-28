@@ -1,6 +1,8 @@
 #include "vrptools.h"
 
-
+#include "trashconfig.h"
+#include "truckManyVisitsDump.h"
+#include "fleetOpt.h"
 
 /*
 void VRPTools::setx(int newx) { 
@@ -16,8 +18,8 @@ VRPTools::VRPTools()
 {
 #ifdef DOVRPLOG
   if ( not google::IsGoogleLoggingInitialized() ) {
-    FLAGS_log_dir = "./logs/";
-    google::InitGoogleLogging( "vrp_trash_collection" );
+    FLAGS_log_dir = "/tmp/";
+    google::InitGoogleLogging( "libvrptools" );
     FLAGS_logtostderr = 0;
     FLAGS_stderrthreshold = google::FATAL;
     FLAGS_minloglevel = google::INFO;

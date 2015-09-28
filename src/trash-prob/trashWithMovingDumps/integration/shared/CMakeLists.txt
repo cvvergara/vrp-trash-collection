@@ -11,6 +11,10 @@ This process created the file `CMakeCache.txt' and the directory
 `CMakeFiles'. Please delete them.")
 endif()
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+include(FindPkgConfig)
+
 set(VRPTOOLS_LIBRARY_NAME "vrptools")
 set(DEPS_LIBRARY_NAME "deps")
 
@@ -40,6 +44,10 @@ if(VRPMINTRACE)
   add_definitions(-DVRPMINTRACE)
 endif()
 
+if(OSRMCLIENTTRACE)
+  add_definitions(-DOSRMCLIENTTRACE)
+endif()
+
 include_directories(
     "../../../initTrash"
     "../../../../baseClasses"
@@ -53,16 +61,6 @@ set(CMAKE_CPP_FLAGS "-Wall -fPIC")
 set(CMAKE_CPP_FLAGS_DEBUG "-g")
 set(CMAKE_CPP_FLAGS_RELEASE "-O2")
 
-# Append the source files here
-set (VRPTOOLS_SOURCES
-  vrptools.cpp
-)
-
-# Append the header files here. this will get copied to include directory
-set (VRPTOOLS_INCLUDE_FILES
-  vrptools.h
-)
-
 ### Find
 ## Boost
 set(BOOST_COMPONENTS date_time filesystem iostreams program_options
@@ -75,6 +73,10 @@ if(NOT Boost_FOUND)
 endif()
 ##
 
+## Threads
+find_package(Threads REQUIRED)
+##
+
 ## OSRM
 # Office
 #set(OSRM_SOURCE_PATH "/disco_local/fpacheco/im/osrm-backend")
@@ -83,10 +85,148 @@ set(OSRM_SOURCE_PATH "/home/fpacheco/workspace/idm/right-side/osrm-backend")
 set(OSRM_LIBRARIES ${OSRM_SOURCE_PATH}/build/libOSRM.a)
 ##
 
+## Glog
+find_package(Glog REQUIRED)
+##
 
-add_library (${VRPTOOLS_LIBRARY_NAME} SHARED ${VRPTOOLS_SOURCES})
+## CURL
+find_package(CURL REQUIRED)
+##
+
+## CURLPP via PKG
+if (UNIX)
+  PKG_CHECK_MODULES(CURLPP curlpp)
+  if (CURLPP_FOUND EQUAL 1)
+    MESSAGE(STATUS "curlpp found" )
+  else()
+    MESSAGE(FATAL_ERROR "curlpp library NOT found (required)!")
+  endif()
+endif(UNIX)
+###
+
+
+
+# base trash
+set (BASECLASSES_SOURCES
+    ../../../../baseClasses/basictypes.cpp
+    #../../../../baseClasses/config.cpp
+    ../../../../baseClasses/md5.cpp
+    ../../../../baseClasses/move.cpp
+    ../../../../baseClasses/node.cpp
+    ../../../../baseClasses/osrmclient.cpp
+    ../../../../baseClasses/signalhandler.cpp
+    ../../../../baseClasses/stats.cpp
+    ../../../../baseClasses/tweval.cpp
+    ../../../../baseClasses/twnode.cpp
+    ../../../../baseClasses/vrp_assert.cpp
+    ../../../../baseClasses/vrposrm.cpp
+)
+
+set (BASECLASSES_INCLUDE_FILES
+    ../../../../baseClasses/basictypes.h
+    ../../../../baseClasses/logger.h
+    ../../../../baseClasses/move.h
+    ../../../../baseClasses/osrmclient.h
+    ../../../../baseClasses/plot.h
+    ../../../../baseClasses/singleton.h
+    ../../../../baseClasses/timer.h
+    ../../../../baseClasses/twc.h
+    ../../../../baseClasses/twnode.h
+    ../../../../baseClasses/vrp_assert.h
+    #../../../../baseClasses/config.h
+    ../../../../baseClasses/md5.h
+    ../../../../baseClasses/node.h
+    ../../../../baseClasses/pg_types_vrp.h
+    ../../../../baseClasses/signalhandler.h
+    ../../../../baseClasses/stats.h
+    ../../../../baseClasses/twbucket.h
+    ../../../../baseClasses/tweval.h
+    ../../../../baseClasses/twpath.h
+    ../../../../baseClasses/vrposrm.h
+)
+
+set (BASETRASH_SOURCES
+    ../../../baseTrash/basevehicle.cpp
+    #../../../baseTrash/extendedvehicle.cpp
+    ../../../baseTrash/prob_trash.cpp
+    ../../../baseTrash/solution.cpp
+    #../../../baseTrash/trashconfig.cpp
+    ../../../baseTrash/trashprob.cpp
+)
+
+set (BASETRASH_INCLUDE_FILES
+    ../../../baseTrash/basevehicle.h
+    #../../../baseTrash/extendedvehicle.h
+    ../../../baseTrash/prob_trash.h
+    ../../../baseTrash/solution.h
+    #../../../baseTrash/trashconfig.h
+    ../../../baseTrash/trashnode.h
+    ../../../baseTrash/trashprob.h
+)
+
+set (INITTRASH_SOURCES
+    ../../../initTrash/truckManyVisitsDump.cpp
+    ../../../initTrash/basicOperations.cpp
+    ../../../initTrash/givenInitialSol.cpp
+)
+
+set (INITTRASH_INCLUDE_FILES
+    ../../../initTrash/truckManyVisitsDump.h
+    ../../../initTrash/basicOperations.h
+    ../../../initTrash/givenInitialSol.h
+)
+
+
+set (SOLVERTRASH_SOURCES
+    ../../solverTrash/costvehicle.cpp
+    ../../solverTrash/fleetOpt.cpp
+    ../../solverTrash/optsol.cpp
+    ../../solverTrash/tabuopt.cpp
+    ../../solverTrash/tripVehicle.cpp
+    ../../solverTrash/vehicle.cpp
+)
+
+set (SOLVERTRASH_INCLUDE_FILES
+    ../../solverTrash/costvehicle.h
+    ../../solverTrash/fleetOpt.h
+    ../../solverTrash/optsol.h
+    ../../solverTrash/tabuopt.h
+    ../../solverTrash/tripVehicle.h
+    ../../solverTrash/vehicle.h
+)
+
+
+# Append the source files here
+set (VRPTOOLS_SOURCES
+  vrptools.cpp
+)
+
+# Append the header files here. this will get copied to include directory
+set (VRPTOOLS_INCLUDE_FILES
+  vrptools.h
+)
+
+#$<TARGET_OBJECTS:A>
+add_library(baseclasses OBJECT ${BASECLASSES_SOURCES} ${BASECLASSES_INCLUDE_FILES} )
+add_library(basetrash OBJECT ${BASETRASH_SOURCES} ${BASETRASH_INCLUDE_FILES} )
+add_library(inittrash OBJECT ${INITTRASH_SOURCES} ${INITTRASH_INCLUDE_FILES} )
+add_library(solvertrash OBJECT ${SOLVERTRASH_SOURCES} ${SOLVERTRASH_INCLUDE_FILES} )
+
+add_library (
+    ${VRPTOOLS_LIBRARY_NAME}
+    SHARED
+    ${BASECLASSES_SOURCES} ${BASECLASSES_INCLUDE_FILES}
+    ${BASETRASH_SOURCES} ${BASETRASH_INCLUDE_FILES}
+    ${INITTRASH_SOURCES} ${INITTRASH_INCLUDE_FILES}
+    ${SOLVERTRASH_SOURCES} ${SOLVERTRASH_INCLUDE_FILES}
+    ${VRPTOOLS_SOURCES}
+    #$<TARGET_OBJECTS:baseclasses>
+    #$<TARGET_OBJECTS:basetrash>
+    #$<TARGET_OBJECTS:inittrash>
+    #$<TARGET_OBJECTS:solvertrash>
+)
 #set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CPP)
 set_target_properties(${VRPTOOLS_LIBRARY_NAME} PROPERTIES VERSION ${VRPTOOLS_VERSION_STRING})
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${Threads_LIBRARIES} ${OSRM_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${Threads_LIBRARIES} ${OSRM_LIBRARIES} ${GLOG_LIBRARIES} ${CURLPP_LIBRARIES} )
 
 add_subdirectory (tests)

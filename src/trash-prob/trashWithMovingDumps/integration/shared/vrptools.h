@@ -16,20 +16,11 @@
 #include "stats.h"
 #endif
 
+/*
 #ifdef OSRMCLIENT
 #include "osrmclient.h"
 #endif
-
-/*
-#include "logger.h"
-#include "timer.h"
-#include "stats.h"
-#include "osrmclient.h"
 */
-
-#include "trashconfig.h"
-#include "truckManyVisitsDump.h"
-#include "fleetOpt.h"
 
 #include "pg_types_vrp.h"
 

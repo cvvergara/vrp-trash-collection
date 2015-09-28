@@ -11,5 +11,6 @@
 
 int main(int argc, char **argv)
 {
+    VRPTools vrp;
     return 0;
 }
