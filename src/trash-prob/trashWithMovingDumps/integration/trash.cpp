@@ -100,7 +100,8 @@ int main(int argc, char **argv)
     bool testResult = osrmi->testOsrmClient(
           -34.905113, -56.157043,
           -34.906807, -56.158463,
-          -34.9076,   -56.157028);
+          -34.9076,   -56.157028
+    );
    // remove the following comment when testing OSRM only
    // assert(true==false);        
 #ifdef VRPMINTRACE

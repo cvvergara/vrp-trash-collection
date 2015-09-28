@@ -20,10 +20,12 @@
 #include "osrmclient.h"
 #endif
 
+/*
 #include "logger.h"
 #include "timer.h"
 #include "stats.h"
 #include "osrmclient.h"
+*/
 
 #include "trashconfig.h"
 #include "truckManyVisitsDump.h"
@@ -36,40 +38,41 @@ class VRPTools {
 public:
     VRPTools();
     // Containers
-    void setContainers( container_t *containers, unsigned int count ) {
+    void setContainers( const container_t *containers, unsigned int count ) {
         mContainers = containers;
         mContainersCount = count;
     }
-    container_t* getContainers() { return mContainers; }
+    const container_t* getContainers() { return mContainers; }
     // Other locs
-    void setLocs( otherloc_t *otherloc, unsigned int count ) {
+    void setLocs( const otherloc_t *otherloc, unsigned int count ) {
         mOtherLocs = otherloc;
         mOtherlocsCount = count;
     }
-    otherloc_t* getOtherLoc() { return mOtherLocs; }
+    const otherloc_t* getOtherLoc() { return mOtherLocs; }
     // Vehicles
-    void setVehicles( vehicle_t *vehicles, unsigned int count ) {
+    void setVehicles( const vehicle_t *vehicles, unsigned int count ) {
         mVehicles = vehicles;
         mVehiclesCount = count;
     }
-    vehicle_t* getVehicles() { return mVehicles; }
+    const vehicle_t* getVehicles() { return mVehicles; }
     // Initial table time
-    void setTimeTable( ttime_t *ttable, unsigned int count ) {
+    void setTimeTable( const ttime_t *ttable, unsigned int count ) {
         mTimeTable = ttable;
         mTimeTableCount = count;
     }
-    ttime_t* getTimeTable() { return mTimeTable; }
+    const ttime_t* getTimeTable() { return mTimeTable; }
     //
     void solve();
 
 private:
-    container_t *mContainers;
+    // Apuntan al primer elemento del array. Cada elemento tiene la estructura.
+    const container_t *mContainers;
     unsigned int mContainersCount;
-    otherloc_t *mOtherLocs;
+    const otherloc_t *mOtherLocs;
     unsigned int mOtherlocsCount;
-    vehicle_t *mVehicles;
+    const vehicle_t *mVehicles;
     unsigned int mVehiclesCount;
-    ttime_t *mTimeTable;
+    const ttime_t *mTimeTable;
     unsigned int mTimeTableCount;
 
     unsigned int mTteration;

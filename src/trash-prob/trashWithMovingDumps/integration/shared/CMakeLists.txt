@@ -19,9 +19,26 @@ set(VRPTOOLS_VERSION_MINOR 1)
 set(VRPTOOLS_VERSION_PATCH 0)
 set(VRPTOOLS_VERSION_STRING ${VRPTOOLS_VERSION_MAJOR}.${VRPTOOLS_VERSION_MINOR}.${VRPTOOLS_VERSION_PATCH})
 
+option(DOVRPLOG "Option description" ON)
+option(DOSTATS "Option description" ON)
+option(OSRMCLIENT "Option description" ON)
+option(VRPMINTRACE "Option description" ON)
 
-set(DOVRPLOG 1)
-set(DOSTATS 1)
+if(DOVRPLOG)
+  add_definitions(-DDOVRPLOG)
+endif()
+
+if(DOSTATS)
+  add_definitions(-DDOSTATS)
+endif()
+
+if(OSRMCLIENT)
+  add_definitions(-DOSRMCLIENT)
+endif()
+
+if(VRPMINTRACE)
+  add_definitions(-DVRPMINTRACE)
+endif()
 
 include_directories(
     "../../../initTrash"
@@ -57,6 +74,15 @@ if(NOT Boost_FOUND)
   MESSAGE(FATAL_ERROR "Fatal error: Boost (version >= 1.49.0) required.\n")
 endif()
 ##
+
+## OSRM
+# Office
+#set(OSRM_SOURCE_PATH "/disco_local/fpacheco/im/osrm-backend")
+# Home
+set(OSRM_SOURCE_PATH "/home/fpacheco/workspace/idm/right-side/osrm-backend")
+set(OSRM_LIBRARIES ${OSRM_SOURCE_PATH}/build/libOSRM.a)
+##
+
 
 add_library (${VRPTOOLS_LIBRARY_NAME} SHARED ${VRPTOOLS_SOURCES})
 #set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CPP)
