@@ -27,6 +27,7 @@ option(DOVRPLOG "Option description" ON)
 option(DOSTATS "Option description" ON)
 option(OSRMCLIENT "Option description" ON)
 option(VRPMINTRACE "Option description" ON)
+option(VRPMAXTRACE "Option description" OFF)
 
 if(DOVRPLOG)
   add_definitions(-DDOVRPLOG)
@@ -46,6 +47,10 @@ endif()
 
 if(OSRMCLIENTTRACE)
   add_definitions(-DOSRMCLIENTTRACE)
+endif()
+
+if(VRPMAXTRACE)
+  add_definitions(-DVRPMAXTRACE)
 endif()
 
 include_directories(

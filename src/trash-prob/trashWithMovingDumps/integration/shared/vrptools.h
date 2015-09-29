@@ -42,7 +42,7 @@ public:
     // Other locs
     void setLocs( otherloc_t *otherloc, unsigned int count ) {
         mOtherLocs = otherloc;
-        mOtherlocsCount = count;
+        mOtherLocsCount = count;
     }
     otherloc_t* getOtherLoc() { return mOtherLocs; }
     // Vehicles
@@ -75,7 +75,7 @@ public:
     // Test if OSRM datastore is alive
     bool checkOsrmClient();
     // Read all data from file
-    bool readDataFromFile(std::string fileBasePath);
+    bool readDataFromFiles(std::string fileBasePath);
     // Solve the problem
     bool check();
     // Solve the problem
@@ -86,7 +86,7 @@ private:
     container_t *mContainers;
     unsigned int mContainersCount;
     otherloc_t *mOtherLocs;
-    unsigned int mOtherlocsCount;
+    unsigned int mOtherLocsCount;
     vehicle_t *mVehicles;
     unsigned int mVehiclesCount;
     ttime_t *mTimeTable;

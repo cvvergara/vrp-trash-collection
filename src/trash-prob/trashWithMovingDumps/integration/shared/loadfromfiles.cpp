@@ -1,3 +1,15 @@
+#include <assert.h>
+#include <fstream>
+
+#include "loadfromfiles.h"
+
+LoadFromFiles::LoadFromFiles(std::string &filePrefix) {
+    load_containers( filePrefix + ".containers.txt" );
+    load_otherlocs( filePrefix + ".otherlocs.txt" );
+    load_vehicles( filePrefix + ".vehicles.txt" );
+    load_ttimes( filePrefix + ".dmatrix-time.txt" );
+}
+
 
 void LoadFromFiles::load_containers(std::string infile) {
     std::ifstream in( infile.c_str() );
@@ -94,6 +106,8 @@ ttime_t LoadFromFiles::parseTtime(std::string line) {
     buffer >> ttime.ttime;
     return ttime;
 }
+
+
 
 container_t *LoadFromFiles::getContainers(unsigned int &container_count) {
     assert( mContainers.size() );

@@ -2,19 +2,14 @@
 #include <sstream>
 #include <string>
 #include <exception>
-#include <string.h>
+#include <vector>
 
 #include "pg_types_vrp.h"
 
 class LoadFromFiles {
 
   public:
-    LoadFromFiles( std::string &filePrefix ) {
-        load_containers( filePrefix + ".containers.txt" );
-        load_otherlocs( filePrefix + ".otherlocs.txt" );
-        load_vehicles( filePrefix + ".vehicles.txt" );
-        load_ttimes( filePrefix + ".dmatrix-time.txt" );
-    };
+    LoadFromFiles( std::string &filePrefix );
 
     container_t *getContainers(unsigned int &container_count);
     otherloc_t *getOtherlocs(unsigned int &otherloc_count);
@@ -30,9 +25,9 @@ class LoadFromFiles {
     otherloc_t parseOtherloc( std::string line );
     vehicle_t parseVehicle( std::string line );
     ttime_t parseTtime( std::string line );
+
     std::vector<container_t> mContainers;
     std::vector<otherloc_t> mOtherLocs;
     std::vector<vehicle_t> mVehicles;
     std::vector<ttime_t> mTimeTable;
-
 };  // end of class LoadFromFiles
