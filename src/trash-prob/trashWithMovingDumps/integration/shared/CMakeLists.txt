@@ -198,19 +198,20 @@ set (SOLVERTRASH_INCLUDE_FILES
 
 # Append the source files here
 set (VRPTOOLS_SOURCES
+  loadfromfiles.cpp
   vrptools.cpp
 )
 
 # Append the header files here. this will get copied to include directory
 set (VRPTOOLS_INCLUDE_FILES
-  vrptools.h
+    loadfromfiles.h
+    vrptools.h
 )
 
-#$<TARGET_OBJECTS:A>
-add_library(baseclasses OBJECT ${BASECLASSES_SOURCES} ${BASECLASSES_INCLUDE_FILES} )
-add_library(basetrash OBJECT ${BASETRASH_SOURCES} ${BASETRASH_INCLUDE_FILES} )
-add_library(inittrash OBJECT ${INITTRASH_SOURCES} ${INITTRASH_INCLUDE_FILES} )
-add_library(solvertrash OBJECT ${SOLVERTRASH_SOURCES} ${SOLVERTRASH_INCLUDE_FILES} )
+#add_library(baseclasses OBJECT ${BASECLASSES_SOURCES} ${BASECLASSES_INCLUDE_FILES} )
+#add_library(basetrash OBJECT ${BASETRASH_SOURCES} ${BASETRASH_INCLUDE_FILES} )
+#add_library(inittrash OBJECT ${INITTRASH_SOURCES} ${INITTRASH_INCLUDE_FILES} )
+#add_library(solvertrash OBJECT ${SOLVERTRASH_SOURCES} ${SOLVERTRASH_INCLUDE_FILES} )
 
 add_library (
     ${VRPTOOLS_LIBRARY_NAME}
@@ -220,10 +221,6 @@ add_library (
     ${INITTRASH_SOURCES} ${INITTRASH_INCLUDE_FILES}
     ${SOLVERTRASH_SOURCES} ${SOLVERTRASH_INCLUDE_FILES}
     ${VRPTOOLS_SOURCES}
-    #$<TARGET_OBJECTS:baseclasses>
-    #$<TARGET_OBJECTS:basetrash>
-    #$<TARGET_OBJECTS:inittrash>
-    #$<TARGET_OBJECTS:solvertrash>
 )
 #set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CPP)
 set_target_properties(${VRPTOOLS_LIBRARY_NAME} PROPERTIES VERSION ${VRPTOOLS_VERSION_STRING})

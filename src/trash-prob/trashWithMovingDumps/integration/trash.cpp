@@ -21,7 +21,7 @@
 #include <math.h>
 #include <stdio.h>
 
-/*
+
 #ifdef DOVRPLOG
 #include "logger.h"
 #endif
@@ -30,7 +30,7 @@
 #include "timer.h"
 #include "stats.h"
 #endif
-*/
+
 
 #include "trashconfig.h"
 #include "truckManyVisitsDump.h"

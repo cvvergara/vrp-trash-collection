@@ -12,5 +12,7 @@
 int main(int argc, char **argv)
 {
     VRPTools vrp;
+    std::cout << "OSRM checkOsrmClient: " << vrp.checkOsrmClient() << std::endl;
+    std::cout << "OSRM available: " << vrp.osrmAvailable() << std::endl;
     return 0;
 }
