@@ -96,16 +96,16 @@ public:
   {
     route_parameters.geometry = want;
     route_parameters.compression = false;
-  };
+  }
   void setWantGeometryText( bool want )
   {
     route_parameters.geometry = want;
     route_parameters.compression = true;
-  };
-  void usePenalty( bool desition ) { addPenalty = desition; };
-  bool getPenalty() const { return addPenalty; };
-  void useOsrm( bool desition ) { use = desition; };
-  bool getUse( ) const { return use; };
+  }
+  void usePenalty( bool desition ) { addPenalty = desition; }
+  bool getPenalty() const { return addPenalty; }
+  void useOsrm( bool desition ) { use = desition; }
+  bool getUse( ) const { return use; }
   bool getOsrmViaroute();
   bool getOsrmTime( double lat1, double lon1 , double lat2, double lon2,
                     double &time );
@@ -123,10 +123,10 @@ public:
   bool getOsrmHints( std::deque<std::string> &hints );
   bool getOsrmStreetNames( std::deque<std::string> &names);
   bool getOsrmNamesOnRoute( std::deque<std::string> &names);
-  int getStatus() const { return status; };
-  int getConnection() const { return connectionAvailable; };
-  std::string getErrorMsg() const { return err_msg; };
-  std::string getHttpContent() const { return httpContent; };
+  int getStatus() const { return status; }
+  int getConnection() const { return connectionAvailable; }
+  std::string getErrorMsg() const { return err_msg; }
+  std::string getHttpContent() const { return httpContent; }
   bool testOsrmClient(
     double x1, double y1,
     double x2, double y2,
@@ -152,7 +152,7 @@ public:
                  << "\nerr_msg: " << err_msg
                  << "\ncoordinates.size(): " << route_parameters.coordinates.size()
                  << "\nhttpContent: " << httpContent;
-  };
+  }
 #endif
 };
 

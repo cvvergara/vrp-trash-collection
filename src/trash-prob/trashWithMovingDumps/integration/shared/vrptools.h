@@ -29,15 +29,29 @@ namespace fs = boost::filesystem;
 
 #include "pg_types_vrp.h"
 
+/**
+ * @class VRPTools
+ * @brief Main class for vrptools shared library.
+ *
+ *  A more elaborate class description.
+ */
 class VRPTools {
 
 public:
     VRPTools();
-    // Containers
+    /**
+     * @brief A member to set containers
+     * @param containers pointer (array) of containers.
+     * @param count number of elements in array.
+     */
     void setContainers( container_t *containers, unsigned int count ) {
         mContainers = containers;
         mContainersCount = count;
     }
+    /**
+     * @brief A member to get containers
+     * @return pointer (array) of containers
+     */
     container_t* getContainers() { return mContainers; }
     // Other locs
     void setLocs( otherloc_t *otherloc, unsigned int count ) {
@@ -83,8 +97,8 @@ public:
 
 private:
     // Apuntan al primer elemento del array. Cada elemento tiene la estructura.
-    container_t *mContainers;
-    unsigned int mContainersCount;
+    container_t *mContainers; ///< Containers
+    unsigned int mContainersCount; ///< Number of containers
     otherloc_t *mOtherLocs;
     unsigned int mOtherLocsCount;
     vehicle_t *mVehicles;
@@ -92,12 +106,12 @@ private:
     ttime_t *mTimeTable;
     unsigned int mTimeTableCount;
 
-    unsigned int mNIters;
-    bool mCheck;
-    bool mRightSide;
-    bool mReady;
-    bool mUseOsrm;
+    unsigned int mNIters; ///< Number of iterations before stop in the solver
+    bool mRightSide; ///< Get containers from right side
+    bool mReady; ///< Detailed description after the member
+    bool mUseOsrm; ///< Use OSRM
 
-    fs::path mLogDir;
-    fs::path mLogFile;
+    bool mLogging; ///< Log vrptools actions
+    fs::path mLogDir; ///< Logging directory path
+    fs::path mLogFile; ///< Logging file name (not path)
 };

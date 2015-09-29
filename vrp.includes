@@ -1,0 +1,16 @@
+src/baseClasses
+src/baseClasses/tests
+src/pick-deliver/basePickDeliver
+src/pick-deliver/initialSolsPickDeliver
+src/pick-deliver/tabu
+src/trash-prob/baseTrash
+src/trash-prob/initTrash
+src/trash-prob/trashWithMovingDumps/integration
+src/trash-prob/trashWithMovingDumps/solverTrash
+src/trash-prob/trashWithMovingDumps/solverTrash/old
+tools/archive/OldCodeToBeIntegrated
+tools/archive/OldCodeToBeIntegrated/tests
+tools/archive/testsDir
+tools/archive/trash-collection
+tools/archive/trash-collection-old
+tools/archive/vrpdptw-steve
