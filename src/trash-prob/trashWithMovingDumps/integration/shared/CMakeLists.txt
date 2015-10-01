@@ -68,8 +68,7 @@ set(CMAKE_CPP_FLAGS_RELEASE "-O2")
 
 ### Find
 ## Boost
-set(BOOST_COMPONENTS date_time filesystem iostreams program_options
-regex system thread unit_test_framework)
+set(BOOST_COMPONENTS date_time filesystem iostreams program_options regex system thread unit_test_framework)
 #Check Boost
 set(BOOST_MIN_VERSION "1.49.0")
 find_package(Boost ${BOOST_MIN_VERSION} COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
@@ -109,7 +108,15 @@ if (UNIX)
 endif(UNIX)
 ###
 
+## rapidjson
+find_package(rapidjson REQUIRED)
+##
 
+### Includes
+include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${CURLPP_INCLUDE_DIRS})
+include_directories(${RAPIDJSON_INCLUDE_DIRS})
+###
 
 # base trash
 set (BASECLASSES_SOURCES
@@ -231,4 +238,6 @@ add_library (
 set_target_properties(${VRPTOOLS_LIBRARY_NAME} PROPERTIES VERSION ${VRPTOOLS_VERSION_STRING})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${Threads_LIBRARIES} ${OSRM_LIBRARIES} ${GLOG_LIBRARIES} ${CURLPP_LIBRARIES} )
 
+
+enable_testing()
 add_subdirectory (tests)
