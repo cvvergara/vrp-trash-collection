@@ -1,6 +1,7 @@
 #include <iostream>     // std::cout, std::fixed
 #include <iomanip>      // std::setprecision
 
+#include "node.h"
 #include "osrmclient.h"
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE OsrmClient test
@@ -80,6 +81,37 @@ BOOST_AUTO_TEST_CASE( getOsrmNearest )
     BOOST_REQUIRE_EQUAL(oname, roname);
     BOOST_REQUIRE_CLOSE( olat, rolat, 0.0001 );
     BOOST_REQUIRE_CLOSE( olon, rolon, 0.0001 );
+}
+
+BOOST_AUTO_TEST_CASE( isRightToSegment )
+{
+    Node lineBegin;
+    Node lineEnd;
+    Node point;
+    bool res;
+
+    lineBegin = Node(1,1);
+    lineEnd = Node(10,10);
+    point = Node (2,1);
+
+    // Esta a la derecha
+    res = point.isRightToSegment(lineBegin,lineEnd);
+    BOOST_REQUIRE_EQUAL(res, true);
+    // Esta a la izquierda
+    res = point.isRightToSegment(lineEnd,lineBegin);
+    BOOST_REQUIRE_EQUAL(res, false);
+
+    // Esta a la derecha
+    point.set_x(100);
+    point.set_y(2);
+    res = point.isRightToSegment(lineBegin,lineEnd);
+    BOOST_REQUIRE_EQUAL(res, true);
+
+    // Esta a la izquierda
+    point.set_x(5);
+    point.set_y(20);
+    res = point.isRightToSegment(lineBegin,lineEnd);
+    BOOST_REQUIRE_EQUAL(res, false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

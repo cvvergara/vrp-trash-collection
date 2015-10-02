@@ -100,13 +100,15 @@ class Node {
   ///@}
 
   /** @name distanceToSegment */
-  /* Shortest distnace from pooit to a segment (v,w) */
+  /* Shortest distance from point to a segment (v,w) */
   ///@{
   double distanceToSegment(const Node &v, const Node &w) const;
   double distanceToSegment(const Node &v, const Node &w, Node &q) const;
   double distanceToSegment(double, double, double, double, double &,
                            double &) const;
   ///@}
+
+  bool isRightToSegment(const Node &lineBegin, const Node &lineEnd) const;
 
   double positionAlongSegment(const Node &v, const Node &w, double tol) const;
 
