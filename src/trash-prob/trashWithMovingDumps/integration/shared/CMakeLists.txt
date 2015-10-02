@@ -62,9 +62,9 @@ include_directories(
 
 # Activa c++11
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CPP_FLAGS "-Wall -fPIC")
-set(CMAKE_CPP_FLAGS_DEBUG "-g")
-set(CMAKE_CPP_FLAGS_RELEASE "-O2")
+set(CMAKE_CPP_FLAGS "-std=c++11 -Wall -fPIC")
+set(CMAKE_CPP_FLAGS_DEBUG "-std=c++11 -g")
+set(CMAKE_CPP_FLAGS_RELEASE "-std=c++11 -O2")
 
 ### Find
 ## Boost
