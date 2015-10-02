@@ -943,6 +943,7 @@ bool OsrmClient::getOsrmLocate(double ilat, double ilon, double &olat, double &o
           ilon * COORDINATE_PRECISION
       );
       coordBackup = route_parameters.coordinates;
+      route_parameters.coordinates.clear();
       route_parameters.coordinates.push_back(p);
       // std::cout << route_parameters.coordinates.size() << std::endl;
       // Ask OSRM
@@ -1022,6 +1023,7 @@ bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &
           ilon * COORDINATE_PRECISION
       );
       coordBackup = route_parameters.coordinates;
+      route_parameters.coordinates.clear();
       route_parameters.coordinates.push_back(p);
       // std::cout << route_parameters.coordinates.size() << std::endl;
       // Ask OSRM
