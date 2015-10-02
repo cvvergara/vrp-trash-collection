@@ -131,7 +131,27 @@ public:
     double x1, double y1,
     double x2, double y2,
     double x3, double y3);
-
+  /*!
+   * \brief Get coordinates of the neareast fisical node (OSRM node) for a point
+   *
+   * \param[in] Point latitude.
+   * \param[in] Point longitude.
+   * \param[out] Node latitude.
+   * \param[out] Node longitude.
+   * \return true on succes.
+   */
+  bool getOsrmLocate(double ilat, double ilon , double &olat, double &olon);
+  /*!
+   * \brief Get coordinates of the nearest point (virtual node) in the nearest edge (OSRM) for a point and edege name
+   *
+   * \param[in] Point latitude.
+   * \param[in] Point longitude.
+   * \param[out] Virtual node (in edge) latitude.
+   * \param[out] Virtual node (in edge) longitude.
+   * \param[out] Edge name.
+   * \return true on succes.
+   */
+  bool getOsrmNearest(double ilat, double ilon , double &olat, double &olon, std::string &oname);
 
 private:
   bool getTime( rapidjson::Document &jtree, double &time );
