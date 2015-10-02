@@ -913,11 +913,13 @@ bool OsrmClient::testOsrmClient(
 bool OsrmClient::getOsrmLocate(double ilat, double ilon, double &olat, double &olon)
 {
     std::string oldService; //! backup service
-    std::stringstream tmp_ss; //!
+    std::stringstream tmpSS; //!
     // std::string rContent; //!
     std::string errorMsg; //!
-    rapidjson::Document jsondoc;
-    osrm::json::Object json_result; //! json result
+    rapidjson::Document jsonDoc;
+    osrm::json::Object jsonResult; //! json result
+    // TODO: Is backup realy necesary
+    std::vector<FixedPointCoordinate> coordBackup;
 
     if ( not connectionAvailable ) return false;
 
@@ -940,9 +942,13 @@ bool OsrmClient::getOsrmLocate(double ilat, double ilon, double &olat, double &o
           ilat * COORDINATE_PRECISION,
           ilon * COORDINATE_PRECISION
       );
+      coordBackup = route_parameters.coordinates;
       route_parameters.coordinates.push_back(p);
+      // std::cout << route_parameters.coordinates.size() << std::endl;
       // Ask OSRM
-      routing_machine->RunQuery( route_parameters, json_result );
+      routing_machine->RunQuery( route_parameters, jsonResult );
+      // Restore points
+      route_parameters.coordinates = coordBackup;
       // Restore service
       route_parameters.service = oldService;
     } catch ( std::exception &e ) {
@@ -960,16 +966,16 @@ bool OsrmClient::getOsrmLocate(double ilat, double ilon, double &olat, double &o
     }
 
     //rContent = "";
-    tmp_ss << json_result;
-    //rContent = tmp_ss.str();
-    jsondoc.Parse( tmp_ss.str().c_str() );
+    tmpSS << jsonResult;
+    //rContent = tmpSS.str();
+    jsonDoc.Parse( tmpSS.str().c_str() );
 
     // Everything ok. Set status.
     status = 1;
     // Get node coordinates from return json and set
     // http://127.0.0.1:5000/locate?loc=-34.8993,-56.1296
     // locate returns -> {"mapped_coordinate":[-34.899513,-56.129681],"status":0}
-    if ( not jsondoc.HasMember( "mapped_coordinate" ) ) {
+    if ( not jsonDoc.HasMember( "mapped_coordinate" ) ) {
       errorMsg = "OsrmClient:getOsrmLocate failed to find 'mapped_coordinate' key in OSRM response!";
   #ifdef DOSTATS
       STATS->inc( err_msg );
@@ -978,19 +984,21 @@ bool OsrmClient::getOsrmLocate(double ilat, double ilon, double &olat, double &o
     }
 
     // extract the latitude and longitude
-    olat = ( double ) jsondoc["mapped_coordinate"][0].GetDouble(); // / COORDINATE_PRECISION;
-    olon = ( double ) jsondoc["mapped_coordinate"][1].GetDouble(); // / COORDINATE_PRECISION;
+    olat = ( double ) jsonDoc["mapped_coordinate"][0].GetDouble(); // / COORDINATE_PRECISION;
+    olon = ( double ) jsonDoc["mapped_coordinate"][1].GetDouble(); // / COORDINATE_PRECISION;
     return true;
 }
 
 bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &olon, std::string &oname)
 {
     std::string oldService; //! backup service
-    std::stringstream tmp_ss; //!
+    std::stringstream tmpSS; //!
     // std::string rContent; //!
     std::string errorMsg; //!
-    rapidjson::Document jsondoc;
-    osrm::json::Object json_result; //! json result
+    rapidjson::Document jsonDoc;
+    osrm::json::Object jsonResult; //! json result
+    // TODO: Is backup realy necesary
+    std::vector<FixedPointCoordinate> coordBackup;
 
     if ( not connectionAvailable ) return false;
 
@@ -1013,9 +1021,13 @@ bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &
           ilat * COORDINATE_PRECISION,
           ilon * COORDINATE_PRECISION
       );
+      coordBackup = route_parameters.coordinates;
       route_parameters.coordinates.push_back(p);
+      // std::cout << route_parameters.coordinates.size() << std::endl;
       // Ask OSRM
-      routing_machine->RunQuery( route_parameters, json_result );
+      routing_machine->RunQuery( route_parameters, jsonResult );
+      // Restore points
+      route_parameters.coordinates = coordBackup;
       // Restore service
       route_parameters.service = oldService;
     } catch ( std::exception &e ) {
@@ -1033,23 +1045,23 @@ bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &
     }
 
     //rContent = "";
-    tmp_ss << json_result;
-    //rContent = tmp_ss.str();
-    jsondoc.Parse( tmp_ss.str().c_str() );
+    tmpSS << jsonResult;
+    //rContent = tmpSS.str();
+    jsonDoc.Parse( tmpSS.str().c_str() );
 
     // Everything ok. Set status.
     status = 1;
     // Get node coordinates from return json and set
     // http://127.0.0.1:5000/nearest?loc=-34.9137291,-56.1743363
     // nearest returns -> {"name":"Doctor Luis Piera","mapped_coordinate":[-34.913792,-56.174328],"status":0}
-    if ( jsondoc.HasMember( "status" ) ) {
-        int rStatus = ( int ) jsondoc["status"].GetInt();
+    if ( jsonDoc.HasMember( "status" ) ) {
+        int rStatus = ( int ) jsonDoc["status"].GetInt();
         if (rStatus == 0) {
             // extract the latitude and longitude
-            olat = ( double ) jsondoc["mapped_coordinate"][0].GetDouble();
-            olon = ( double ) jsondoc["mapped_coordinate"][1].GetDouble();
+            olat = ( double ) jsonDoc["mapped_coordinate"][0].GetDouble();
+            olon = ( double ) jsonDoc["mapped_coordinate"][1].GetDouble();
             // extract name
-            oname = ( std::string ) jsondoc["name"].GetString();
+            oname = ( std::string ) jsonDoc["name"].GetString();
             return true;
         } else {
             errorMsg = "OsrmClient:getOsrmNearest failed. Bad status 'status' in OSRM response!";
