@@ -177,9 +177,9 @@ void Solution::dumpSolutionForPg () const
               "\tVID" <<
               "\tid" <<
               "\tntype" <<
-              "\tDeparture" <<
-              "\tdeltaTime" <<
-              "\tdeltaCargo" << std::endl;
+              "\tDepart" <<
+              "\tdTime" <<
+              "\tdCargo" << std::endl;
     for ( UINT j = 0; j < fleet[i].size(); ++j ) {
       seq++;
       std::cout <<
