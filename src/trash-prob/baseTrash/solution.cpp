@@ -171,32 +171,39 @@ void Solution::dumpSolutionForPg () const
 
   for ( UINT i = 0; i < fleet.size(); ++i ) {
     if ( fleet[i].size() <= 1 ) continue;
-
+    int seq = 0;
     std::cout <<
-              "\tseq" <<
-              "VID" <<
+              "seq" <<
+              "\tVID" <<
               "\tid" <<
               "\tntype" <<
               "\tDeparture" <<
               "\tdeltaTime" <<
               "\tdeltaCargo" << std::endl;
     for ( UINT j = 0; j < fleet[i].size(); ++j ) {
+      seq++;
       std::cout <<
-                   i <<
+                 seq <<
+                "\t" << fleet[i].getVid() <<
                 "\t" << fleet[i][j].id() <<
                 "\t" << fleet[i][j].type() <<
                 "\t" << fleet[i][j].departureTime() <<
                 "\t" << fleet[i][j].deltaTime() <<
                 "\t" << fleet[i][j].demand() << std::endl;
     }
-
-    std::cout << fleet[i].getVid() <<
+    seq++;
+    std::cout <<
+              seq  <<
+              "\t" << fleet[i].getVid() <<
               "\t" << fleet[i].getDumpSite().id() <<
               "\t" << fleet[i].getDumpSite().type() <<
               "\t" << fleet[i].getDumpSite().departureTime() <<
               "\t" <<  fleet[i].getDumpSite().deltaTime() <<
               "\t" << fleet[i].getDumpSite().demand() << std::endl;
-    std::cout << fleet[i].getVid() <<
+    seq++;
+    std::cout <<
+              seq  <<
+              "\t" << fleet[i].getVid() <<
               "\t" << fleet[i].getEndingSite().id() <<
               "\t" << fleet[i].getEndingSite().type() <<
               "\t" << fleet[i].getEndingSite().departureTime() <<
