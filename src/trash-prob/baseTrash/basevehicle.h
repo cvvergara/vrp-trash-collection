@@ -69,7 +69,7 @@ class Comptrips {
 
   void e_add_trip(const BaseVehicle &trip);
 
-  bool isvalid() const {return vid >= 0;};  // more complicated than this
+  bool isvalid() const {return vid >= 0;}  // more complicated than this
   bool findNearestNodeTo(Bucket &unassigned, POS &pos, Trashnode &bestNode);
   bool findFastestNodeTo(bool first, Bucket &unassigned, POS &pos, Trashnode &bestNode, double &bestTime);
   bool e_setPath(const Bucket &sol);
@@ -109,36 +109,36 @@ class Comptrips {
   // accessors
   //--------------------------------------------------------------------
 
-  Twpath<Trashnode> getvpath() const { return path; };
-  Twpath<Trashnode> &getvpath() { return path; };
+  Twpath<Trashnode> getvpath() const { return path; }
+  Twpath<Trashnode> &getvpath() { return path; }
   std::deque<int> getpath() const;
-  UINT size() const { return path.size(); };
-  double getmaxcapacity() const { return maxcapacity; };
-  int twvTot() const { return endingSite.twvTot(); };
-  int cvTot() const { return endingSite.cvTot(); };
-  double getCargo() const { return  path.cargo(); };
-  double getDuration() const { return ( path.size() - 1 == 0 ) ? 0.0 : endingSite.getTotTime(); };
-  double getcost() const { return cost; };
-  double getw1() const { return w1; };
-  double getw2() const { return w2; };
-  double getw3() const { return w3; };
-  int getVid() const { return vid; };
+  UINT size() const { return path.size(); }
+  double getmaxcapacity() const { return maxcapacity; }
+  int twvTot() const { return endingSite.twvTot(); }
+  int cvTot() const { return endingSite.cvTot(); }
+  double getCargo() const { return  path.cargo(); }
+  double getDuration() const { return ( path.size() - 1 == 0 ) ? 0.0 : endingSite.getTotTime(); }
+  double getcost() const { return cost; }
+  double getw1() const { return w1; }
+  double getw2() const { return w2; }
+  double getw3() const { return w3; }
+  int getVid() const { return vid; }
   //    inline double getCurrentCapacity() const {return (maxcapacity - path.cargo());}
-  const Trashnode &getDepot() const { return path[0]; };
+  const Trashnode &getDepot() const { return path[0]; }
   const Trashnode &getStartingSite() const {return path[0];}
-  const Trashnode &getDumpSite() const { return dumpSite; };
+  const Trashnode &getDumpSite() const { return dumpSite; }
   const Trashnode &getEndingSite() const {return endingSite;}
-  Trashnode &getDepot() { return path[0]; };
+  Trashnode &getDepot() { return path[0]; }
   Trashnode &getStartingSite() {return path[0];}
-  Trashnode &getDumpSite()  { return dumpSite; };
+  Trashnode &getDumpSite()  { return dumpSite; }
   Trashnode &getEndingSite()  {return endingSite;}
   void set_endingSite(const Trashnode &other);
   void set_startingSite(const Trashnode &other);
 
   int countPickups() const;
 
-  const Trashnode &operator[]( int i ) const { return path[i]; };
-  Trashnode  &operator[](int i)  { return path[i]; };
+  const Trashnode &operator[]( int i ) const { return path[i]; }
+  Trashnode  &operator[](int i)  { return path[i]; }
   void clear() { path.clear();}
 
 #ifdef DOVRPLOG
@@ -175,9 +175,9 @@ class Comptrips {
   dumpSite
   endingSite
   */
-  bool feasable() const { return path[size()-1].feasable(maxcapacity) and dumpSite.feasable(maxcapacity) and endingSite.feasable(maxcapacity); };
-  bool has_cv()const { return endingSite.cvTot() != 0; };
-  bool has_twv()const { return endingSite.twvTot() != 0; };
+  bool feasable() const { return path[size()-1].feasable(maxcapacity) and dumpSite.feasable(maxcapacity) and endingSite.feasable(maxcapacity); }
+  bool has_cv()const { return endingSite.cvTot() != 0; }
+  bool has_twv()const { return endingSite.twvTot() != 0; }
   //bool has_cv() const { return path[path.size() - 1].has_cv(maxcapacity); };
   //bool has_twv() const { return endingSite.has_twv(); };
 
@@ -194,7 +194,7 @@ class Comptrips {
   //void setdepot(Trashnode _depot) { endingSite = _depot; };
   //void setdumpSite(Trashnode _dump) { dumpSite = _dump; };
 
-  void setVid(UINT p_vid) {vid = p_vid;};
+  void setVid(UINT p_vid) {vid = p_vid;}
   void setweights( double _w1, double _w2, double _w3 ) {
     w1 = _w1;
     w2 = _w2;
@@ -217,21 +217,21 @@ class Comptrips {
   // I really hate these shortcuts & I love them but I'll think about them really hard
   //----------------------------------------------------------------
 
-  Bucket  Path() const { return path; };
-  inline int nid(int i) const { return path[i].nid(); };
-  inline int id(int i) const { return path[i].id(); };
-  inline double x(const int i) const { return path[i].x(); };
-  inline double y(const int i) const { return path[i].y(); };
-  bool hasDemand(int i) const { return path[i].hasDemand(); };
-  bool hasSupply(int i) const { return path[i].hasSupply(); };
-  bool hasNoGoods(int i) const { return path[i].hasNoGoods(); };
-  bool earlyArrival(int i, const double D) const { return path[i].earlyArrival(D); };
-  bool lateArrival(int i, const double D) const { return path[i].lateArrival(D); };
-  bool onTime(int i, const double D) const { return not earlyArrival(i, D) and not lateArrival(i, D); };
-  bool isDump(int i) const { return path[i].isDump(); };
-  bool isPickup(int i) const { return path[i].isPickup(); };
-  bool isDepot(int i) const { return path[i].isDepot(); };
-  bool cargo(int i) const { return path[i].cargo(); };
+  Bucket  Path() const { return path; }
+  inline int nid(int i) const { return path[i].nid(); }
+  inline int id(int i) const { return path[i].id(); }
+  inline double x(const int i) const { return path[i].x(); }
+  inline double y(const int i) const { return path[i].y(); }
+  bool hasDemand(int i) const { return path[i].hasDemand(); }
+  bool hasSupply(int i) const { return path[i].hasSupply(); }
+  bool hasNoGoods(int i) const { return path[i].hasNoGoods(); }
+  bool earlyArrival(int i, const double D) const { return path[i].earlyArrival(D); }
+  bool lateArrival(int i, const double D) const { return path[i].lateArrival(D); }
+  bool onTime(int i, const double D) const { return not earlyArrival(i, D) and not lateArrival(i, D); }
+  bool isDump(int i) const { return path[i].isDump(); }
+  bool isPickup(int i) const { return path[i].isPickup(); }
+  bool isDepot(int i) const { return path[i].isDepot(); }
+  bool cargo(int i) const { return path[i].cargo(); }
   bool insert(const TwBucket<Trashnode> &nodes, POS atPos) {
     return path.insert(nodes, atPos);
   }

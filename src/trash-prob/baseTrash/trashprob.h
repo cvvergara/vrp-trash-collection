@@ -49,7 +49,7 @@ public:
   bool isValid() const;
   //std::string whatIsWrong() const;
   std::string getErrorsString() const;
-  void  whatIsWrong() ;
+  void  whatIsWrong();
 
 };
 

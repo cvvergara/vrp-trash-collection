@@ -49,7 +49,7 @@ public:
   void clear() {
     Prob_trash::clear();
     fleet.clear();
-  };
+  }
 
   Solution( const Prob_trash &P ): Prob_trash( P ) {}
   Solution( const std::string &infile, const std::vector<int> &solution );
@@ -100,7 +100,7 @@ public:
     return fleet.size() == another.fleet.size() &&
            std::abs( totalCost - another.totalCost ) < EPSILON;
 
-  };
+  }
 
   bool operator <  ( Solution &another ) const {
     return fleet.size() < another.fleet.size() || totalCost < another.totalCost;
