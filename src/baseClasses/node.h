@@ -44,7 +44,7 @@ class Node {
   ///@{
   bool isLatLon() const {
     return (x_ < 180) && (x_ > -180)
-           && (y_ < 180) && (y_ > -180);
+           && (y_ < 90) && (y_ > -90);
   }
   bool isValid() const { return  valid_ > 0;}
   bool isSamePos(const Node &other) const { return distance(other) == 0; }

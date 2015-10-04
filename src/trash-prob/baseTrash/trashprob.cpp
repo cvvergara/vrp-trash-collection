@@ -161,7 +161,7 @@ TrashProb::TrashProb(  container_t *p_containers, unsigned int container_count,
 bool isLatLon(double x, double y)
 {
   return       -180.0 <= x and x <= 180.0
-               and  - 180.0 <= y and y <= 180.0;
+               and  - 90.0 <= y and y <= 90.0;
 }
 
 void TrashProb::addContainers( container_t *_containers, int count )

@@ -47,40 +47,45 @@ BOOST_AUTO_TEST_CASE( getOsrmNearest )
 {
     double ilat, ilon;
     double olat, olon;
-    std::string oname;
-    std::string roname;
+    unsigned int forw_id, reve_id, street_id;
+    unsigned int one_way;
     double rolat, rolon;
+
 
     // http://127.0.0.1:5000/nearest?loc=-34.9137291,-56.1743363
     // {"name":"Doctor Luis Piera","mapped_coordinate":[-34.913792,-56.174328],"status":0}
     ilat = -34.9137291;
     ilon = -56.1743363;
+    one_way = 1000;
     olat = -1.0;
     olon = -1.0;
     rolat = -34.913792;
-    rolon = -56.174328;
-    roname = "Doctor Luis Piera";
+    rolon = -56.174328;    
+    //roname = "Doctor Luis Piera";
 
     osrmi->useOsrm(true);
-    osrmi->getOsrmNearest(ilat, ilon, olat, olon, oname);
+    osrmi->getOsrmNearest(ilat, ilon, olat, olon, one_way, forw_id, reve_id, street_id);
+    std::cout << olat << "|" << olon << "|" << one_way << "|" << forw_id << "|" << reve_id << "|" << street_id << std::endl;
     BOOST_REQUIRE_CLOSE( olat, rolat, 0.0001 );
     BOOST_REQUIRE_CLOSE( olon, rolon, 0.0001 );
-    BOOST_REQUIRE_EQUAL(oname, roname);
+    BOOST_REQUIRE_EQUAL( one_way, 0);
 
     // http://127.0.0.1:5000/nearest?loc=-34.9136522,-56.174577
     // {"name":"Doctor Emilio Frugoni","mapped_coordinate":[-34.913654,-56.174641],"status":0}
     ilat = -34.9136522;
     ilon = -56.174577;
+    one_way = 1000;
     olat = -1.0;
     olon = -1.0;
     rolat = -34.913654;
     rolon = -56.174641;
-    roname = "Doctor Emilio Frugoni";
+    //roname = "Doctor Emilio Frugoni";
     osrmi->useOsrm(true);
-    osrmi->getOsrmNearest(ilat, ilon, olat, olon, oname);
-    BOOST_REQUIRE_EQUAL(oname, roname);
+    osrmi->getOsrmNearest(ilat, ilon, olat, olon, one_way, forw_id, reve_id, street_id);
+    std::cout << olat << "|" << olon << "|" << one_way << "|" << forw_id << "|" << reve_id << "|" << street_id << std::endl;
     BOOST_REQUIRE_CLOSE( olat, rolat, 0.0001 );
     BOOST_REQUIRE_CLOSE( olon, rolon, 0.0001 );
+    BOOST_REQUIRE_EQUAL( one_way, 1 );
 }
 
 BOOST_AUTO_TEST_CASE( isRightToSegment )

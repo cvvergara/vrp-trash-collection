@@ -38,8 +38,7 @@ public:
               otherloc_t *p_otherlocs, unsigned int otherloc_count,
               ttime_t *p_ttimes, unsigned int ttime_count,
               vehicle_t *p_vehicles, unsigned int vehicle_count,
-              unsigned int check);
-
+              unsigned int check );
 
   void addContainers( container_t *containers, int count );
   void addOtherlocs( otherloc_t *otherlocs, int count );

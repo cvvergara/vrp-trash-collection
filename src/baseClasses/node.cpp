@@ -269,11 +269,6 @@ double Node::distanceToSegment(double segmentX1, double segmentY1,
 
 bool Node::isRightToSegment(const Node &lineBegin, const Node &lineEnd) const
 {
-    /*
-        public bool isLeft(Point a, Point b, Point c){
-             return ((b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x)) > 0;
-        }
-     */
     return ((lineEnd.x()-lineBegin.x())*(this->y()-lineBegin.y())-(lineEnd.y()-lineBegin.y())*(this->x()-lineBegin.x())) < 0;
 }
 

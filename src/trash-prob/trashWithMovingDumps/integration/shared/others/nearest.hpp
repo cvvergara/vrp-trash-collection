@@ -73,7 +73,7 @@ template <class DataFacadeT> class NearestPlugin final : public BasePlugin
 			unsigned long uint_max = std::numeric_limits<unsigned int>::max();
             // reply.status = http::Reply::ok;
             json_result.values["status"] = 0;
-            
+
             std::cout << "Hay " << number_of_results << " PhantomNodes." << std::endl;
 
             if (number_of_results > 1)
@@ -86,9 +86,9 @@ template <class DataFacadeT> class NearestPlugin final : public BasePlugin
                 {
                     osrm::json::Array json_coordinate;
                     osrm::json::Object result;
-                    
+
                     std::cout << "PhantomNode " << i << ": " << phantom_node_vector.at(i) << std::endl;
-                    
+
                     json_coordinate.values.push_back(phantom_node_vector.at(i).location.lat /
                                                      COORDINATE_PRECISION);
                     json_coordinate.values.push_back(phantom_node_vector.at(i).location.lon /
@@ -103,9 +103,9 @@ template <class DataFacadeT> class NearestPlugin final : public BasePlugin
             else
             {
                 osrm::json::Array json_coordinate;
-                
+
                 std::cout << "PhantomNode 0: " << phantom_node_vector.front() << std::endl;
-                
+
                 json_coordinate.values.push_back(phantom_node_vector.front().location.lat /
                                                  COORDINATE_PRECISION);
                 json_coordinate.values.push_back(phantom_node_vector.front().location.lon /
@@ -113,22 +113,23 @@ template <class DataFacadeT> class NearestPlugin final : public BasePlugin
                 json_result.values["mapped_coordinate"] = json_coordinate;
                 json_result.values["name"] =
                     facade->get_name_for_id(phantom_node_vector.front().name_id);
-                
-                std::cout << "GetCoordinateOfNode(forward_node_id): " << facade->GetCoordinateOfNode(phantom_node_vector.front().forward_node_id)  << std::endl;
-                std::cout << "GetTarget(forward_node_id): " << facade->GetTarget(phantom_node_vector.front().forward_node_id) << std::endl;
-                std::cout << "GetCoordinateOfNode(target): " << facade->GetCoordinateOfNode( facade->GetTarget(phantom_node_vector.front().forward_node_id) )  << std::endl;
-                
+
+                //std::cout << "GetCoordinateOfNode(forward_node_id): " << facade->GetCoordinateOfNode(phantom_node_vector.front().forward_node_id)  << std::endl;
+                //std::cout << "GetCoordinateOfNode(reverse_node_id): " << facade->GetCoordinateOfNode(phantom_node_vector.front().reverse_node_id)  << std::endl;
+                //std::cout << "GetTarget(forward_node_id): " << facade->GetTarget(phantom_node_vector.front().forward_node_id) << std::endl;
+                //std::cout << "GetCoordinateOfNode(target): " << facade->GetCoordinateOfNode( facade->GetTarget(phantom_node_vector.front().forward_node_id) )  << std::endl;
+
                 if (phantom_node_vector.front().forward_node_id < uint_max and phantom_node_vector.front().reverse_node_id < uint_max) {
-					json_result.values["one_way"] = 0;					
-					json_result.values["reverse_node_id"] = phantom_node_vector.front().reverse_node_id;					
-					std::cout << "GetCoordinateOfNode(reverse_node_id): " << facade->GetCoordinateOfNode(phantom_node_vector.front().reverse_node_id)  << std::endl;
+					json_result.values["one_way"] = 0;
+                    json_result.values["reverse_node_id"] = phantom_node_vector.front().reverse_node_id;
 				} else {
 					json_result.values["one_way"] = 1;
+                    json_result.values["reverse_node_id"] = 0;
 				}
-				json_result.values["forward_node_id"] = phantom_node_vector.front().forward_node_id;
+				json_result.values["forward_node_id"] = phantom_node_vector.front().forward_node_id;                
 				json_result.values["forward_weight"] = phantom_node_vector.front().forward_weight;
-				json_result.values["reverse_weight"] = phantom_node_vector.front().reverse_weight;				
-				
+				json_result.values["reverse_weight"] = phantom_node_vector.front().reverse_weight;
+                json_result.values["name_id"] = phantom_node_vector.front().name_id;
             }
         }
         return 200;

@@ -990,7 +990,8 @@ bool OsrmClient::getOsrmLocate(double ilat, double ilon, double &olat, double &o
     return true;
 }
 
-bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &olon, std::string &oname)
+bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &olon,
+    unsigned int &one_way, unsigned int &forward_id, unsigned int &reverse_id, unsigned int &street_id)
 {
     std::string oldService; //! backup service
     std::stringstream tmpSS; //!
@@ -1060,10 +1061,22 @@ bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &
         int rStatus = ( int ) jsonDoc["status"].GetInt();
         if (rStatus == 0) {
             // extract the latitude and longitude
-            olat = ( double ) jsonDoc["mapped_coordinate"][0].GetDouble();
-            olon = ( double ) jsonDoc["mapped_coordinate"][1].GetDouble();
-            // extract name
-            oname = ( std::string ) jsonDoc["name"].GetString();
+            if ( jsonDoc.HasMember( "mapped_coordinate" ) ) {
+                olat = ( double ) jsonDoc["mapped_coordinate"][0].GetDouble();
+                olon = ( double ) jsonDoc["mapped_coordinate"][1].GetDouble();
+            }
+            if ( jsonDoc.HasMember( "one_way" ) ) {
+                one_way = ( unsigned int ) jsonDoc["one_way"].GetInt();
+            }
+            if ( jsonDoc.HasMember( "forward_node_id" ) ) {
+                forward_id = ( unsigned int ) jsonDoc["forward_node_id"].GetInt();
+            }
+            if ( jsonDoc.HasMember( "reverse_node_id" ) ) {
+                reverse_id = ( unsigned int ) jsonDoc["reverse_node_id"].GetInt();
+            }
+            if ( jsonDoc.HasMember( "name_id" ) ) {
+                street_id = ( unsigned int ) jsonDoc["name_id"].GetInt();
+            }
             return true;
         } else {
             errorMsg = "OsrmClient:getOsrmNearest failed. Bad status 'status' in OSRM response!";
