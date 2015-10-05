@@ -151,7 +151,9 @@ public:
    * \param[out] Edge name.
    * \return true on succes.
    */
-  bool getOsrmNearest(double ilat, double ilon , double &olat, double &olon, std::string &oname);
+  bool getOsrmNearest(double ilat, double ilon ,
+    double &olat, double &olon, unsigned int &one_way,
+    unsigned int &forward_id, unsigned int &reverse_id, unsigned int &street_id);
 
 private:
   bool getTime( rapidjson::Document &jtree, double &time );

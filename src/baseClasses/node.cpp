@@ -267,6 +267,11 @@ double Node::distanceToSegment(double segmentX1, double segmentY1,
   return distance;
 }
 
+bool Node::isRightToSegment(const Node &lineBegin, const Node &lineEnd) const
+{
+    return ((lineEnd.x()-lineBegin.x())*(this->y()-lineBegin.y())-(lineEnd.y()-lineBegin.y())*(this->x()-lineBegin.x())) < 0;
+}
+
 
 // Constructors
 

@@ -170,6 +170,7 @@ void VRPTools::solve()
     #ifdef DOVRPLOG
         DLOG(INFO) << "Initial solution: 0 is best";
     #endif
+
         double best_cost = 9999999;
         Solution best_sol( tp );
         best_cost = best_sol.getCostOsrm();
