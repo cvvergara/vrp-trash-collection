@@ -299,9 +299,21 @@ bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
  */
 bool OsrmClient::getOsrmViaroute()
 {
-  if ( not connectionAvailable ) return false;
+  if ( not connectionAvailable )
+  {
+        #ifdef OSRMCLIENT
+          DLOG(INFO) << "Not connectionAvailable";
+        #endif
+      return false;
+  }
 
-  if ( not use ) return false;
+  if ( not use )
+  {
+        #ifdef OSRMCLIENT
+          DLOG(INFO) << "Not used";
+        #endif
+      return false;
+  }
 
 #ifdef DOSTATS
   Timer timer;

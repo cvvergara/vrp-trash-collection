@@ -11,11 +11,11 @@
 
 int main(int argc, char **argv)
 {
-    std::string fileDir = "../../../../tests/";
+    std::string fileDir = "../tests/InputFiles/";
     VRPTools vrp;
     std::cout << "OSRM checkOsrmClient: " << vrp.checkOsrmClient() << std::endl;
     std::cout << "OSRM available: " << vrp.osrmAvailable() << std::endl;
-    vrp.readDataFromFiles(fileDir + "a_du_rm_cl_01");
+    vrp.readDataFromFiles(fileDir + "rivera");
     //vrp.readDataFromFiles(fileDir + "a_du_rm_cl_08");
     //std::cout << "OSRM check: " << vrp.check() << std::endl;
     vrp.solve();
