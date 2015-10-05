@@ -680,7 +680,12 @@ void fill_times(const TwBucket<knode> nodesOnPath) const {
   // buld call
   std::deque< Node > call;
   for (unsigned int i = 0; i < nodesOnPath.size(); ++i) {
-      call.push_back(nodesOnPath[i]);
+        call.push_back(nodesOnPath[i]);
+        #ifdef OSRMCLIENT
+          std::ostringstream strs;
+          strs << "Nodos en el path:" << i << "ID: " << nodesOnPath[i].id() << " x: " << nodesOnPath[i].x() << " y: " << nodesOnPath[i].y();
+          DLOG(INFO) << strs.str();
+        #endif
   }
   osrmi->addViaPoints(call);
   if (!osrmi->getOsrmViaroute()) {
@@ -841,6 +846,11 @@ void getNodesOnPath(
   std::deque< Node > call;
   for (unsigned int i = 0; i < truck.size(); ++i) {
       call.push_back(truck[i]);
+        #ifdef OSRMCLIENT
+          std::ostringstream strs;
+          strs << "Nodos en el truck:" << i << "ID: " << truck[i].id() << " x: " << truck[i].x() << " y: " << truck[i].y();
+          DLOG(INFO) << strs.str();
+        #endif
   }
   call.push_back(dumpSite);
   osrmi->addViaPoints(call);
@@ -908,10 +918,10 @@ void getNodesOnPath(
   TwBucket<knode> streetNodes;
   for (unsigned int i = 0; i < unassigned.size(); ++i) {
     if (streetIDs.find(unassigned[i].streetId()) != streetIDs.end()) {
-#ifdef VRPMAXTRACE
-    DLOG(INFO) << "Posible on route inserting: " << unassigned[i].id();
-#endif
-      streetNodes.push_back(unassigned[i]);
+        #ifdef VRPMAXTRACE
+            DLOG(INFO) << "Posible on route inserting: " << unassigned[i].id();
+        #endif
+        streetNodes.push_back(unassigned[i]);
     } 
   }
 #ifdef VRPMAXTRACE
@@ -981,7 +991,33 @@ void getNodesOnPath(
       if ( pos > 0 ) {
         // found one on the segment so save it so we can order them
         std::pair< double, unsigned int > p( pos, i );
-        seg.push_back( p );
+        //  Node::isRightToSegment(const Node &lineBegin, const Node &lineEnd)
+        const Node lineBegin = *geometry.begin();
+        const Node lineEnd = *geometry.end();
+        /*#ifdef OSRMCLIENT
+          std::ostringstream strs;
+          strs << "Segmento: " << i << "Inicio: " << &lineBegin.x() << " Fin: " << lineEnd.y();
+          DLOG(INFO) << strs.str();
+        #endif*/
+        if(streetNodes[i].isRightToSegment(lineBegin, lineEnd))
+        {
+
+            #ifdef OSRMCLIENT
+              std::ostringstream strs;
+              strs << "Nodo dentro del path, está a la derecha:" << i << "StreetID: " << unassigned[i].streetId() << " x: " << unassigned[i].x() << " y: " << unassigned[i].y();
+              DLOG(INFO) << strs.str();
+            #endif
+            seg.push_back( p );
+        }
+        else
+        {
+          #ifdef OSRMCLIENT
+            std::ostringstream strs;
+            strs << "Nodo fuera del path, está a la izquierda:" << i << "StreetID: " << unassigned[i].streetId() << " x: " << unassigned[i].x() << " y: " << unassigned[i].y();
+            DLOG(INFO) << strs.str();
+          #endif
+        }
+
       }
     }
 
