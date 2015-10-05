@@ -977,11 +977,26 @@ void getNodesOnPath(
     // loop through the nodes and see which are on this segment
     for ( unsigned int i=0; i<streetNodes.size(); i++ ) {
       double pos = streetNodes[i].positionAlongSegment( *(git-1), *git, tol );
+
+      // Not used!
       double distToDump = streetNodes[i].distanceToSquared( dumpSite );
+
       if ( pos > 0 ) {
-        // found one on the segment so save it so we can order them
-        std::pair< double, unsigned int > p( pos, i );
-        seg.push_back( p );
+        // check if segment of the street is 2 way and Node is in the right side
+        oldStateOsrm = osrmi->getUse();
+        osrmi->useOsrm(true);  //forcing osrm usage
+        osrmi->clear();
+        double olon, olat;
+        unsigned int one_way = 0;
+        unsigned int fw_id, rv_id, street_id;
+        osrmi->getOsrmNearest( streetNodes[i].x(), streetNodes[i].y(), olon, olat, one_way, fw_id, rv_id, street_id);
+        osrmi->useOsrm(oldStateOsrm);
+        //
+        if ( one_way == 1 || streetNodes[i].isRightToSegment(*(git-1), *git) ) {
+            // found one on the segment so save it so we can order them
+            std::pair< double, unsigned int > p( pos, i );
+            seg.push_back( p );
+        }
       }
     }
 
