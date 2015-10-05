@@ -51,11 +51,7 @@ endforeach()
 find_path(
   RAPIDJSON_INCLUDE_DIRS
   NAMES rapidjson/rapidjson.h
-<<<<<<< HEAD
   PATHS ${RAPIDJSON_INCLUDEDIR}
-=======
-  PATHS ${RAPIDJSON_INCLUDEDIR} /usr/include /usr/local/include
->>>>>>> 548b6d496c09942640cf26afbc3f44e5929ef6b2
   DOC "Include directory for the rapidjson library."
 )
 
@@ -98,8 +94,4 @@ elseif(rapidjson_FIND_REQUIRED)
     message(FATAL_ERROR "Could not find rapidjson")
 else()
   message(STATUS "Optional package rapidjson was not found")
-<<<<<<< HEAD
 endif()
-=======
-endif()
->>>>>>> 548b6d496c09942640cf26afbc3f44e5929ef6b2
