@@ -1003,6 +1003,11 @@ void getNodesOnPath(
         osrmi->useOsrm(oldStateOsrm);
         //
         if ( one_way == 1 || streetNodes[i].isRightToSegment(*(git-1), *git) ) {
+        #ifdef VRPMINTRACE
+            if ( one_way == 0) {
+                DLOG(INFO) << "Found node (" << streetNodes[i].id() << ") at right in two way street";
+            }
+        #endif
             // found one on the segment so save it so we can order them
             std::pair< double, unsigned int > p( pos, i );
             seg.push_back( p );
