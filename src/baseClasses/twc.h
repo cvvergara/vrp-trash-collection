@@ -174,7 +174,7 @@ class CompareSecond {
         else {
           travel_Time[i][j] = travel_time_onTrip[i][j];
         }
-  };
+  }
     
   void getProcessOrder() {
     //process_order.resize(original.size());

@@ -106,21 +106,13 @@ public:
     return fleet.size() < another.fleet.size() || totalCost < another.totalCost;
   }
 
-
   bool applyInsMove( const Move &move ) ;
   bool applyInterSwMove( const Move &move ) ;
   bool applyIntraSwMove( const Move &move ) ;
 
-
-
   int countPickups();
     
-
-
-
-
   // Cost related
-
   int v_computeCosts();
   void dumpCostValues();
   void setInitialValues();

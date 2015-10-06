@@ -126,6 +126,7 @@ set (BASECLASSES_SOURCES
     ../../../../baseClasses/md5.cpp
     ../../../../baseClasses/move.cpp
     ../../../../baseClasses/node.cpp
+    ../../../../baseClasses/phantomnode.cpp
     ../../../../baseClasses/osrmclient.cpp
     ../../../../baseClasses/signalhandler.cpp
     ../../../../baseClasses/stats.cpp
@@ -149,6 +150,7 @@ set (BASECLASSES_INCLUDE_FILES
     #../../../../baseClasses/config.h
     ../../../../baseClasses/md5.h
     ../../../../baseClasses/node.h
+    ../../../../baseClasses/phantomnode.h
     ../../../../baseClasses/pg_types_vrp.h
     ../../../../baseClasses/signalhandler.h
     ../../../../baseClasses/stats.h

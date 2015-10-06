@@ -38,11 +38,11 @@ bool OsrmClient::connectionAvailable = true;
 
 OsrmClient::OsrmClient(const OsrmClient &other) {
   connectionAvailable = other.connectionAvailable;
-};
+}
 
 OsrmClient &OsrmClient::operator=(const OsrmClient &other) {
   connectionAvailable = other.connectionAvailable;
-};
+}
 
 /*!  * \brief The OsrmClient constructor.  */
 OsrmClient::OsrmClient() {

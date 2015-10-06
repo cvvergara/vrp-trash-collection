@@ -259,7 +259,6 @@ void Prob_trash::loadProblem( const std::string &infile )
 }
 
 
-
 void Prob_trash::load_trucks( std::string infile )
 {
   assert ( otherlocs.size() );
@@ -288,6 +287,11 @@ void Prob_trash::load_trucks( std::string infile )
   }
 
   in.close();
+
+}
+
+void Prob_trash::setPhantomNodesForPickups()
+{
 
 }
 

@@ -230,8 +230,9 @@ void TrashProb::addContainers( container_t *_containers, int count )
       dm += node.demand();
       x += node.x();
       y += node.y();
-    } else invalid.push_back( node );
-
+    } else {
+      invalid.push_back( node );
+    }
   }
 
   st = st / pickups.size();
@@ -429,7 +430,7 @@ void  TrashProb::whatIsWrong()
     errorsFound.push_back(errorStr);
   };
 
-};
+}
 
 
 std::string TrashProb::getErrorsString() const
