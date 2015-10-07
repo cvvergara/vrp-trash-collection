@@ -12,8 +12,8 @@ public:
     :mX(0.0),mY(0.0){
   }
   Point(const Point &other) {
-      mX = other.x();
-      mY = other.y();
+      mX = other.mX;
+      mY = other.mY;
   }
   Point(double x, double y) {
       mX = x;
