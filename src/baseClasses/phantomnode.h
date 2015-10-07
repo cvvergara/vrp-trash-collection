@@ -8,7 +8,9 @@
 class Point
 {
 public:
-  Point() {}
+  Point()
+    :mX(0.0),mY(0.0){
+  }
   Point(const Point &other) {
       this->mX = other.mX;
       this->mY = other.mY;
@@ -21,8 +23,14 @@ public:
   double y () const { return mY; }
 
   Point& operator= ( const Point &other ){
+<<<<<<< HEAD
     this->mX = other.mX;
     this->mY = other.mY;
+=======
+    //Point tmp(other);
+    mX=other.x();
+    mY=other.y();
+>>>>>>> 79ce6645d32029ab58b1c56c9b026e34068e4252
     return *this;
   }
 

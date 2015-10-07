@@ -60,10 +60,13 @@ add_executable (testPoint ${TESTPOINT_SOURCES})
 target_link_libraries (testPoint ${Boost_LIBRARIES})
 
 ## ----------------------------------------
+# Append the source files here
 set (TESTPHANTOMNODE_SOURCES
     ../../../../../baseClasses/phantomnode.cpp
     testphantomnode.cpp
+
 )
+
 set (TESTPHANTOMNODE_INCLUDE_FILES
 
 )

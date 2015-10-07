@@ -15,8 +15,10 @@ BOOST_AUTO_TEST_CASE( init )
     double ilat, ilon;
     ilat = -34.123456;
     ilon = -56.654321;
+    Point p;
+    p = Point(ilon,ilat);
 
-    Point p = Point(ilon,ilat);
+    //p(p2);
     BOOST_REQUIRE_CLOSE( p.x(), ilon, 0.00001 );
     BOOST_REQUIRE_CLOSE( p.y(), ilat, 0.00001 );
 
