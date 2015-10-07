@@ -35,36 +35,36 @@ class Solution: public Prob_trash
 {
 protected:
   typedef  TwBucket<Trashnode> Bucket;
-
   std::deque<Vehicle> fleet;
-
-
   double totalDistance;
   double totalCost;
   double w1, w2, w3;
 
 public:
+  // Default constructors
+  Solution( const Prob_trash &P ): Prob_trash( P ) {}
+  Solution( const std::string &infile, const std::vector<int> &solution );
+  Solution( const std::string &infile, const std::string &soliFile );
+  // Evaluate
   void evaluate();
-
+  // Clear problem and fleet
   void clear() {
     Prob_trash::clear();
     fleet.clear();
   }
-
-  Solution( const Prob_trash &P ): Prob_trash( P ) {}
-  Solution( const std::string &infile, const std::vector<int> &solution );
-  Solution( const std::string &infile, const std::string &soliFile );
-
-
+  // Set protected variables
   void setweights( double _w1, double _w2, double _w3 ) {w1 = _w1; w2 = _w2; w3 = _w3;}
+  // Dump fleets to LOG
   void dumproutes();
+  //
   void tau() ;
+  // Plot solution to file
   void plot( std::string file, std::string title );
+  // Solutions outputs
   std::string solutionAsText() const ;
   std::string solutionAsTextID() const ;
   std::vector<int>  solutionAsVector() const ;
   std::vector<int>  solutionAsVectorID() const ;
-
   vehicle_path_t *getSolutionForPg(UINT &count) const;
 
   int computeCosts();

@@ -42,14 +42,14 @@ protected:
 
   //    Trashnode depot;
   Twpath<Trashnode> datanodes;              //dissallowing set operations
-  Bucket otherlocs;
-  Bucket dumps;
-  Bucket depots;
-  Bucket pickups;
+  Bucket otherlocs;                         ///< Dumps and depts information.
+  Bucket dumps;                             ///< Dumps sites.
+  Bucket depots;                            ///< PahntomNode information for pickups. UID is the id of pickups nodes.
+  Bucket pickups;                           ///< Clients. Containers.
   std::map<UID,PhantomNode> phantomNodes;   ///< PahntomNode information for pickups. UID is the id of pickups nodes.
   Bucket endings;
   Bucket invalid;
-  std::deque<Vehicle> trucks;
+  std::deque<Vehicle> trucks;               ///< Veihcles information
   std::deque<Vehicle> invalidTrucks;
   Trashnode C;                              ///< Nodo que tiene valores medios de coordenadas cargadas
 

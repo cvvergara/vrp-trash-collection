@@ -86,9 +86,8 @@
 
 
 template <class knode> class TWC {
- private:
-  typedef TwBucket<knode> Bucket;
-
+private:
+// CompareSecond class
 template<typename Pair>
 class CompareSecond {
  public:
@@ -101,6 +100,8 @@ class CompareSecond {
     return false;
   }
 };
+// End CompareSecond class
+
 #ifdef OSRMCLIENT
   /*! \todo */
   class TTindex {  // all are ids when prev==from its a 3 node call
@@ -131,14 +132,15 @@ class CompareSecond {
   typedef std::map<TTindex, double, classcomp>  TT4;
   typedef typename std::map<TTindex, double, classcomp>::iterator p_TT4;
   mutable TT4 travel_Time4;
-#endif
-#endif
+#endif //0
+#endif //OSRMCLIENT
 
+  typedef TwBucket<knode> Bucket;
   TwBucket<knode> original;
   std::map< std::string, int> streetNames; 
-  mutable std::vector<std::vector<double> > twcij;
-  mutable std::vector<std::vector<double> > travel_Time;
-  mutable std::vector<std::vector<double> > travel_time_onTrip;
+  mutable std::vector< std::vector<double> > twcij;
+  mutable std::vector< std::vector<double> > travel_Time;
+  mutable std::vector< std::vector<double> > travel_time_onTrip;
   mutable std::vector< std::vector< std::deque< int64_t> > > nodes_onTrip;
 
   typedef std::pair< std::pair <UINT, UINT>,  double> id_time;
@@ -147,7 +149,7 @@ class CompareSecond {
    std::set<id_time, CompareSecond< id_time > >  process_order_far;
 
  public:
-  /*! \brief cleans all the tables, leaving them blanck for a next execution */
+  /*! \brief cleans all the tables, leaving them blank for a next execution */
   void cleanUp() {
     original.clear();
     twcij.clear();
@@ -831,6 +833,7 @@ void getNodesOnPath(
    const knode &dumpSite,
    const TwBucket<knode> &unassigned,
    TwBucket<knode> &orderedStreetNodes) const {
+
 #ifndef OSRMCLIENT
   DLOG(INFO) << "NO OSRM";
   return;
@@ -844,11 +847,15 @@ void getNodesOnPath(
   // buld call
   osrmi->setWantGeometry(true);
   std::deque< Node > call;
+  // En calle de dos vias
+  // Para el truck[0] debo imponer que vaya luego al afterPNode
+  // Para el resto que pase por beforePNode
+  //
   for (unsigned int i = 0; i < truck.size(); ++i) {
       call.push_back(truck[i]);
         #ifdef OSRMCLIENT
           std::ostringstream strs;
-          strs << "Nodos en el truck:" << i << "ID: " << truck[i].id() << " x: " << truck[i].x() << " y: " << truck[i].y();
+          strs << "Nodos en el truck:" << i << " ID: " << truck[i].id() << " x: " << truck[i].x() << " y: " << truck[i].y();
           DLOG(INFO) << strs.str();
         #endif
   }
@@ -1006,6 +1013,7 @@ void getNodesOnPath(
         #ifdef VRPMINTRACE
             if ( one_way == 0) {
                 DLOG(INFO) << "Found node (" << streetNodes[i].id() << ") at right in two way street";
+                DLOG(INFO) << "(" << streetNodes[i].x() << "," << streetNodes[i].y() << ")";
             }
         #endif
             // found one on the segment so save it so we can order them

@@ -26,7 +26,7 @@ class Trip: public Vehicle1 {
   int m_trip_id;
 
   Trip(const Trashnode &S, const Trashnode &D, const Trashnode &E, double maxcap)
-    : Vehicle1(S, D, E, maxcap), m_trip_id(0) { };
+    : Vehicle1(S, D, E, maxcap), m_trip_id(0) { }
 
 
   void swapBestToDump(Trip &other);
@@ -56,15 +56,15 @@ class Vehicle: public Vehicle1 {
   std::deque< Trip > trips;
 
 
-  Vehicle():Vehicle1(){};
+  Vehicle():Vehicle1(){}
   Vehicle(const std::string &line, const Bucket &otherlocs )
-    : Vehicle1(line, otherlocs)   { };
+    : Vehicle1(line, otherlocs)   { }
   Vehicle( int _vid, int _start_id, int _dump_id, int _end_id,
            int _capacity, int _dumpservicetime, int _starttime,
            int _endtime, const Bucket &otherlocs )
     : Vehicle1( _vid, _start_id, _dump_id, _end_id,
                    _capacity, _dumpservicetime, _starttime,
-                   _endtime, otherlocs ) {};
+                   _endtime, otherlocs ) {}
 
 
 
