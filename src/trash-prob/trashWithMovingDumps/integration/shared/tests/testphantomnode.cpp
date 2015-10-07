@@ -12,21 +12,32 @@ BOOST_AUTO_TEST_SUITE( PhantomNodeTest )
 BOOST_AUTO_TEST_CASE( init )
 {
 
+    UID phantomNodeId,fwNodeId,rvNodeId, fwWeight, rvWeight, nameId;
     double ilat, ilon;
     ilat = -34.123456;
     ilon = -56.654321;
+    phantomNodeId = 1;
+    fwNodeId = 2;
+    rvNodeId = 3;
+    fwWeight = 4;
+    rvWeight = 5;
+    nameId = 6;
+    std::cout << "Creating PhantomNode with parameters:"<< std::endl;
+    std::cout << "phantomNodeId,lon,lat,fwNodeId,rvNodeId,fwWeight, rvWeight, nameId" << std::endl;
+    std::cout << phantomNodeId << ilon << ilat << fwNodeId << rvNodeId <<  fwWeight <<  rvWeight <<  nameId << std::endl;
+    PhantomNode pn(phantomNodeId,ilon,ilat,fwNodeId,rvNodeId, fwWeight, rvWeight, nameId);
+    std::cout << "Created PhantomNode with parameters:"<< std::endl;
+    std::cout << "phantomNodeId,lon,lat,fwNodeId,rvNodeId,fwWeight, rvWeight, nameId" << std::endl;
+    std::cout << pn.mPhantomNodeId << pn.mPoint.x() << pn.mPoint.y() << pn.mForwNodeId << pn.mReveNodeId <<  pn.forwWeight() <<  pn.reveWeight() <<  pn.mNameId << std::endl;
 
-    Point p = Point(ilon,ilat);
-    BOOST_REQUIRE_CLOSE( p.x(), ilon, 0.00001 );
-    BOOST_REQUIRE_CLOSE( p.y(), ilat, 0.00001 );
-
-    Point q(p);
-    BOOST_REQUIRE_CLOSE( p.x(), q.x(), 0.00001 );
-    BOOST_REQUIRE_CLOSE( p.y(), q.y(), 0.00001 );
-
-    Point r = p;
-    BOOST_REQUIRE_CLOSE( p.x(), r.x(), 0.00001 );
-    BOOST_REQUIRE_CLOSE( p.y(), r.y(), 0.00001 );
+    BOOST_REQUIRE_EQUAL(phantomNodeId,pn.mPhantomNodeId);
+    BOOST_REQUIRE_EQUAL(ilon,pn.mPoint.x());
+    BOOST_REQUIRE_EQUAL(ilat,pn.mPoint.y());
+    BOOST_REQUIRE_EQUAL(fwNodeId,pn.mForwNodeId);
+    BOOST_REQUIRE_EQUAL(rvNodeId,pn.mReveNodeId );
+    BOOST_REQUIRE_EQUAL(fwWeight,pn.forwWeight());
+    BOOST_REQUIRE_EQUAL(rvWeight,pn.reveWeight());
+    BOOST_REQUIRE_EQUAL(nameId,pn.mNameId);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
