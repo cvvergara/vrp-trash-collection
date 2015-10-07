@@ -141,15 +141,44 @@ private:
   void setPhantomNodes() {
     // Delete previous
     mPhantomNodes.clear();
-
+  #ifdef VRPMINTRACE
     DLOG(INFO) << "mPhantonNodes cleared!";
-    DLOG(INFO) << "Original have " << original.size() << " elements!";
+    DLOG(INFO) << "original have " << original.size() << " elements!";
+  #endif
 
+    // Variables
+    bool oldStateOsrm;
+    double olat, olon;
+    unsigned int one_way = 0;
+    unsigned int fw_id, rv_id, fw_wt, rv_wt, street_id;
+
+    // Backup OSRM state
+    oldStateOsrm = osrmi->getUse();
+    osrmi->useOsrm(true);  //forcing osrm usage
+    osrmi->clear();
+
+    int pncount = 0;
     for (UINT i = 0; i < original.size(); i++) {
         if ( original[i].isPickup() ) {
+        #ifdef VRPMINTRACE
             DLOG(INFO) << original[i].id() << " is pickup!";
+        #endif
+            osrmi->getOsrmNearest( original[i].x(), original[i].y(), olon, olat, one_way, fw_id, rv_id, street_id);
+            if (one_way == 0) {
+            #ifdef VRPMINTRACE
+                DLOG(INFO) << original[i].id() << " is in two way street!";
+            #endif
+                // Two way street
+                PhantomNode pn = PhantomNode(pncount, olon, olat, fw_id, rv_id, fw_wt, rv_wt, street_id);
+                // Add before and after to pn
+
+                // Add pn to de map
+                mPhantomNodes[original[i].id()] = pn;
+                pncount++;
+            }
         }
     }
+    osrmi->useOsrm(oldStateOsrm);
   }
 
 #if 0
@@ -711,7 +740,7 @@ void fill_times(const TwBucket<knode> nodesOnPath) const {
         call.push_back(nodesOnPath[i]);
         #ifdef OSRMCLIENT
           std::ostringstream strs;
-          strs << "Nodos en el path:" << i << "ID: " << nodesOnPath[i].id() << " x: " << nodesOnPath[i].x() << " y: " << nodesOnPath[i].y();
+          strs << "Nodos en el path:" << i << " ID: " << nodesOnPath[i].id() << " x: " << nodesOnPath[i].x() << " y: " << nodesOnPath[i].y();
           DLOG(INFO) << strs.str();
         #endif
   }

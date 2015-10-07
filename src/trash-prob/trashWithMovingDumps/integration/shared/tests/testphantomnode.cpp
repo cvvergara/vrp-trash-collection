@@ -25,17 +25,10 @@ BOOST_AUTO_TEST_CASE( init )
     std::cout << "Creating PhantomNode with parameters:"<< std::endl;
     std::cout << "phantomNodeId,lon,lat,fwNodeId,rvNodeId,fwWeight, rvWeight, nameId" << std::endl;
     std::cout << phantomNodeId << "," << ilon << "," << ilat << "," << fwNodeId << "," << rvNodeId << "," <<  fwWeight << "," <<  rvWeight << "," <<  nameId << "," << std::endl;
-<<<<<<< HEAD
     PhantomNode pn = PhantomNode(phantomNodeId,ilon,ilat,fwNodeId,rvNodeId, fwWeight, rvWeight, nameId);
     std::cout << "Created PhantomNode with parameters:"<< std::endl;
     std::cout << "phantomNodeId,lon,lat,fwNodeId,rvNodeId,fwWeight, rvWeight, nameId" << std::endl;
     std::cout << pn.id() << pn.point().x() << pn.point().y() << pn.forwNodeId() << pn.reveNodeId() <<  pn.forwWeight() <<  pn.reveWeight() <<  pn.nameId()<< std::endl;
-=======
-    PhantomNode pn(phantomNodeId,ilon,ilat,fwNodeId,rvNodeId, fwWeight, rvWeight, nameId);
-    std::cout << "Created PhantomNode with parameters:"<< std::endl;
-    std::cout << "phantomNodeId,lon,lat,fwNodeId,rvNodeId,fwWeight, rvWeight, nameId" << std::endl;
-    std::cout << pn.id() << "," << pn.point().x() << "," << pn.point().y() << "," << pn.forwNodeId() << "," << pn.reveNodeId() << "," <<  pn.forwWeight() << "," <<  pn.reveWeight() << "," <<  pn.nameId()<< "," << std::endl;
->>>>>>> 79ce6645d32029ab58b1c56c9b026e34068e4252
 
     BOOST_REQUIRE_EQUAL(phantomNodeId,pn.id());
     BOOST_REQUIRE_EQUAL(ilon,pn.point().x());
@@ -45,8 +38,6 @@ BOOST_AUTO_TEST_CASE( init )
     BOOST_REQUIRE_EQUAL(fwWeight,pn.forwWeight());
     BOOST_REQUIRE_EQUAL(rvWeight,pn.reveWeight());
     BOOST_REQUIRE_EQUAL(nameId,pn.nameId());
-<<<<<<< HEAD
-=======
 
     std::cout << "Creating other PhantomNode with created PhantomNode as parameter:"<< std::endl;
     PhantomNode pn2(pn);
@@ -115,8 +106,6 @@ BOOST_AUTO_TEST_CASE( init )
     std::cout << "phantomNodeId,lon,lat,fwNodeId,rvNodeId,fwWeight, rvWeight, nameId" << std::endl;
     std::cout << pn3.id() << "," << pn3.point().x() << "," << pn3.point().y() << "," << pn3.forwNodeId() << "," << pn3.reveNodeId() << "," <<  pn3.forwWeight() << "," <<  pn3.reveWeight() << "," <<  pn3.nameId()<< "," << std::endl;
     BOOST_REQUIRE_EQUAL(pn.inSameStreet(pn3),false);
-
->>>>>>> 79ce6645d32029ab58b1c56c9b026e34068e4252
 }
 
 BOOST_AUTO_TEST_SUITE_END()
