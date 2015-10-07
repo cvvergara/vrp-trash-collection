@@ -64,6 +64,7 @@ target_link_libraries (testPoint ${Boost_LIBRARIES})
 set (TESTPHANTOMNODE_SOURCES
     testphantomnode.cpp
     ../../../../../baseClasses/phantomnode.cpp
+
 )
 
 set (TESTPHANTOMNODE_INCLUDE_FILES
