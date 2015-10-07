@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE( init )
     nameId = 6;
     std::cout << "Creating PhantomNode with parameters:"<< std::endl;
     std::cout << "phantomNodeId,lon,lat,fwNodeId,rvNodeId,fwWeight, rvWeight, nameId" << std::endl;
-    std::cout << phantomNodeId << ilon << ilat << fwNodeId << rvNodeId <<  fwWeight <<  rvWeight <<  nameId << std::endl;
+    std::cout << phantomNodeId << "," << ilon << "," << ilat << "," << fwNodeId << "," << rvNodeId << "," <<  fwWeight << "," <<  rvWeight << "," <<  nameId << "," << std::endl;
     PhantomNode pn(phantomNodeId,ilon,ilat,fwNodeId,rvNodeId, fwWeight, rvWeight, nameId);
     std::cout << "Created PhantomNode with parameters:"<< std::endl;
     std::cout << "phantomNodeId,lon,lat,fwNodeId,rvNodeId,fwWeight, rvWeight, nameId" << std::endl;
