@@ -28,16 +28,16 @@ BOOST_AUTO_TEST_CASE( init )
     PhantomNode pn(phantomNodeId,ilon,ilat,fwNodeId,rvNodeId, fwWeight, rvWeight, nameId);
     std::cout << "Created PhantomNode with parameters:"<< std::endl;
     std::cout << "phantomNodeId,lon,lat,fwNodeId,rvNodeId,fwWeight, rvWeight, nameId" << std::endl;
-    std::cout << pn.mPhantomNodeId << pn.mPoint.x() << pn.mPoint.y() << pn.mForwNodeId << pn.mReveNodeId <<  pn.forwWeight() <<  pn.reveWeight() <<  pn.mNameId << std::endl;
+    std::cout << pn.id() << pn.point().x() << pn.point().y() << pn.forwNodeId() << pn.reveNodeId() <<  pn.forwWeight() <<  pn.reveWeight() <<  pn.nameId()<< std::endl;
 
     BOOST_REQUIRE_EQUAL(phantomNodeId,pn.mPhantomNodeId);
-    BOOST_REQUIRE_EQUAL(ilon,pn.mPoint.x());
-    BOOST_REQUIRE_EQUAL(ilat,pn.mPoint.y());
-    BOOST_REQUIRE_EQUAL(fwNodeId,pn.mForwNodeId);
-    BOOST_REQUIRE_EQUAL(rvNodeId,pn.mReveNodeId );
+    BOOST_REQUIRE_EQUAL(ilon,pn.point().x());
+    BOOST_REQUIRE_EQUAL(ilat,pn.point().y());
+    BOOST_REQUIRE_EQUAL(fwNodeId,pn.forwNodeId());
+    BOOST_REQUIRE_EQUAL(rvNodeId,pn.reveNodeId());
     BOOST_REQUIRE_EQUAL(fwWeight,pn.forwWeight());
     BOOST_REQUIRE_EQUAL(rvWeight,pn.reveWeight());
-    BOOST_REQUIRE_EQUAL(nameId,pn.mNameId);
+    BOOST_REQUIRE_EQUAL(nameId,pn.nameId());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
