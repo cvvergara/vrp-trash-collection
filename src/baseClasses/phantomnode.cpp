@@ -2,8 +2,7 @@
 
 PhantomNode::PhantomNode(UID phantomNodeId, double x, double y, UID fwNodeId, UID rvNodeId, UID fwWeight, UID rvWeight, UID nameId) {
     mPhantomNodeId = phantomNodeId;
-    mX = x;
-    mY = y;
+    mPoint = Point(x, y);
     mForwNodeId = fwNodeId;
     mReveNodeId = rvNodeId;
     mForwWeight = fwWeight;
@@ -13,13 +12,23 @@ PhantomNode::PhantomNode(UID phantomNodeId, double x, double y, UID fwNodeId, UI
 
 PhantomNode::PhantomNode(const PhantomNode &other) {
     mPhantomNodeId = other.mPhantomNodeId;
-    mX = other.mX;
-    mY = other.mY;
+    mPoint = other.mPoint;
     mForwNodeId = other.mForwNodeId;
     mReveNodeId = other.mReveNodeId;
     mForwWeight = other.mForwWeight;
     mReveWeight = other.mReveWeight;
     mNameId = other.mNameId;
+}
+
+bool PhantomNode::inSameStreet(const PhantomNode &other)
+{
+    return (
+        mNameId == other.mNameId &&
+            (
+                (mForwNodeId == other.mForwNodeId && mReveNodeId == other.mReveNodeId) ||
+                (mForwNodeId == other.mReveNodeId && mReveNodeId == other.mForwNodeId)
+            )
+    );
 }
 
 PhantomNode& PhantomNode::operator= (const PhantomNode &other)

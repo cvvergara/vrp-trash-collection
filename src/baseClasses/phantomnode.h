@@ -1,23 +1,41 @@
 #ifndef PHANTOMNODE_H
 #define PHANTOMNODE_H
 
+#include <iostream>
+
 #include <basictypes.h>
 
 class Point
 {
 public:
   Point() {}
+  Point(const Point &other) {
+      mX = other.mX;
+      mY = other.mY;
+  }
   Point(double x, double y) {
       mX = x;
       mY = y;
   }
-  double x () { return mX; }
-  double y () { return mY; }
+  double x () const { return mX; }
+  double y () const { return mY; }
+
+  Point& operator= ( const Point &other ){
+    Point tmp(other);
+    *this = tmp;
+    return *this;
+  }
 
 private:
   double mX;
   double mY;
 };
+
+inline std::ostream &operator<<(std::ostream &out, const Point &p)
+{
+    out << " (" << p.x() << ", " << p.y() << ") ";
+    return out;
+}
 
 
 /*! \class PhantomNode
@@ -35,41 +53,41 @@ public:
     PhantomNode( const PhantomNode &other );
 
     void setId(UID phantomNodeId) { mPhantomNodeId = phantomNodeId; }
-    UID id () { return mPhantomNodeId; }
+    UID id () const { return mPhantomNodeId; }
 
-    void setX (double x) { mX = x; }
-    double x () { return mX; }
-
-    void setY (double y) { mY = y; }
-    double y () { return mY; }
+    void setPoint (const Point &p) {
+        mPoint = Point(p.x(),p.y());
+    }
+    Point point () const { return mPoint; }
 
     void setForwNodeId(UID fwNodeId) { mForwNodeId = fwNodeId; }
-    UID forwNodeId () { return mForwNodeId; }
+    UID forwNodeId () const { return mForwNodeId; }
 
     void setReveNodeId(UID rvNodeId) { mReveNodeId = rvNodeId; }
-    UID reveNodeId () { return mReveNodeId; }
+    UID reveNodeId () const { return mReveNodeId; }
 
     void setForwWeight(UID fwWeight) { mForwWeight = fwWeight; }
-    UID forwWeight () { return mForwWeight; }
+    UID forwWeight () const { return mForwWeight; }
 
     void setReveWeight(UID rvWeight) { mReveWeight = rvWeight; }
-    UID reveWeight () { return mReveWeight; }
+    UID reveWeight () const { return mReveWeight; }
 
     void setNameId(UID nameId) { mNameId = nameId; }
-    UID nameId () { return mNameId; }
+    UID nameId () const { return mNameId; }
 
-    void setBeforePNode (Point p) { mBeforePNode = p; }
-    Point beforePNode () { return mBeforePNode; }
+    void setBeforePNode (const Point &p) { mBeforePNode = p; }
+    Point beforePNode () const { return mBeforePNode; }
 
-    void setAfterPNode (Point p) { mAfterPNode = p; }
-    Point afterPNode () { return mAfterPNode; }
+    void setAfterPNode (const Point &p) { mAfterPNode = p; }
+    Point afterPNode () const { return mAfterPNode; }
+
+    bool inSameStreet(const PhantomNode &other);
 
     PhantomNode& operator= ( const PhantomNode &other );
 
 private:
     UID mPhantomNodeId;     ///< internal node number
-    double mX;              ///< Longitude
-    double mY;              ///< Latitude
+    Point mPoint;           ///< Longitude, Latitude
     UID mForwNodeId;        ///< OSRM forward node id
     UID mReveNodeId;        ///< OSRM reverse node id
     UID mForwWeight;        ///< OSRM forward weight
@@ -78,5 +96,20 @@ private:
     Point mBeforePNode;     ///< Longitude and latitude of point before phantom node
     Point mAfterPNode;      ///< Longitude and latitude of point after phantom node
 };
+
+inline std::ostream &operator<<(std::ostream &out, const PhantomNode &pn)
+{
+    out << "id: " << pn.id() << ", "
+        << "Point: " << pn.point() << ", "
+        << "Forward node Id: " << pn.forwNodeId() << ", "
+        << "Reverse node Id: " << pn.reveNodeId() << ", "
+        << "Forward weight: " << pn.forwWeight() << ", "
+        << "Reverse weight: " << pn.reveWeight() << ", "
+        << "Name Id: " << pn.nameId() << ", "
+        << "Before PN: " << pn.beforePNode() << ", "
+        << "After PN: " << pn.afterPNode();
+    return out;
+}
+
 
 #endif // PHANTOMNODE_H

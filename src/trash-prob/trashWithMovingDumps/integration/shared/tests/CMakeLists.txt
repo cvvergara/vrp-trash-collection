@@ -48,3 +48,23 @@ MESSAGE(STATUS "curlpp: " ${CURLPP_LIBRARIES} )
 add_executable (test002 ${TEST002_SOURCES})
 target_link_libraries (test002 ${OSRM_LIBRARIES} ${GLOG_LIBRARIES} ${CURLPP_LIBRARIES} ${Boost_LIBRARIES} pthread rt )
 #target_link_libraries (test002 ${OSRM_LIBRARIES} ${GLOG_LIBRARIES} ${CURLPP_LIBRARIES} ${Boost_LIBRARIES} )
+
+## ----------------------------------------
+set (TESTPOINT_SOURCES
+    testpoint.cpp
+)
+set (TESTPOINT_INCLUDE_FILES
+
+)
+add_executable (testPoint ${TESTPOINT_SOURCES})
+target_link_libraries (testPoint ${Boost_LIBRARIES})
+
+## ----------------------------------------
+set (TESTPHANTOMNODE_SOURCES
+    testphantomnode.cpp
+)
+set (TESTPHANTOMNODE_INCLUDE_FILES
+
+)
+add_executable (testPhantomNode ${TESTPHANTOMNODE_SOURCES})
+target_link_libraries (testPhantomNode ${Boost_LIBRARIES})
