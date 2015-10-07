@@ -8,10 +8,12 @@
 class Point
 {
 public:
-  Point() {}
+  Point()
+    :mX(0.0),mY(0.0){
+  }
   Point(const Point &other) {
-      mX = other.mX;
-      mY = other.mY;
+      mX = other.x();
+      mY = other.y();
   }
   Point(double x, double y) {
       mX = x;
@@ -21,8 +23,9 @@ public:
   double y () const { return mY; }
 
   Point& operator= ( const Point &other ){
-    Point tmp(other);
-    *this = tmp;
+    //Point tmp(other);
+    mX=other.x();
+    mY=other.y();
     return *this;
   }
 
