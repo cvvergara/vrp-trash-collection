@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE( init )
     std::cout << "phantomNodeId,lon,lat,fwNodeId,rvNodeId,fwWeight, rvWeight, nameId" << std::endl;
     std::cout << pn.id() << pn.point().x() << pn.point().y() << pn.forwNodeId() << pn.reveNodeId() <<  pn.forwWeight() <<  pn.reveWeight() <<  pn.nameId()<< std::endl;
 
-    BOOST_REQUIRE_EQUAL(phantomNodeId,pn.mPhantomNodeId);
+    BOOST_REQUIRE_EQUAL(phantomNodeId,pn.id());
     BOOST_REQUIRE_EQUAL(ilon,pn.point().x());
     BOOST_REQUIRE_EQUAL(ilat,pn.point().y());
     BOOST_REQUIRE_EQUAL(fwNodeId,pn.forwNodeId());
