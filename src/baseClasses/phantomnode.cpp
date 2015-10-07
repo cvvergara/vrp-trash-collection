@@ -33,17 +33,12 @@ bool PhantomNode::inSameStreet(const PhantomNode &other)
 
 PhantomNode& PhantomNode::operator= (const PhantomNode &other)
 {
-    PhantomNode tmp(other);
-    *this = tmp;
+    this->mPhantomNodeId = other.mPhantomNodeId;
+    this->mPoint = other.mPoint;
+    this->mForwNodeId = other.mForwNodeId;
+    this->mReveNodeId = other.mReveNodeId;
+    this->mForwWeight = other.mForwWeight;
+    this->mReveWeight = other.mReveWeight;
+    this->mNameId = other.mNameId;
     return *this;
-    /*
-    mPhantomNodeId = other.mPhantomNodeId;
-    mX = other.mX;
-    mY = other.mY;
-    mForwNodeId = other.mForwNodeId;
-    mReveNodeId = other.mReveNodeId;
-    mForwWeight = other.mForwWeight;
-    mReveWeight = other.mReveWeight;
-    mNameId = other.mNameId;
-    */
 }

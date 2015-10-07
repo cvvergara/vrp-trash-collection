@@ -173,9 +173,13 @@ void Prob_trash::loadProblem( const std::string &infile )
 
   twc->emptiedTruck = false;
 
+  // Read containes/packups
   load_pickups( datafile + ".containers.txt" );
+
+  // Read other_locs
   load_otherlocs( datafile + ".otherlocs.txt" );
 
+  // Mmmmmmhhhhhh
   intersection = otherlocs * pickups;
   invalid = invalid + intersection;
   pickups = pickups - intersection;
@@ -184,7 +188,6 @@ void Prob_trash::loadProblem( const std::string &infile )
 #ifdef VRPMINTRACE
   invalid.dump( "invalid" );
 #endif
-
 
   nodes = pickups + otherlocs;
   nodes.push_back(C);
@@ -203,21 +206,23 @@ void Prob_trash::loadProblem( const std::string &infile )
   assert(pickups.size());
   assert(otherlocs.size());
 
+  // Datanodes = pickups + otherlocs
+  // pickups are Twnode::kPickup
   datanodes = nodes;
 
+  // Read time OSRM matrix from file
+  twc->loadAndProcess_distance( datafile + ".dmatrix-time.txt", datanodes, invalid );
 
-
-  twc->loadAndProcess_distance( datafile + ".dmatrix-time.txt", datanodes,
-                                invalid );
+  // Read trucks
   load_trucks( datafile + ".vehicles.txt" );
 
+  //
 #ifdef OSRMCLIENT
   twc->setHints( dumps );
   twc->setHints( nodes );
   twc->setHints( depots );
   twc->setHints( pickups );
   twc->setHints( endings );
-
   twc->fill_travel_time_onTrip();
   twc->settCC(C, pickups);
 #endif  // OSRMCLIENT
@@ -365,6 +370,8 @@ void Prob_trash::load_dumps( std::string infile )   //1 dump problem
   std::ifstream in( infile.c_str() );
   std::string line;
   int cnt = 0;
+
+  // Delete previous
   dumps.clear();
 
   while ( getline( in, line ) ) {
@@ -395,7 +402,10 @@ void Prob_trash::load_pickups( std::string infile )
   std::ifstream in( infile.c_str() );
   std::string line;
   int cnt = 0;
+
+  // Delete previous
   pickups.clear();
+
   double st, op, cl, dm, x, y;
   st = op = cl = dm = x = y = 0;
 

@@ -28,24 +28,25 @@
 // #include <limits>
 
 #ifdef DOVRPLOG
-#include "./logger.h"
+#include "logger.h"
 #endif
 
 #ifdef OSRMCLIENT
-#include "./osrmclient.h"
+#include "osrmclient.h"
+#include "phantomnode.h"
 #endif
 
 #ifdef DOSTATS
-#include "./timer.h"
-#include "./stats.h"
+#include "timer.h"
+#include "stats.h"
 #endif
 
-#include "./basictypes.h"
-#include "./node.h"
-#include "./twpath.h"
-#include "./singleton.h"
-#include "./pg_types_vrp.h"
-#include "./signalhandler.h"
+#include "basictypes.h"
+#include "node.h"
+#include "twpath.h"
+#include "singleton.h"
+#include "pg_types_vrp.h"
+#include "signalhandler.h"
 
 
 /*! \class TWC
@@ -87,22 +88,25 @@
 
 template <class knode> class TWC {
 private:
-// CompareSecond class
-template<typename Pair>
-class CompareSecond {
- public:
-  bool operator()(const Pair& firstPair, const Pair& secondPair) {
-    if (firstPair.second > secondPair.second) return true;
-    if (firstPair.second < secondPair.second) return false;
-    if (firstPair.first.second > secondPair.first.second) return true;
-    if (firstPair.first.second < secondPair.first.second) return false;
-      return firstPair.first.first > secondPair.first.first;
-    return false;
-  }
-};
-// End CompareSecond class
+    // CompareSecond class
+    template<typename Pair>
+    class CompareSecond {
+     public:
+      bool operator()(const Pair& firstPair, const Pair& secondPair) {
+        if (firstPair.second > secondPair.second) return true;
+        if (firstPair.second < secondPair.second) return false;
+        if (firstPair.first.second > secondPair.first.second) return true;
+        if (firstPair.first.second < secondPair.first.second) return false;
+          return firstPair.first.first > secondPair.first.first;
+        return false;
+      }
+    };
+    // End CompareSecond class
 
 #ifdef OSRMCLIENT
+  typedef std::map<UID,PhantomNode> PhantomNodes;   ///< Type definiton for PahntomNodes.
+  PhantomNodes mPhantomNodes;                       ///< PahntomNodes information for pickups. UID is the id of pickups nodes.
+
   /*! \todo */
   class TTindex {  // all are ids when prev==from its a 3 node call
     UID prev_;
@@ -128,18 +132,39 @@ class CompareSecond {
              rhs.middle() ? true : lhs.to() < rhs.to();
     }
   };
+  /**
+   * @brief find and set phantom nodes for pickups sites
+   *
+   * This information is relevant in right side pickup trucks/containers
+   *
+   */
+  void setPhantomNodes() {
+    // Delete previous
+    mPhantomNodes.clear();
+
+    DLOG(INFO) << "mPhantonNodes cleared!";
+    DLOG(INFO) << "Original have " << original.size() << " elements!";
+
+    for (UINT i = 0; i < original.size(); i++) {
+        if ( original[i].isPickup() ) {
+            DLOG(INFO) << original[i].id() << " is pickup!";
+        }
+    }
+  }
+
 #if 0
   typedef std::map<TTindex, double, classcomp>  TT4;
   typedef typename std::map<TTindex, double, classcomp>::iterator p_TT4;
   mutable TT4 travel_Time4;
 #endif //0
+
 #endif //OSRMCLIENT
 
   typedef TwBucket<knode> Bucket;
-  TwBucket<knode> original;
-  std::map< std::string, int> streetNames; 
+  TwBucket<knode> original;                                 ///< The nodes. Set in loadAndProcess_distance and setNodes (Not used anywhere!)
+  std::map< std::string, int> streetNames;                  ///< Map whit street name and id
   mutable std::vector< std::vector<double> > twcij;
-  mutable std::vector< std::vector<double> > travel_Time;
+  mutable std::vector< std::vector<double> > travel_Time;   ///< Travel time matrix
   mutable std::vector< std::vector<double> > travel_time_onTrip;
   mutable std::vector< std::vector< std::deque< int64_t> > > nodes_onTrip;
 
@@ -160,6 +185,7 @@ class CompareSecond {
     process_order_far.clear();
 #ifdef OSRMCLIENT
     // travel_Time4.clear();
+    mPhantomNodes.clear();
 #endif
   }
 
@@ -169,15 +195,15 @@ class CompareSecond {
   int z2Tot;
 
   void initializeTravelTime() {
-    for (UINT i = 0; i < travel_Time.size(); ++i) 
-      for (UINT j = 0; i < travel_Time.size(); ++i) 
+    for (UINT i = 0; i < travel_Time.size(); ++i)
+      for (UINT j = 0; i < travel_Time.size(); ++i)
         if (i != j && travel_time_onTrip[i][j] == 0)
           travel_Time[i][j] = -1;
         else {
           travel_Time[i][j] = travel_time_onTrip[i][j];
         }
   }
-    
+
   void getProcessOrder() {
     //process_order.resize(original.size());
     for (UINT i = 0; i < original.size()-1; ++i) {
@@ -203,33 +229,33 @@ class CompareSecond {
     }
 assert(true==false);
 #endif
-  } 
+  }
 
 
   // -------------------  major tools  ----------------------------
 
   /*! @name findNearestNodeTo
-    \brief Searches a bucket of unassigned nodes for one that is 
+    \brief Searches a bucket of unassigned nodes for one that is
        nearest to the existing path (truck) and is compatible with
        the time windows.
 
     \warning  size(unsassigned)>0
     \warning  compatability checks:
        path[pos] -> bestNode && bestNode -> path[pos]
-   
+
     given a \b trucks path and a set of unassigned nodes
        finds the closest node to the path that is locally compatible
        at position pos.
-   
+
     path's segment: (pos-1, \b pos)
     \b bestNode distance to path segment: \b besDist
-   
+
     \param[in] truck The truck that we want to find the best node for.
     \param[in] unassigned The bucket of unassined nodes to look through.
     \param[out] pos The right position of the segment in the truck:
     \param[out] bestNode The best node from the unassigned bucket
     \param[out] bestDist has the best distance
-   
+
     \return True if valid results where found
    */
   ///@{
@@ -324,7 +350,7 @@ bool  findBestToNodeHasMoreNodesOnPath(
         bestTo = to;
         assert(bestTo < original.size());
       }
-    
+
   }
     // build the whole subpath, nodes on trip need to be in unassigned set
 #ifdef VRPMAXTRACE
@@ -383,7 +409,7 @@ bool  findBestFromNodeHasMoreNodesOnPath(
         bestFrom = from;
         assert(bestFrom < original.size());
       }
-    
+
   }
     // build the whole subpath, nodes on trip need to be in unassigned set
 #ifdef VRPMAXTRACE
@@ -512,7 +538,7 @@ bool  findNodeHasMoreNodesOnPath(const TwBucket<knode> &trip,
   TwBucket<knode> l_subPath = subPath;
   TwBucket<knode> m_assigned = assigned;
   l_subPath = l_subPath - m_assigned;
-  for (UINT i = 0; i < subPath.size(); ++i) 
+  for (UINT i = 0; i < subPath.size(); ++i)
     if (!l_subPath.hasNid(subPath[i])) {
       subPath.erase(i);
       --i;
@@ -555,7 +581,7 @@ TwBucket<knode> actualNodesOnTrip(UINT from, UINT to, const TwBucket<knode> &ass
   }
   TwBucket<knode> l_subPath = subPath;
   l_subPath = l_subPath - m_assigned;
-  for (UINT i = 0; i < subPath.size(); ++i) 
+  for (UINT i = 0; i < subPath.size(); ++i)
     if (!l_subPath.hasNid(subPath[i])) {
       subPath.erase(i);
       --i;
@@ -579,7 +605,7 @@ void fill_travel_time_onTrip() {
   compulsory_fill();
   getProcessOrder();
 
-  if (original.size() < 500) 
+  if (original.size() < 500)
     fill_travel_time_onTrip_work(process_order_far);
 
   fill_travel_time_onTrip_work(process_order);
@@ -601,9 +627,9 @@ void fill_travel_time_onTrip_work(
 #ifdef VRPMINTRACE
       if ((process_order.size() % 200) == 0)
         DLOG(INFO) << "fill_travel_time_onTrip " << i << " size " << process_order.size() << " working with " <<original[i].id() << "," << original[j].id()
-                 << " onTrip time" << travel_time_onTrip[i][j] 
-                 << " on data time" << travel_Time[i][j] 
-                 << " onTrip time" << travel_time_onTrip[j][i] 
+                 << " onTrip time" << travel_time_onTrip[i][j]
+                 << " on data time" << travel_Time[i][j]
+                 << " onTrip time" << travel_time_onTrip[j][i]
                  << " on data time" << travel_Time[j][i] << "\n";
 #endif
 
@@ -658,10 +684,10 @@ bool compulsory_fill() {
   for (int i = original.size()-1; !original[i].isPickup(); --i) {
     for (UINT j = 0; j < i; ++j) {
 #if 0
-    DLOG(INFO) << "working with " << original[i].id() << ", " << original[j].id() 
-                 << " onTrip time" << travel_time_onTrip[i][j] 
-                 << " on data time" << travel_Time[i][j] 
-                 << " onTrip time" << travel_time_onTrip[j][i] 
+    DLOG(INFO) << "working with " << original[i].id() << ", " << original[j].id()
+                 << " onTrip time" << travel_time_onTrip[i][j]
+                 << " on data time" << travel_Time[i][j]
+                 << " onTrip time" << travel_time_onTrip[j][i]
                  << " on data time" << travel_Time[j][i] << "\n";
 #endif
       process_pair_onPath(i,j);
@@ -708,7 +734,7 @@ void fill_times(const TwBucket<knode> nodesOnPath) const {
 
 
   // lets have a peek
-  #ifdef VRPMMAXTRACE 
+  #ifdef VRPMMAXTRACE
   DLOG(INFO) << "sequential for the times";
   for (unsigned int i= 0; i < call.size(); ++i) {
     DLOG(INFO) << call[i].id() << "," << times[i];
@@ -739,7 +765,7 @@ void fill_times(const TwBucket<knode> nodesOnPath) const {
             assert (nodeOnPath < original.size());
             if (nodesOnPath[k].isPickup()) nodes_onTrip[from][to].push_back(nodeOnPath);
           }
-  #ifdef VRPMAXTRACE 
+  #ifdef VRPMAXTRACE
           for (unsigned int i = 0; i < nodes_onTrip[from][to].size(); ++i) {
             DLOG(INFO) << nodes_onTrip[from][to][i];
           }
@@ -748,7 +774,7 @@ void fill_times(const TwBucket<knode> nodesOnPath) const {
         }
   //      if (std::abs(travel_time_onTrip[from][to] - (times[j]-times[i])) > 0.0001) {
           if (travel_time_onTrip[from][to] > (times[j]-times[i])) {
-  #ifdef VRPMAXTRACE 
+  #ifdef VRPMAXTRACE
             DLOG(INFO) << from << "," << to << " -> ";
             DLOG(INFO) << " old value " << travel_time_onTrip[from][to];
             DLOG(INFO) << " new value " << times[j]-times[i];
@@ -763,7 +789,7 @@ void fill_times(const TwBucket<knode> nodesOnPath) const {
               assert (nodeOnPath < original.size());
               if (nodesOnPath[k].isPickup()) nodes_onTrip[from][to].push_back(nodeOnPath);
             }
-  #ifdef VRPMAXTRACE 
+  #ifdef VRPMAXTRACE
             for (unsigned int i = 0; i < nodes_onTrip[from][to].size(); ++i) {
               DLOG(INFO) << nodes_onTrip[from][to][i];
             }
@@ -778,7 +804,7 @@ void fill_times(const TwBucket<knode> nodesOnPath) const {
 #if 0
   // extract triplets/quadruplets and store in table
   UINT i_nid, j_nid, k_nid, l_nid;
-  double timeij, timejk, timeijk, timeijkl, timejkl; 
+  double timeij, timejk, timeijk, timeijkl, timejkl;
   for (unsigned int i = 0; i < nodesOnPath.size()-2; ++i) {
     if (!(i< nodesOnPath.size())) continue;
     i_nid = nodesOnPath[i].nid();
@@ -809,11 +835,12 @@ void fill_times(const TwBucket<knode> nodesOnPath) const {
       }  //k
     }  // j
   }  // i
-  
+
 // assert(true==false);
-#endif 
+#endif
 
 }
+
 #if 0
 void travel_Time4Insert(UINT i_nid, UINT j_nid, UINT k_nid, UINT l_nid, double time) const {
   TTindex index(i_nid, j_nid, k_nid, l_nid);
@@ -901,7 +928,7 @@ void getNodesOnPath(
     DLOG(INFO) << "name:" << names[i] << "\tid:" << streetMapPtr->second;
 #endif
   }
-  
+
 
 
   std::set < int >::const_iterator streetsPtr;
@@ -914,7 +941,7 @@ void getNodesOnPath(
     DLOG(INFO) << count << ":" << (*streetsPtr);
   }
 #endif
-  
+
 
   if (streetIDs.size() == 0) {
      osrmi->useOsrm(oldStateOsrm);
@@ -929,7 +956,7 @@ void getNodesOnPath(
             DLOG(INFO) << "Posible on route inserting: " << unassigned[i].id();
         #endif
         streetNodes.push_back(unassigned[i]);
-    } 
+    }
   }
 #ifdef VRPMAXTRACE
   DLOG(INFO) << "StreetNodes.size" << streetNodes.size();
@@ -1047,7 +1074,7 @@ void getNodesOnPath(
     // remove the nodes we already used
     for (it = seg.begin(); it != seg.end(); it++)
         streetNodes.erase(it->second);
-    
+
     // and repeat for next segment
     git++;
   }
@@ -1076,14 +1103,14 @@ void getNodesOnPath(
 
 
 /*!
-truck: 0 1 2 3 4 5 6 D  
+truck: 0 1 2 3 4 5 6 D
 call: 0 1 2 3 4 5 6 D       D 6 5 4 3 2 1 0
       |_____________|       |_____________|
          cycle 1               cycle 2
 
 retrievable pairs
 0 1  1 2  .... 6 D
-D 6  5 4  .... 1 0  
+D 6  5 4  .... 1 0
 
 Retrievable time triplets
 0 1 2  1 2 3  .....  5 6 D
@@ -1091,11 +1118,11 @@ Retrievable time triplets
 
 Retrievable caudraplets
 0 1 2 3  1 2 3 4  ..... 5 6 D E
-0 6 5 4  6 5 4 3  ..... 2 1 D E  
+0 6 5 4  6 5 4 3  ..... 2 1 D E
 
 
 Special case:  When truck.size() == 1
-truck: 0 D 
+truck: 0 D
 call: 0 D  D 0
 
 pairs: 0 D   D 0
@@ -1103,8 +1130,8 @@ triplets: NONE
 quadruplets: NONE
 
 Special case:
-truck: 0 1 D  
-call: 0 1 D  D 1 0 
+truck: 0 1 D
+call: 0 1 D  D 1 0
 
 pairs:
 0 1  1 D  D 1  1 0
@@ -1122,7 +1149,7 @@ bool setTravelingTimesOfRoute(
   return false;
 #else  // with OSRMCLIENT
 
- 
+
   bool oldStateOsrm = osrmi->getUse();
   osrmi->useOsrm(true);  //forcing osrm usage
 
@@ -1148,87 +1175,87 @@ bool setTravelingTimesOfRoute(
   osrmi->addViaPoints(call);
   if (!osrmi->getOsrmViaroute()) {
      DLOG(INFO) << "getOsrmViaroute failed";
-     osrmi->useOsrm(oldStateOsrm);  
+     osrmi->useOsrm(oldStateOsrm);
      return false;
   }
   if (!osrmi->getOsrmTimes(times)){
      DLOG(INFO) << "getOsrmTimes failed";
-     osrmi->useOsrm(oldStateOsrm);  
+     osrmi->useOsrm(oldStateOsrm);
      return false;
   }
 
 
   // lets have a peek
-  #ifdef VRPMAXTRACE 
+  #ifdef VRPMAXTRACE
   DLOG(INFO) << "squential";
   for (unsigned int i= 0; i < call.size(); ++i) {
     DLOG(INFO) << call[i].id() << "," << times[i];
   }
-  #endif 
+  #endif
 
 
-  #ifdef VRPMAXTRACE 
+  #ifdef VRPMAXTRACE
   DLOG(INFO) << "pairs";
-  #endif 
+  #endif
   for (unsigned int i = 0; i < call.size()-1; ++i) {
     //TravelTime(call[i].nid(), call[i+1].nid());
     travel_Time[call[i].nid()][call[i+1].nid()] = times[i+1]-times[i];
-    #ifdef VRPMAXTRACE 
-    DLOG(INFO) << call[i].id() << " -> " 
+    #ifdef VRPMAXTRACE
+    DLOG(INFO) << call[i].id() << " -> "
                << call[i+1].id() << " = " << times[i+1] - times[i];
-    #endif 
+    #endif
   }
 
 #if 0
   // extract triplets and store in table
-  #ifdef VRPMAXTRACE 
+  #ifdef VRPMAXTRACE
   DLOG(INFO) << "triplets";
-  #endif 
+  #endif
   for (unsigned int i = 0; i < call.size()-2; ++i) {
 
     // TTindex index(call[i].nid(), call[i].nid(), call[i+1].nid(), call[i+2].nid());
     // travel_Time4.insert(std::pair<TTindex,double>(index, times[i+2]-times[i]));
     travel_Time4Insert( call[i].nid(), call[i].nid(), call[i+1].nid(), call[i+2].nid(), times[i+2]-times[i]);
 
-    #ifdef VRPMAXTRACE 
-    DLOG(INFO) << call[i].id() << " -> " 
+    #ifdef VRPMAXTRACE
+    DLOG(INFO) << call[i].id() << " -> "
                << call[i+1].id() << " -> "
                << call[i+2].id() << " = " << times[i+2] - times[i];
-    #endif 
+    #endif
   }
 
-   
+
   // extract quadraplets and store in table
-  #ifdef VRPMAXTRACE 
+  #ifdef VRPMAXTRACE
   DLOG(INFO) << "quadruplets";
-  #endif 
+  #endif
   for (unsigned int i= 0; i < call.size()-3; ++i) {
     // TTindex index(call[i].nid(), call[i+1].nid(), call[i+2].nid(), call[i+3].nid());
     //travel_Time4.insert(std::pair<TTindex,double>(index, times[i+3]-times[i]));
     travel_Time4Insert( call[i].nid(), call[i+1].nid(), call[i+2].nid(), call[i+3].nid(), times[i+3]-times[i]);
-    #ifdef VRPMAXTRACE 
-    DLOG(INFO) << call[i].id() << " -> " 
-               << call[i+1].id() << " -> " 
-               << call[i+2].id() << " -> " 
+    #ifdef VRPMAXTRACE
+    DLOG(INFO) << call[i].id() << " -> "
+               << call[i+1].id() << " -> "
+               << call[i+2].id() << " -> "
                << call[i+3].id() << " = " <<  times[i+3]-times[i];
-    #endif 
+    #endif
   }
 #endif
-  osrmi->useOsrm(oldStateOsrm);  
+  osrmi->useOsrm(oldStateOsrm);
 #endif  // with OSRMCLIENT
 }
 
 
 
 /*!
-truck: 0 1 2 3 4 5 6 D 
-call: 0 n 1   0 1 n 2  1 2 n 3   2 3 n 4   3 4 n 5   4 5 n 6   5 6 n D 
+truck: 0 1 2 3 4 5 6 D
+call: 0 n 1   0 1 n 2  1 2 n 3   2 3 n 4   3 4 n 5   4 5 n 6   5 6 n D
         |     |____________________________________________|    |
 note: special                 cycle                           special
 Retrievable time triplets
 0 n 1  n 1 0         not: 1 0 1
 0 1 n  1 n 2  n 2 1  not: 2 1 2
-1 2 n  2 n 3  n 3 2  
+1 2 n  2 n 3  n 3 2
 2 3 n  3 n 4  n 4 3
 3 4 n  4 n 5  n 5 4
 4 5 n  5 n 6  n 6 5
@@ -1258,13 +1285,13 @@ bool setTravelingTimesInsertingOneNode(
   return false;
 #else  // with OSRMCLIENT
 
- 
+
   bool oldStateOsrm = osrmi->getUse();
   osrmi->useOsrm(true);  //forcing osrm usage
 
   if (truck.size() == 1) {
      TravelTime(truck[0], node, dumpSite);
-     osrmi->useOsrm(oldStateOsrm);  
+     osrmi->useOsrm(oldStateOsrm);
      return false;
   }
 
@@ -1273,7 +1300,7 @@ bool setTravelingTimesInsertingOneNode(
   osrmi->clear();
 
   std::deque< Node > call;
-  std::deque< double > times; 	
+  std::deque< double > times;
   // special case  0 n 1
   call.push_back(truck[0]);
   call.push_back(node);
@@ -1297,73 +1324,73 @@ bool setTravelingTimesInsertingOneNode(
   osrmi->addViaPoints(call);
   if (!osrmi->getOsrmViaroute()) {
      DLOG(INFO) << "getOsrmViaroute failed";
-     osrmi->useOsrm(oldStateOsrm);  
+     osrmi->useOsrm(oldStateOsrm);
      return false;
   }
   if (!osrmi->getOsrmTimes(times)){
      DLOG(INFO) << "getOsrmTimes failed";
-     osrmi->useOsrm(oldStateOsrm);  
+     osrmi->useOsrm(oldStateOsrm);
      return false;
   }
 
 
   // lets have a peek
-  #ifdef VRPMAXTRACE 
+  #ifdef VRPMAXTRACE
   DLOG(INFO) << "squential";
   for (unsigned int i= 0; i < call.size(); ++i) {
     DLOG(INFO) << call[i].id() << "," << times[i];
   }
-  #endif 
+  #endif
 
 
-  #ifdef VRPMAXTRACE 
+  #ifdef VRPMAXTRACE
   DLOG(INFO) << "pairs";
-  #endif 
+  #endif
   for (unsigned int i = 0; i < call.size()-1; ++i) {
     TravelTime(call[i].nid(), call[i+1].nid());
     travel_Time[call[i].nid()][call[i+1].nid()] = times[i+1]-times[i];
-    #ifdef VRPMAXTRACE 
-    DLOG(INFO) << call[i].id() << " -> " 
+    #ifdef VRPMAXTRACE
+    DLOG(INFO) << call[i].id() << " -> "
                << call[i+1].id() << " = " << times[i+1] - times[i];
-    #endif 
+    #endif
   }
 
 #if 0
   // extract triplets and store in table
-  #ifdef VRPMAXTRACE 
+  #ifdef VRPMAXTRACE
   DLOG(INFO) << "triplets";
-  #endif 
+  #endif
   for (unsigned int i = 0; i < call.size()-1; ++i) {
     if (call[i].id() == call[i+2].id()) continue;
     // TTindex index(call[i].nid(), call[i].nid(), call[i+1].nid(), call[i+2].nid());
     // travel_Time4.insert(std::pair<TTindex,double>(index, times[i+2]-times[i]));
     travel_Time4Insert( call[i].nid(), call[i].nid(), call[i+1].nid(), call[i+2].nid(), times[i+2]-times[i]);
-    #ifdef VRPMAXTRACE 
-    DLOG(INFO) << call[i].id() << " -> " 
+    #ifdef VRPMAXTRACE
+    DLOG(INFO) << call[i].id() << " -> "
                << call[i+1].id() << " -> "
                << call[i+2].id() << " = " << times[i+2] - times[i];
-    #endif 
+    #endif
   }
 
-   
+
   // extract quadraplets and store in table
-  #ifdef VRPMAXTRACE 
+  #ifdef VRPMAXTRACE
   DLOG(INFO) << "quadruplets";
-  #endif 
+  #endif
   for (unsigned int i= 3; i < call.size()-1; i+=4) {
     // TTindex index(call[i].nid(), call[i+1].nid(), call[i+2].nid(), call[i+3].nid());
     // travel_Time4.insert(std::pair<TTindex,double>(index, times[i+3]-times[i]));
     travel_Time4Insert( call[i].nid(), call[i+1].nid(), call[i+2].nid(), call[i+3].nid(), times[i+3]-times[i]);
-    #ifdef VRPMAXTRACE 
-    DLOG(INFO) << call[i].id() << " -> " 
-               << call[i+1].id() << " -> " 
-               << call[i+2].id() << " -> " 
+    #ifdef VRPMAXTRACE
+    DLOG(INFO) << call[i].id() << " -> "
+               << call[i+1].id() << " -> "
+               << call[i+2].id() << " -> "
                << call[i+3].id() << " = " <<  times[i+3]-times[i];
-    #endif 
+    #endif
   }
 #endif
 
-  osrmi->useOsrm(oldStateOsrm);  
+  osrmi->useOsrm(oldStateOsrm);
 #endif  // with OSRMCLIENT
 }
 
@@ -1371,10 +1398,10 @@ bool setTravelingTimesInsertingOneNode(
   /*!
   .....  j j+1 .....
   .....  j pos j+1 ...
- 
-  pos = j+1 
+
+  pos = j+1
   min ( TT(j,node,j+1) )
- 
+
   returns false when:
     no compatible node fits in the truck
   */
@@ -1394,12 +1421,12 @@ bool setTravelingTimesInsertingOneNode(
     double tSubs;
     double deltaTime;
     int bestIndex;
-    
+
     for ( int j = 0; j < truck.size(); j++ ) {
       for ( int i = 0; i < unassigned.size(); i++ ) {
         if (j == 0)setTravelingTimesInsertingOneNode(truck, dumpSite, unassigned[i]);
 
-        // special case 
+        // special case
         if (j ==  truck.size()-1) {
           if (j == 0) {
 #if 1
@@ -1408,7 +1435,7 @@ bool setTravelingTimesInsertingOneNode(
 #else
             tAdd = TravelTime(truck[j], unassigned[i]);
             tSubs = 0;
-#endif 
+#endif
           } else {
             tAdd = TravelTime(truck[j-1], truck[j], unassigned[i], dumpSite);
             tSubs = TravelTime(truck[j-1], truck[j], dumpSite);
@@ -1839,19 +1866,19 @@ private:
   bool isInPath(UINT from, UINT middle, UINT to) {
 #if 0
     TravelTime(from,to);
-    if (travel_time_onTrip[from][to] == 0) 
+    if (travel_time_onTrip[from][to] == 0)
        process_pair_onPath(from, to);
 
     if (std::find(nodes_onTrip[from][to].begin(),
-                  nodes_onTrip[from][to].end(), middle) 
+                  nodes_onTrip[from][to].end(), middle)
         != nodes_onTrip[from][to].end()) return false;
     return true;
 #endif
-    //if (travel_time_onTrip[from][to] == 0) 
+    //if (travel_time_onTrip[from][to] == 0)
        process_pair_onPath(from, to);
-    //if (travel_time_onTrip[from][middle] == 0) 
+    //if (travel_time_onTrip[from][middle] == 0)
        process_pair_onPath(from, middle);
-    //if (travel_time_onTrip[middle][to] == 0) 
+    //if (travel_time_onTrip[middle][to] == 0)
        process_pair_onPath(middle, to);
 #if 0
  DLOG(INFO) << from << "," << middle <<"," << to;
@@ -2026,7 +2053,7 @@ private:
 
 
   /// \brief find best node to arrive to from "from"
-  /*!  
+  /*!
 
   \param[in] from
   \param[in] nodes: main nodes bucket
@@ -2049,18 +2076,18 @@ private:
       // from the reachable nodes get the nodes that belong to the
       // same street
       for (int i = 0; i < reachable.size(); i++) {
-        if (reachable[i].streetId() == streetId) { 
+        if (reachable[i].streetId() == streetId) {
           streetNodes.push_back(reachable[i]);
         }
       }
       if (streetNodes.size() != 0) {
         reachable = streetNodes;
-      } 
+      }
     } else {
       reachable = getReachable(from.nid(),streetNodes);
-    } 
+    }
 
-    
+
     bestNode = from;
     if (!reachable.size()) return false;
 
@@ -2612,6 +2639,11 @@ private:
     twcij_calculate();
     assert(original == _original);
     assert(check_integrity());
+
+#ifdef OSRMCLIENT
+    setPhantomNodes();
+#endif
+
   }
 
 
@@ -2775,15 +2807,15 @@ private:
 
 
 #ifdef OSRMCLIENT
- private:
+private:
   void getAllHintsAndStreets() {
 #ifdef DOSTATS
     Timer timer;
 #endif  //DOSTATS
 
 #ifdef VRPMAXTRACE
-    DLOG(INFO) << "GgetAllHintsAndStreets\n";
-#endif  
+    DLOG(INFO) << "getAllHintsAndStreets\n";
+#endif
     std::deque<std::string> hints;
     std::deque<std::string> streets;
     std::map< std::string, int>::const_iterator street_ptr;
@@ -2800,7 +2832,7 @@ private:
       for ( j = from; j < to ; j++ ) osrmi->addViaPoint(original[j]);
 
       if (   osrmi->getOsrmViaroute()
-          && osrmi->getOsrmHints(hints) 
+          && osrmi->getOsrmHints(hints)
           && osrmi->getOsrmStreetNames(streets)) {
         for (j = from, k = 0; j < to; j++, k++) {
           // setting the hint
@@ -2815,7 +2847,7 @@ private:
           } else {
             original[j].set_streetId(street_ptr->second);
           }
-          
+
         }
       } else {
 #ifdef VRPAMXTRACE
@@ -2838,7 +2870,7 @@ private:
     ttime_t structure array containing the travel time matrix values passed
     from the database and loads them into the problem and does some
     additional needed computations.
-   
+
     \param[in] ttimes The travel time data array from PosgreSQL
     \param[in] count The count of entries in \b ttimes
     \param[in] datanodes The data nodes Bucket previous loaded from PostgreSQL
@@ -2847,7 +2879,9 @@ private:
   void loadAndProcess_distance(ttime_t *ttimes, int count,
                                const Bucket &datanodes, const Bucket &invalid) {
     assert(datanodes.size());
+    // Delete previous
     original.clear();
+    // datanodes is pickups + otherlocs
     original = datanodes;
 
 #ifdef OSRMCLIENT
@@ -2874,6 +2908,11 @@ private:
     twcij_calculate();
     assert(original == datanodes);
     assert(check_integrity());
+
+#ifdef OSRMCLIENT
+    setPhantomNodes();
+#endif
+
   }
 
 
@@ -2884,16 +2923,16 @@ private:
     Reads \b infile and loads it into the travel time matrix and populates
     any missing entries we=ith an approx distance. It also computes the TWC
     matrix.
-   
+
     file format (separated by spaces):
     # comment
     from to time
 
     where
-    from: id of the node 
-    to:   id of the node 
+    from: id of the node
+    to:   id of the node
     time:  time to go from node "from" to node "to"
-   
+
     \param[in] infile: The file name to load.
     \param[in] datanodes: The bucket of data nodes that has already been loaded.
     \param[in] invalid: A bucket of invalid nodes found in the data nodes.
@@ -2954,6 +2993,11 @@ private:
     twcij_calculate();
     assert(original == datanodes);
     assert(check_integrity());
+
+#ifdef OSRMCLIENT
+    setPhantomNodes();
+#endif
+
   }
 
   /*! \brief Returns a constant reference to the travel time matrix. */
@@ -2978,13 +3022,13 @@ private:
   }
 
 
- private:
+private:
   // constructors
   static TWC<knode>* p_twc;
   TWC() :z1Tot(0), z2Tot(0), emptiedTruck(false) {
     cleanUp();
-  };
-  TWC(const TWC &) {};
+  }
+  TWC(const TWC &) {}
   TWC& operator=(const TWC &) {}
 
 
@@ -3127,7 +3171,8 @@ private:
     return true;
   }
 
- public:
+public:
+
   void set_TravelTime(UID fromId, UID toId, double time) {
      #ifdef VRPMINTRACE
      if (!travel_Time[fromId][toId] == time)
@@ -3136,6 +3181,7 @@ private:
      #endif
      travel_Time[fromId][toId] = time;
   }
+
 };  // end of class
 
 

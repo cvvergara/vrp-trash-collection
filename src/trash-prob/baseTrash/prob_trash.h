@@ -41,7 +41,7 @@ protected:
   inline double _MIN() {return ( - std::numeric_limits<double>::max() ); }
 
   //    Trashnode depot;
-  Twpath<Trashnode> datanodes;              //dissallowing set operations
+  Twpath<Trashnode> datanodes;              ///< Pickups + otherlocs ()
   Bucket otherlocs;                         ///< Dumps and depts information.
   Bucket dumps;                             ///< Dumps sites.
   Bucket depots;                            ///< PahntomNode information for pickups. UID is the id of pickups nodes.

@@ -22,7 +22,7 @@
 
 class Trip: public Vehicle1 {
   public:
-  Trip():Vehicle1(){};
+  Trip():Vehicle1(){}
   int m_trip_id;
 
   Trip(const Trashnode &S, const Trashnode &D, const Trashnode &E, double maxcap)

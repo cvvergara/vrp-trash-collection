@@ -379,7 +379,7 @@ bool Trip::getRemovalValues(const Trip &other, POS &o_ins_pos, POS &del_pos, dou
   bool insertInPath;
   bestRemoval(del_node, del_pos, delta_del);
   return other.bestInsertion(del_node, o_ins_pos, o_delta_ins);
-};
+}
 
 
 // I want node from other
@@ -408,7 +408,7 @@ void Trip::getNodesOnPath(const Trip &o_trip, POS o_i_pos, Bucket &nodesOnPath) 
   if (o_i_pos - 1 < o_nodes.size()) o_nodes.erase(o_i_pos - 1);
   o_nodes.pop_front();  // delete the starting site
   twc->getNodesOnPath(path, dumpSite, o_nodes, nodesOnPath);
-};
+}
 
 
 void Trip::getNodesInOrder() {
@@ -449,7 +449,7 @@ void Trip::getNodesOnPath(const Trip &o_trip, Bucket &nodesOnPath) const {
   o_nodes = o_trip.path; // choose from this
   o_nodes.pop_front();  // delete the starting site
   twc->getNodesOnPath(path, dumpSite, o_nodes, nodesOnPath);
-};
+}
 
 void Trip::getNodesNotOnPath(const Trip &o_trip, Bucket &nodesNotOnPath) const {
   Bucket o_nodes;
@@ -459,7 +459,7 @@ void Trip::getNodesNotOnPath(const Trip &o_trip, Bucket &nodesNotOnPath) const {
   o_nodes.pop_front();  // delete the starting site
   twc->getNodesOnPath(path, dumpSite, o_nodes, nodesOnPath);
   nodesNotOnPath = o_nodes - nodesOnPath;  
-};
+}
 
 
 
