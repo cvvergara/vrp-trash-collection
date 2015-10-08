@@ -8,12 +8,11 @@
 class Point
 {
 public:
-  Point()
-    :mX(0.0),mY(0.0){
+  Point(): mX(0),mY(0) {
   }
   Point(const Point &other) {
-      this->mX = other.mX;
-      this->mY = other.mY;
+      mX = other.x();
+      mY = other.y();
   }
   Point(double x, double y) {
       mX = x;
@@ -23,8 +22,8 @@ public:
   double y () const { return mY; }
 
   Point& operator= ( const Point &other ){
-    this->mX = other.mX;
-    this->mY = other.mY;
+    mX = other.x();
+    mY = other.y();
     return *this;
   }
 
@@ -49,8 +48,10 @@ inline std::ostream &operator<<(std::ostream &out, const Point &p)
 class PhantomNode
 {
 public:
-    PhantomNode() {}
-    PhantomNode( UID phantomNodeId ) { mPhantomNodeId = phantomNodeId; }
+    PhantomNode(): mPoint( Point(0,0) ), mBeforePNode( Point(0,0) ), mAfterPNode( Point(0,0) )
+    {}
+    PhantomNode( UID phantomNodeId ): mPoint( Point(0,0) ), mBeforePNode( Point(0,0) ), mAfterPNode( Point(0,0) )
+    { mPhantomNodeId = phantomNodeId; }
     PhantomNode( UID phantomNodeId, double x, double y, UID fwNodeId, UID rvNodeId, UID fwWeight, UID rvWeight, UID nameId );
     PhantomNode( const PhantomNode &other );
 
@@ -77,10 +78,14 @@ public:
     void setNameId(UID nameId) { mNameId = nameId; }
     UID nameId () const { return mNameId; }
 
-    void setBeforePNode (const Point &p) { mBeforePNode = p; }
+    void setBeforePNode (const Point &p) {
+        mBeforePNode = Point( p.x(),p.y() );
+    }
     Point beforePNode () const { return mBeforePNode; }
 
-    void setAfterPNode (const Point &p) { mAfterPNode = p; }
+    void setAfterPNode (const Point &p) {
+        mAfterPNode = Point( p.x(),p.y() );
+    }
     Point afterPNode () const { return mAfterPNode; }
 
     bool inSameStreet(const PhantomNode &other);

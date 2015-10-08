@@ -26,6 +26,7 @@
 #include <utility>
 // #include <math.h>
 // #include <limits>
+#include <iomanip>      // std::setprecision
 
 #ifdef DOVRPLOG
 #include "logger.h"
@@ -139,6 +140,9 @@ private:
    *
    */
   void setPhantomNodes() {
+    // Multiplier for before and after
+    double mb = 0.97;
+    double ma = 1.03;
     // Delete previous
     mPhantomNodes.clear();
   #ifdef VRPMINTRACE
@@ -148,8 +152,9 @@ private:
 
     // Variables
     bool oldStateOsrm;
-    double olat, olon;
-    unsigned int one_way = 0;
+    double pnlon, pnlat; // PhantomNode
+    double fnlon, fnlat; // Fisical Node
+    unsigned int one_way;
     unsigned int fw_id, rv_id, fw_wt, rv_wt, street_id;
 
     // Backup OSRM state
@@ -161,24 +166,89 @@ private:
     for (UINT i = 0; i < original.size(); i++) {
         if ( original[i].isPickup() ) {
         #ifdef VRPMINTRACE
+            std::cout.precision(6);
             DLOG(INFO) << original[i].id() << " is pickup!";
         #endif
-            osrmi->getOsrmNearest( original[i].x(), original[i].y(), olon, olat, one_way, fw_id, rv_id, street_id);
+            one_way = 100;
+            osrmi->getOsrmNearest( original[i].x(), original[i].y(), pnlon, pnlat, one_way, fw_id, rv_id, fw_wt, rv_wt, street_id);
             if (one_way == 0) {
-            #ifdef VRPMINTRACE
-                DLOG(INFO) << original[i].id() << " is in two way street!";
-            #endif
+                #ifdef VRPMINTRACE
+                    DLOG(INFO) << original[i].id() << " [lon,lat] " << original[i].x() << original[i].y() << " is in two way street!";
+                #endif
                 // Two way street
-                PhantomNode pn = PhantomNode(pncount, olon, olat, fw_id, rv_id, fw_wt, rv_wt, street_id);
+                PhantomNode pn = PhantomNode(pncount, pnlon, pnlat, fw_id, rv_id, fw_wt, rv_wt, street_id);
+                // Get nearest fisical OSRM node (edge intersection) of phantom
+                osrmi->getOsrmLocate(pnlon, pnlat, fnlon, fnlat);
                 // Add before and after to pn
-
+                double alon, alat, blon, blat;
+                // WARNING: longitude and latitude!!!!!!
+                // Only valid for very short distances
+                //
+                // I think
+                // FN---------PN
+                //            |
+                //         original[i]
+                // Before
+                blon = fnlon + mb * (pnlon - fnlon);
+                blat = fnlat + mb * (pnlat - fnlat);
+                // After
+                alon = fnlon + ma * (pnlon - fnlon);
+                alat = fnlat + ma * (pnlat - fnlat);
+                #ifdef VRPMINTRACE
+                    std::cout << std::setprecision(8) << "PN: (" << pnlon << "," << pnlat << ")" << std::endl;
+                    std::cout << "FN: (" << fnlon << "," << fnlat << ")" << std::endl;
+                    std::cout << "Before: (" << blon << "," << blat << ")" << std::endl;
+                    std::cout << "After: (" << alon << "," << alat << ")" << std::endl;
+                #endif
+                bool ret = original[i].isRightToSegment(
+                    Node(fnlon,fnlat),
+                    Node(pnlon,pnlat)
+                );
+                if (ret) {
+                    Point pb, pa;
+                    pb = Point(blon,blat);
+                    pa = Point(alon,alat);
+                    pn.setBeforePNode( pb );
+                    pn.setAfterPNode( pa );
+                } else {
+                    Point pb, pa;
+                    pb = Point(alon,alat);
+                    pa = Point(blon,blat);
+                    pn.setBeforePNode( pb );
+                    pn.setAfterPNode( pa );
+                }
+                #ifdef VRPMINTRACE
+                    std::cout << std::setprecision(8) << "PhantomNode" << std::endl;
+                    std::cout << pn << std::endl;
+                #endif
                 // Add pn to de map
-                mPhantomNodes[original[i].id()] = pn;
+                mPhantomNodes[ original[i].id() ] = pn;
                 pncount++;
             }
+            #ifdef VRPMINTRACE
+                if (one_way == 1) {
+                    DLOG(INFO) << original[i].id() << " is in one way street!";
+                }
+            #endif
         }
     }
     osrmi->useOsrm(oldStateOsrm);
+
+    #ifdef VRPMINTRACE
+        DLOG(INFO) << "COID" << "\t" << "COLON" << "\t" << "COLAT" << "\t" << "PNID" << "\t" << "PNLON" << "\t" << "PNLAT" << "\t"
+                   << "BELON" << "\t" << "BELAT" << "\t" << "AFLON" << "\t" << "AFLAT";
+        for (UINT i = 0; i < original.size(); i++) {
+            UID id = original[i].id();
+            auto it = mPhantomNodes.find( id );
+            if ( it!=mPhantomNodes.end() ) {
+            // if ( mPhantomNodes.find( id ) != mPhantomNodes.end() ) {
+                DLOG(INFO) << std::setprecision(8) << original[i].id() << "\t" << original[i].x() << "\t"  << original[i].y() << "\t"
+                           << it->second.id() << "\t" << it->second.point().x() << "\t" << it->second.point().y() << "\t"
+                           << it->second.beforePNode().x() << "\t" << it->second.beforePNode().y() << "\t"
+                           << it->second.afterPNode().x() << "\t" << it->second.afterPNode().y();
+            }
+        }
+    #endif
   }
 
 #if 0
@@ -1060,9 +1130,9 @@ void getNodesOnPath(
         osrmi->useOsrm(true);  //forcing osrm usage
         osrmi->clear();
         double olon, olat;
-        unsigned int one_way = 0;
-        unsigned int fw_id, rv_id, street_id;
-        osrmi->getOsrmNearest( streetNodes[i].x(), streetNodes[i].y(), olon, olat, one_way, fw_id, rv_id, street_id);
+        unsigned int one_way = 100;
+        unsigned int fw_id, rv_id, fw_wt, rv_wt, street_id;
+        osrmi->getOsrmNearest( streetNodes[i].x(), streetNodes[i].y(), olon, olat, one_way, fw_id, rv_id, fw_wt, rv_wt, street_id);
         osrmi->useOsrm(oldStateOsrm);
         //
         if ( one_way == 1 || streetNodes[i].isRightToSegment(*(git-1), *git) ) {

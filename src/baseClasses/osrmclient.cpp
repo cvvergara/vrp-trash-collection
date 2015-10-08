@@ -922,7 +922,7 @@ bool OsrmClient::testOsrmClient(
   return true;
 }
 
-bool OsrmClient::getOsrmLocate(double ilat, double ilon, double &olat, double &olon)
+bool OsrmClient::getOsrmLocate(double ilon, double ilat, double &olon, double &olat)
 {
     std::string oldService; //! backup service
     std::stringstream tmpSS; //!
@@ -1002,8 +1002,8 @@ bool OsrmClient::getOsrmLocate(double ilat, double ilon, double &olat, double &o
     return true;
 }
 
-bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &olon,
-    unsigned int &one_way, unsigned int &forward_id, unsigned int &reverse_id, unsigned int &street_id)
+bool OsrmClient::getOsrmNearest(double ilon, double ilat, double &olon, double &olat,
+    unsigned int &one_way, unsigned int &forward_id, unsigned int &reverse_id, unsigned int &forward_wt, unsigned int &reverse_wt, unsigned int &street_id)
 {
     std::string oldService; //! backup service
     std::stringstream tmpSS; //!
@@ -1085,6 +1085,12 @@ bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &
             }
             if ( jsonDoc.HasMember( "reverse_node_id" ) ) {
                 reverse_id = ( unsigned int ) jsonDoc["reverse_node_id"].GetInt();
+            }
+            if ( jsonDoc.HasMember( "forward_weight" ) ) {
+                forward_wt = ( unsigned int ) jsonDoc["forward_weight"].GetInt();
+            }
+            if ( jsonDoc.HasMember( "reverse_weight" ) ) {
+                reverse_wt = ( unsigned int ) jsonDoc["reverse_weight"].GetInt();
             }
             if ( jsonDoc.HasMember( "name_id" ) ) {
                 street_id = ( unsigned int ) jsonDoc["name_id"].GetInt();

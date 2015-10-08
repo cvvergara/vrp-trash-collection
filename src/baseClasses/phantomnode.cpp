@@ -1,6 +1,8 @@
 #include "phantomnode.h"
 
-PhantomNode::PhantomNode(UID phantomNodeId, double x, double y, UID fwNodeId, UID rvNodeId, UID fwWeight, UID rvWeight, UID nameId) {
+PhantomNode::PhantomNode(UID phantomNodeId, double x, double y, UID fwNodeId, UID rvNodeId, UID fwWeight, UID rvWeight, UID nameId):
+    mBeforePNode( Point(0,0) ), mAfterPNode( Point(0,0) )
+{
     mPhantomNodeId = phantomNodeId;
     mPoint = Point(x, y);
     mForwNodeId = fwNodeId;
@@ -33,12 +35,14 @@ bool PhantomNode::inSameStreet(const PhantomNode &other)
 
 PhantomNode& PhantomNode::operator= (const PhantomNode &other)
 {
-    this->mPhantomNodeId = other.mPhantomNodeId;
-    this->mPoint = other.mPoint;
-    this->mForwNodeId = other.mForwNodeId;
-    this->mReveNodeId = other.mReveNodeId;
-    this->mForwWeight = other.mForwWeight;
-    this->mReveWeight = other.mReveWeight;
-    this->mNameId = other.mNameId;
+    mPhantomNodeId = other.mPhantomNodeId;
+    mPoint = other.mPoint;
+    mForwNodeId = other.mForwNodeId;
+    mReveNodeId = other.mReveNodeId;
+    mForwWeight = other.mForwWeight;
+    mReveWeight = other.mReveWeight;
+    mBeforePNode = other.mBeforePNode;
+    mAfterPNode = other.mAfterPNode;
+    mNameId = other.mNameId;
     return *this;
 }

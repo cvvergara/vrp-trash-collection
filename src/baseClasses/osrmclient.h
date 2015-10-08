@@ -134,26 +134,34 @@ public:
   /*!
    * \brief Get coordinates of the neareast fisical node (OSRM node) for a point
    *
-   * \param[in] Point latitude.
    * \param[in] Point longitude.
-   * \param[out] Node latitude.
+   * \param[in] Point latitude.
    * \param[out] Node longitude.
+   * \param[out] Node latitude.
    * \return true on succes.
    */
-  bool getOsrmLocate(double ilat, double ilon , double &olat, double &olon);
+  bool getOsrmLocate(double ilon, double ilat , double &olon, double &olat);
   /*!
    * \brief Get coordinates of the nearest point (virtual node) in the nearest edge (OSRM) for a point and edege name
    *
-   * \param[in] Point latitude.
    * \param[in] Point longitude.
-   * \param[out] Virtual node (in edge) latitude.
+   * \param[in] Point latitude.
    * \param[out] Virtual node (in edge) longitude.
-   * \param[out] Edge name.
+   * \param[out] Virtual node (in edge) latitude.
+   * \param[out] OSRM forward node Id.
+   * \param[out] OSRM reverse node Id.
+   * \param[out] OSRM forward weight.
+   * \param[out] OSRM reverse weight.
+   * \param[out] OSRM edge name id.
+   * \param[out] OSRM name.
+   *
    * \return true on succes.
+   *
    */
-  bool getOsrmNearest(double ilat, double ilon ,
-    double &olat, double &olon, unsigned int &one_way,
-    unsigned int &forward_id, unsigned int &reverse_id, unsigned int &street_id);
+  bool getOsrmNearest(double ilon, double ilat ,
+    double &olon, double &olat, unsigned int &one_way,
+    unsigned int &forward_id, unsigned int &reverse_id,
+    unsigned int &forward_wt, unsigned int &reverse_wt, unsigned int &street_id);
 
 private:
   bool getTime( rapidjson::Document &jtree, double &time );
