@@ -168,7 +168,7 @@ void Solution::dumpSolutionForPg () const
               "\t" << results[i].deltatime <<
               "\t" << results[i].cargo << std::endl;
               */
-  PhantomNodes mapPhantomNodes = TWC<knode>::getPhantomNodes();
+  PhantomNodes mapPhantomNodes = TWC::getPhantomNodes();
 
   for ( UINT i = 0; i < fleet.size(); ++i ) {
     if ( fleet[i].size() <= 1 ) continue;
@@ -232,6 +232,8 @@ void Solution::dumpSolutionForPg () const
               std::cout <<
                          seq <<
                         "\t" << fleet[i].getVid() <<
+                        "\t" << fleet[i][j].x() <<
+                        "\t" << fleet[i][j].y() <<
                         "\t" << fleet[i][j].id() <<
                         "\t" << fleet[i][j].type() <<
                         "\t" << fleet[i][j].departureTime() <<
