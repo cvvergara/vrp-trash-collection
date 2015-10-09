@@ -59,7 +59,7 @@ class Twnode: public Node {
     kEnd = 3,       ///< ending site
     kDelivery = 4,   ///< delivery site
     kLoad = 5,       ///< load site, fills the truck
-    kPhantomNode = 100 ///< phantom pickup site in order to do a pickup by right side of street
+    kPhantomNode = 100  ///< Virtual node
   } NodeType;
 
 
@@ -98,7 +98,7 @@ class Twnode: public Node {
   bool isDelivery() const {return type_ == kDelivery;}
   /*! \brief True when its a loading site (truck gets filled).  */
   bool isLoad() const {return type_ == kLoad;}
-  /*! \brief True when its a phantom node.  */
+  /*! \brief True when its a loading site (truck gets filled).  */
   bool isPhantomNode() const {return type_ == kPhantomNode;}
   ///@}
 
@@ -183,6 +183,7 @@ class Twnode: public Node {
   Twnode();
   /*! \brief Construct from a string */
   explicit Twnode(std::string line);
+  Twnode(UID nid, UID id, double x, double y);
 
  private:
   NodeType type_;       ///< Defines what type of Twnode

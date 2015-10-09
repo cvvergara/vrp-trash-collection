@@ -168,44 +168,78 @@ void Solution::dumpSolutionForPg () const
               "\t" << results[i].deltatime <<
               "\t" << results[i].cargo << std::endl;
               */
+  PhantomNodes mapPhantomNodes = TWC<knode>::getPhantomNodes();
 
-      auto it = mPhantomNodes.find(truck[i].id());
-      if (it!=mPhantomNodes.end()) {
-          DLOG(INFO) << "In twc.h setTravelingTimesOfRoute"
-                     << std::setprecision(8) << truck[i].id() << "\t" << truck[i].x() << "\t"  << truck[i].y() << "\t"
-                     << it->second.id() << "\t" << it->second.point().x() << "\t" << it->second.point().y() << "\t"
-                     << it->second.beforePNode().x() << "\t" << it->second.beforePNode().y() << "\t"
-                     << it->second.afterPNode().x() << "\t" << it->second.afterPNode().y();
-          //Obtain before and after PNodes
-          Node beforPNode(100, it->second.reveNodeId() , it->second.beforePNode().x(), it->second.beforePNode().y());
-          Node afterPNode(100,it->second.forwNodeId(),it->second.afterPNode().x(),it->second.afterPNode().y());
-
-          call.push_back(beforPNode);
-          call.push_back(truck[i]);
-          call.push_back(afterPNode);
-      }
   for ( UINT i = 0; i < fleet.size(); ++i ) {
     if ( fleet[i].size() <= 1 ) continue;
     int seq = 0;
     std::cout <<
               "seq" <<
               "\tVID" <<
+              "\tx" <<
+              "\ty" <<
               "\tid" <<
               "\tntype" <<
               "\tDepart" <<
               "\tdTime" <<
               "\tdCargo" << std::endl;
     for ( UINT j = 0; j < fleet[i].size(); ++j ) {
-      seq++;
-      std::cout <<
-                 seq <<
-                "\t" << fleet[i].getVid() <<
-                "\t" << fleet[i][j].id() <<
-                "\t" << fleet[i][j].type() <<
-                "\t" << fleet[i][j].departureTime() <<
-                "\t" << fleet[i][j].deltaTime() <<
-                "\t" << fleet[i][j].demand() << std::endl;
+        seq++;
+        auto it = mapPhantomNodes.find(fleet[i].id());
+        if ( it!=mapPhantomNodes.end() ) {
+          Twnode before = Twnode(TWC::mIPNId,it->second.reveNodeId(),it->second.beforePNode().x(),it->second.beforePNode().y());
+          n.set_type( Twnode::kPhantomNode );
+          Twnode after = Twnode(TWC::mIPNId,it->second.forwNodeId(),it->second.afterPNode().x(),it->second.afterPNode().y());
+          n.set_type( Twnode::kPhantomNode );
+
+          //Print beforeNode
+          std::cout <<
+                     seq <<
+                    "\t" << fleet[i].getVid() <<
+                    "\t" << it->second.beforePNode().x() <<
+                    "\t" << it->second.beforePNode().y() <<
+                    "\t" << it->second.reveNodeId() <<
+                    "\t" << TWC::mIPNId <<
+                    "\t" << "" <<
+                    "\t" << "" <<
+                    "\t" << "" << std::endl;
+          //Print Node
+            std::cout <<
+                       seq <<
+                      "\t" << fleet[i].getVid() <<
+                      "\t" << fleet[i][j].x() <<
+                      "\t" << fleet[i][j].y() <<
+                      "\t" << fleet[i][j].id() <<
+                      "\t" << fleet[i][j].type() <<
+                      "\t" << fleet[i][j].departureTime() <<
+                      "\t" << fleet[i][j].deltaTime() <<
+                      "\t" << fleet[i][j].demand() << std::endl;
+            //Print afterNode
+            std::cout <<
+                       seq <<
+                      "\t" << fleet[i].getVid() <<
+                      "\t" << it->second.afterPNode().x() <<
+                      "\t" << it->second.afterPNode().y() <<
+                      "\t" << it->second.forwNodeId() <<
+                      "\t" << TWC::mIPNId <<
+                      "\t" << "" <<
+                      "\t" << "" <<
+                      "\t" << "" << std::endl;
+        }
+        else
+        {
+            //Print Node
+              std::cout <<
+                         seq <<
+                        "\t" << fleet[i].getVid() <<
+                        "\t" << fleet[i][j].id() <<
+                        "\t" << fleet[i][j].type() <<
+                        "\t" << fleet[i][j].departureTime() <<
+                        "\t" << fleet[i][j].deltaTime() <<
+                        "\t" << fleet[i][j].demand() << std::endl;
+        }
     }
+
     seq++;
     std::cout <<
               seq  <<

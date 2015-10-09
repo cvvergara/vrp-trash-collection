@@ -26,7 +26,7 @@
 #include "logger.h"
 #endif
 
-#include "node.h"
+#include "twnode.h"
 
 
 // load our assert to throw macros and tell rapidjson to use them
@@ -81,8 +81,8 @@ public:
 
   void clear();
   void addViaPoint( double lat, double lon );
-  void addViaPoint( const Node &node );
-  void addViaPoints( const std::deque<Node> &path );
+  void addViaPoint( const Twnode &node );
+  void addViaPoints( const std::deque<Twnode> &path );
 
   /*!
    * \brief Set whether you want the path geometry returned.
@@ -111,11 +111,11 @@ public:
                     double &time );
   bool getOsrmTime( double lat1, double lon1 , double lat2, double lon2,
                     const std::string &hint1, const std::string &hint2, double &time );
-  bool getOsrmTime( const Node &node1, const Node &node2, double &time );
-  bool getOsrmTime( const Node &node1, const Node &node2, const Node &node3,
+  bool getOsrmTime( const Twnode &node1, const Twnode &node2, double &time );
+  bool getOsrmTime( const Twnode &node1, const Twnode &node2, const Twnode &node3,
                     double &time );
-  bool getOsrmTime( const Node &node1, const Node &node2, const Node &node3,
-                    const Node &node4, double &time );
+  bool getOsrmTime(const Twnode &node1, const Twnode &node2, const Twnode &node3,
+                    const Twnode &node4, double &time );
   bool getOsrmTime( double &time );
   bool getOsrmTimes( std::deque<double> &times );
   bool getOsrmGeometry( std::deque<Node> &geom );

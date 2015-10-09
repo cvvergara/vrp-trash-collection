@@ -151,7 +151,7 @@ void OsrmClient::addViaPoint( double lat, double lon )
  * \brief Add a \ref Node as a location to the OSRM request.
  * \param[in] node The Node to add, assumed to be in WGS84.
  */
-void OsrmClient::addViaPoint( const Node &node )
+void OsrmClient::addViaPoint(const Twnode &node )
 {
   if ( not connectionAvailable ) return;
 
@@ -172,13 +172,13 @@ void OsrmClient::addViaPoint( const Node &node )
  * \brief Add a path of \ref Node as locations to a the OSRM request.
  * \param[in] path A std::deque<Node> that you want to add.
  */
-void OsrmClient::addViaPoints( const std::deque<Node> &path )
+void OsrmClient::addViaPoints(const std::deque<Twnode> &path )
 {
   if ( not connectionAvailable ) return;
 
   if ( not use ) return;
 
-  std::deque<Node>::const_iterator it;
+  std::deque<Twnode>::const_iterator it;
 
   for ( it = path.begin(); it != path.end(); ++it )
     addViaPoint( *it );
@@ -224,7 +224,7 @@ bool OsrmClient::getOsrmTime( double lat1, double lon1 , double lat2,
   return false;
 }
 
-bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
+bool OsrmClient::getOsrmTime( const Twnode &node1, const Twnode &node2,
                               double &time )
 {
   if ( not connectionAvailable ) return false;
@@ -245,8 +245,8 @@ bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
   return false;
 }
 
-bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
-                              const Node &node3, double &time )
+bool OsrmClient::getOsrmTime( const Twnode &node1, const Twnode &node2,
+                              const Twnode &node3, double &time )
 {
   if ( not connectionAvailable ) return false;
 
@@ -268,8 +268,8 @@ bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
   return false;
 }
 
-bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
-                              const Node &node3, const Node &node4, double &time )
+bool OsrmClient::getOsrmTime( const Twnode &node1, const Twnode &node2,
+                              const Twnode &node3, const Twnode &node4, double &time )
 {
   if ( not connectionAvailable ) return false;
 
