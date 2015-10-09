@@ -169,6 +169,21 @@ void Solution::dumpSolutionForPg () const
               "\t" << results[i].cargo << std::endl;
               */
 
+      auto it = mPhantomNodes.find(truck[i].id());
+      if (it!=mPhantomNodes.end()) {
+          DLOG(INFO) << "In twc.h setTravelingTimesOfRoute"
+                     << std::setprecision(8) << truck[i].id() << "\t" << truck[i].x() << "\t"  << truck[i].y() << "\t"
+                     << it->second.id() << "\t" << it->second.point().x() << "\t" << it->second.point().y() << "\t"
+                     << it->second.beforePNode().x() << "\t" << it->second.beforePNode().y() << "\t"
+                     << it->second.afterPNode().x() << "\t" << it->second.afterPNode().y();
+          //Obtain before and after PNodes
+          Node beforPNode(100, it->second.reveNodeId() , it->second.beforePNode().x(), it->second.beforePNode().y());
+          Node afterPNode(100,it->second.forwNodeId(),it->second.afterPNode().x(),it->second.afterPNode().y());
+
+          call.push_back(beforPNode);
+          call.push_back(truck[i]);
+          call.push_back(afterPNode);
+      }
   for ( UINT i = 0; i < fleet.size(); ++i ) {
     if ( fleet[i].size() <= 1 ) continue;
     int seq = 0;

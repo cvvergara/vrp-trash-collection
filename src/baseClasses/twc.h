@@ -1264,7 +1264,7 @@ bool setTravelingTimesOfRoute(
 
   //Push pickups
   for (unsigned int i = 1; i < tSize; ++i) {
-      auto it = mPhantomNodes.find( id );
+      auto it = mPhantomNodes.find( truck[i].id() );
       if ( it!=mPhantomNodes.end() ) {
           DLOG(INFO) << "In twc.h setTravelingTimesOfRoute"
                      << std::setprecision(8) << truck[i].id() << "\t" << truck[i].x() << "\t"  << truck[i].y() << "\t"
@@ -1294,8 +1294,9 @@ bool setTravelingTimesOfRoute(
 
   //Push pickups
   for (int i = tSize - 1; i > 0; --i) {
-      auto it = mPhantomNodes.find( id );
+      auto it = mPhantomNodes.find( truck[i].id() );
       if ( it!=mPhantomNodes.end() ) {
+          std::cout <<  "In twc.h setTravelingTimesOfRoute" << std::endl;
           DLOG(INFO) << "In twc.h setTravelingTimesOfRoute"
                      << std::setprecision(8) << truck[i].id() << "\t" << truck[i].x() << "\t"  << truck[i].y() << "\t"
                      << it->second.id() << "\t" << it->second.point().x() << "\t" << it->second.point().y() << "\t"
@@ -1305,9 +1306,10 @@ bool setTravelingTimesOfRoute(
           Node beforPNode(100, it->second.reveNodeId() , it->second.beforePNode().x(), it->second.beforePNode().y());
           Node afterPNode(100,it->second.forwNodeId(),it->second.afterPNode().x(),it->second.afterPNode().y());
 
-          call.push_back(beforPNode);
-          call.push_back(truck[i]);
           call.push_back(afterPNode);
+          call.push_back(truck[i]);
+          call.push_back(beforPNode);
+
       }
       else
           call.push_back(truck[i]);
