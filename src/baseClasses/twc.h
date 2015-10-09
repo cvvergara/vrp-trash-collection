@@ -258,28 +258,30 @@ private:
     osrmi->useOsrm(oldStateOsrm);
 
     #ifdef VRPMINTRACE
-        DLOG(INFO) << "COID" << "\t" << "COLON" << "\t" << "COLAT" << "\t" << "PNID" << "\t" << "PNLON" << "\t" << "PNLAT" << "\t"
+        DLOG(INFO) << "Begin PhantomNodes for pickups sites";
+        DLOG(INFO) << "CONID" << "\t" << "COID" << "\t" << "COLON" << "\t" << "COLAT" << "\t" << "PNID" << "\t" << "PNLON" << "\t" << "PNLAT" << "\t"
                    << "BELON" << "\t" << "BELAT" << "\t" << "AFLON" << "\t" << "AFLAT";
         for (UINT i = 0; i < original.size(); i++) {
             UID id = original[i].id();
             auto it = mPhantomNodes.find( id );
             if ( it!=mPhantomNodes.end() ) {
-            // if ( mPhantomNodes.find( id ) != mPhantomNodes.end() ) {
-                DLOG(INFO) << std::setprecision(8) << original[i].id() << "\t" << original[i].x() << "\t"  << original[i].y() << "\t"
+                DLOG(INFO) << std::setprecision(8) << original[i].nid() << "\t" << original[i].id() << "\t" << original[i].x() << "\t"  << original[i].y() << "\t"
                            << it->second.id() << "\t" << it->second.point().x() << "\t" << it->second.point().y() << "\t"
                            << it->second.beforePNode().x() << "\t" << it->second.beforePNode().y() << "\t"
                            << it->second.afterPNode().x() << "\t" << it->second.afterPNode().y();
             }
         }
+        DLOG(INFO) << "End PhantomNodes for pickups sites";
     #endif
   }
 
+/*
 #if 0
   typedef std::map<TTindex, double, classcomp>  TT4;
   typedef typename std::map<TTindex, double, classcomp>::iterator p_TT4;
   mutable TT4 travel_Time4;
 #endif //0
-
+*/
 #endif //OSRMCLIENT
 
   typedef TwBucket<knode> Bucket;
@@ -317,13 +319,26 @@ private:
   int z2Tot;
 
   void initializeTravelTime() {
-    for (UINT i = 0; i < travel_Time.size(); ++i)
+    #ifdef VRPMINTRACE
+      DLOG(INFO) << "started initializeTravelTime";
+    #endif
+    for (UINT i = 0; i < travel_Time.size(); ++i) {
       for (UINT j = 0; i < travel_Time.size(); ++i)
         if (i != j && travel_time_onTrip[i][j] == 0)
           travel_Time[i][j] = -1;
         else {
           travel_Time[i][j] = travel_time_onTrip[i][j];
         }
+    }
+
+    #ifdef VRPMINTRACE
+      DLOG(INFO) << "Updated travel_Time";
+      dump_travel_Time();
+    #endif
+
+    #ifdef VRPMINTRACE
+      DLOG(INFO) << "ended initializeTravelTime";
+    #endif
   }
 
   void getProcessOrder() {
@@ -713,6 +728,9 @@ TwBucket<knode> actualNodesOnTrip(UINT from, UINT to, const TwBucket<knode> &ass
 }
 
 void fill_travel_time_onTrip() {
+  #ifdef VRPMINTRACE
+    DLOG(INFO) << "strarted fill_travel_time_onTrip";
+  #endif
 
   #ifdef VRPMINTRACE
     DLOG(INFO) << "fill_travel_time_onTrip to be checked: " << original.size();
@@ -734,6 +752,9 @@ void fill_travel_time_onTrip() {
     fill_travel_time_onTrip_work(process_order_far);
 
   fill_travel_time_onTrip_work(process_order);
+  #ifdef VRPMINTRACE
+    DLOG(INFO) << "ended fill_travel_time_onTrip";
+  #endif
 }
 
 void fill_travel_time_onTrip_work(std::set<id_time, CompareSecond< id_time > >  &process_order) {
@@ -840,7 +861,11 @@ bool compulsory_fill() {
 void fill_times(const TwBucket<knode> nodesOnPath) const {
 
   #ifdef VRPMINTRACE
-    DLOG(INFO) << "fill_times";
+    DLOG(INFO) << "strated fill_times";
+  #endif
+
+  #ifdef VRPMINTRACE
+    nodesOnPath.dump("nodesOnPath");
   #endif
 
   //get all the times using osrm
@@ -873,7 +898,7 @@ void fill_times(const TwBucket<knode> nodesOnPath) const {
       }
       // call.push_back(nodesOnPath[i]);
       #ifdef VRPMINTRACE
-        DLOG(INFO) << "Nodos en el path:" << i << " ID: " << nodesOnPath[i].id() << " x: " << nodesOnPath[i].x() << " y: " << nodesOnPath[i].y();
+        //DLOG(INFO) << "Nodos en el path:" << i << " ID: " << nodesOnPath[i].id() << " x: " << nodesOnPath[i].x() << " y: " << nodesOnPath[i].y();
       #endif
   }
 
@@ -975,6 +1000,8 @@ void fill_times(const TwBucket<knode> nodesOnPath) const {
                   }
                 }
               }
+
+
               #ifdef VRPMINTRACE
                 for (unsigned int i = 0; i < nodes_onTrip[from][to].size(); ++i) {
                   DLOG(INFO) << nodes_onTrip[from][to][i];
@@ -1095,8 +1122,18 @@ void fill_times(const TwBucket<knode> nodesOnPath) const {
 #endif
 */
 
+  #ifdef VRPMINTRACE
+    DLOG(INFO) << "Updated travel_Time";
+    //dump_travel_Time();
+  #endif
+
+  #ifdef VRPMINTRACE
+    DLOG(INFO) << "ended fill_times";
+  #endif
+
 }
 
+/*
 #if 0
 void travel_Time4Insert(UINT i_nid, UINT j_nid, UINT k_nid, UINT l_nid, double time) const {
   TTindex index(i_nid, j_nid, k_nid, l_nid);
@@ -1104,6 +1141,7 @@ void travel_Time4Insert(UINT i_nid, UINT j_nid, UINT k_nid, UINT l_nid, double t
   travel_Time4.insert(std::pair<TTindex,double>(index, time));
 }
 #endif
+*/
 
 
 /*!
@@ -1116,9 +1154,18 @@ void getNodesOnPath(
    const knode &dumpSite,
    const TwBucket<knode> &unassigned,
    TwBucket<knode> &orderedStreetNodes) const {
-#ifdef VRPMINTRACE
-    DLOG(INFO) << "started getNodesOnPath";
-#endif
+
+  #ifdef VRPMINTRACE
+      DLOG(INFO) << "started getNodesOnPath";
+  #endif
+
+  #ifdef VRPMINTRACE
+      truck.dump("truck");
+  #endif
+
+  #ifdef VRPMINTRACE
+      unassigned.dump("unassigned");
+  #endif
 
 #ifndef OSRMCLIENT
   DLOG(INFO) << "NO OSRM";
@@ -1391,7 +1438,7 @@ void getNodesOnPath(
 #endif  // with OSRMCLIENT
 
 #ifdef VRPMINTRACE
-    DLOG(INFO) << "end getNodesOnPath";
+    DLOG(INFO) << "Ended getNodesOnPath";
 #endif
 
 }
@@ -3265,6 +3312,21 @@ private:
 
 
  public:
+
+  // Just for log. Dump travel_Time matrix.
+  void dump_travel_Time() {
+    int rcSize = original.size();
+    DLOG(INFO) << "Begin travel_Time matrix";
+    for ( int i = 0; i < rcSize; i++ ) {
+      std::stringstream row;
+      for ( int j = 0; j < rcSize; j++ ) {
+          row << travel_Time[i][j] << "\t";
+      }
+      DLOG(INFO) << row.str() << std::endl;
+    }
+    DLOG(INFO) << "End travel_Time matrix";
+  }
+
   /*!  \brief Assign the travel time matrix to TWC from Pg
 
     This method is specific for PostgreSQL integration. It receives a
@@ -3282,15 +3344,23 @@ private:
     assert(datanodes.size());
     // Delete previous
     original.clear();
+
     // datanodes is pickups + otherlocs
     original = datanodes;
 
-#ifdef OSRMCLIENT
-    getAllHintsAndStreets();
-#endif
+    #ifdef VRPMINTRACE
+      original.dump("Data now loaded in original!");
+    #endif
 
+    // Why?
+    #ifdef OSRMCLIENT
+        getAllHintsAndStreets();
+    #endif
+
+    // Initialize travel_Time
     prepareTravelTime();
 
+    // Read the data
     for (int i = 0; i < count; ++i) {
       int from    = ttimes[i].from_id;
       int to      = ttimes[i].to_id;
@@ -3298,6 +3368,7 @@ private:
 
       if (invalid.hasId(from) || invalid.hasId(to)) continue;
 
+      // User pass Id, then, get internal nodeId (nid)
       int fromId = getNidFromId(from);
       int toId = getNidFromId(to);
 
@@ -3306,14 +3377,22 @@ private:
       travel_Time[fromId][toId] = time;
     }
 
+    // Print the actual travel_Time
+    #ifdef VRPMINTRACE
+      DLOG(INFO) << "First travel_Time (reading from ttime_t)";
+      dump_travel_Time();
+    #endif
+
+    // ?????
     twcij_calculate();
+
     assert(original == datanodes);
     assert(check_integrity());
 
-#ifdef OSRMCLIENT
-    setPhantomNodes();
-#endif
-
+    // If OSRM, need phantom nodes!
+    #ifdef OSRMCLIENT
+        setPhantomNodes();
+    #endif
   }
 
 
@@ -3395,9 +3474,9 @@ private:
     assert(original == datanodes);
     assert(check_integrity());
 
-#ifdef OSRMCLIENT
-    setPhantomNodes();
-#endif
+    #ifdef OSRMCLIENT
+        setPhantomNodes();
+    #endif
 
   }
 
