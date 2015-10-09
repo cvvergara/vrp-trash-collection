@@ -222,7 +222,7 @@ private:
                     std::cout << pn << std::endl;
                 #endif
                 // Add pn to de map
-                mPhantomNodes[ original[i].id() ] = pn;
+                f = pn;
                 pncount++;
             }
             #ifdef VRPMINTRACE
@@ -261,7 +261,7 @@ private:
 
   typedef TwBucket<knode> Bucket;
   TwBucket<knode> original;                                 ///< The nodes. Set in loadAndProcess_distance and setNodes (Not used anywhere!)
-  std::map< std::string, int> streetNames;                  ///< Map whit street name and id
+  std::map< std::string, int> streetNames;                  ///< Map with street name and id
   mutable std::vector< std::vector<double> > twcij;
   mutable std::vector< std::vector<double> > travel_Time;   ///< Travel time matrix
   mutable std::vector< std::vector<double> > travel_time_onTrip;
@@ -1258,17 +1258,63 @@ bool setTravelingTimesOfRoute(
   std::deque< double > times;
   osrmi->clear();
   // cycle 1:
-  for (unsigned int i = 0; i < tSize; ++i) {
-      call.push_back(truck[i]);
+
+  //Push Departure Site
+  call.push_back(truck[0]);
+
+  //Push pickups
+  for (unsigned int i = 1; i < tSize; ++i) {
+      auto it = mPhantomNodes.find( id );
+      if ( it!=mPhantomNodes.end() ) {
+          DLOG(INFO) << "In twc.h setTravelingTimesOfRoute"
+                     << std::setprecision(8) << truck[i].id() << "\t" << truck[i].x() << "\t"  << truck[i].y() << "\t"
+                     << it->second.id() << "\t" << it->second.point().x() << "\t" << it->second.point().y() << "\t"
+                     << it->second.beforePNode().x() << "\t" << it->second.beforePNode().y() << "\t"
+                     << it->second.afterPNode().x() << "\t" << it->second.afterPNode().y();
+          //Obtain before and after PNodes
+          Node beforPNode(100, it->second.reveNodeId() , it->second.beforePNode().x(), it->second.beforePNode().y());
+          Node afterPNode(100,it->second.forwNodeId(),it->second.afterPNode().x(),it->second.afterPNode().y());
+
+          call.push_back(beforPNode);
+          call.push_back(truck[i]);
+          call.push_back(afterPNode);
+      }
+      else
+          call.push_back(truck[i]);
   }
+
+  //Push Dump Site
   call.push_back(dumpSite);
 
 #if 1
   // cycle 2:
+
+  //Push Dump Site
   call.push_back(dumpSite);
-  for (int i = tSize - 1; i >= 0; --i) {
-      call.push_back(truck[i]);
+
+  //Push pickups
+  for (int i = tSize - 1; i > 0; --i) {
+      auto it = mPhantomNodes.find( id );
+      if ( it!=mPhantomNodes.end() ) {
+          DLOG(INFO) << "In twc.h setTravelingTimesOfRoute"
+                     << std::setprecision(8) << truck[i].id() << "\t" << truck[i].x() << "\t"  << truck[i].y() << "\t"
+                     << it->second.id() << "\t" << it->second.point().x() << "\t" << it->second.point().y() << "\t"
+                     << it->second.beforePNode().x() << "\t" << it->second.beforePNode().y() << "\t"
+                     << it->second.afterPNode().x() << "\t" << it->second.afterPNode().y();
+          //Obtain before and after PNodes
+          Node beforPNode(100, it->second.reveNodeId() , it->second.beforePNode().x(), it->second.beforePNode().y());
+          Node afterPNode(100,it->second.forwNodeId(),it->second.afterPNode().x(),it->second.afterPNode().y());
+
+          call.push_back(beforPNode);
+          call.push_back(truck[i]);
+          call.push_back(afterPNode);
+      }
+      else
+          call.push_back(truck[i]);
   }
+
+  //Push Departure Site
+  call.push_back(truck[0]);
 #endif
   // process osrm
   osrmi->addViaPoints(call);
