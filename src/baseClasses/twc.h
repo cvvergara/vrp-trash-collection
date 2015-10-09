@@ -245,7 +245,7 @@ private:
                     std::cout << pn << std::endl;
                 #endif
                 // Add pn to de map
-                //f = pn;
+                f = pn;
                 pncount++;
             }
             #ifdef VRPMINTRACE
