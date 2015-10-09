@@ -1171,8 +1171,11 @@ void getNodesOnPath(
         #endif
       */
   }
+
+  // Add dumpsite
   call.push_back(dumpSite);
 
+  // Add points to osrm
   osrmi->addViaPoints(call);
 
   if (!osrmi->getOsrmViaroute()) {
@@ -1766,7 +1769,11 @@ bool setTravelingTimesInsertingOneNode(
        const knode &dumpSite,
        POS &pos,
        knode &bestNode,
-       double &bestTime) const {
+       double &bestTime) const
+{
+#ifdef VRPMINTRACE
+  DLOG(INFO) << "started findFastestNodeTo";
+#endif
     assert(unassigned.size());
     bool flag = false;
     bestTime = VRP_MAX();   // time to minimize
@@ -1845,6 +1852,9 @@ bool setTravelingTimesInsertingOneNode(
       unassigned.push_back(unassigned[0]);
       unassigned.erase(unassigned[0]);
     }
+#ifdef VRPMINTRACE
+  DLOG(INFO) << "ended findFastestNodeTo";
+#endif
     return flag;
 }
 
@@ -2137,11 +2147,10 @@ bool setTravelingTimesInsertingOneNode(
 private:
   double getTravelTime(UID from, UID to) const {
     assert(from < original.size() && to < original.size());
-    double time;
     if (travel_Time[from][to] == -1) {
-#ifdef DOSTATS
-    STATS->inc("TWC::extra process_pair_onPath");
-#endif
+      #ifdef DOSTATS
+        STATS->inc("TWC::extra process_pair_onPath");
+      #endif
       process_pair_onPath(from,to);
       process_pair_onPath(to,from);
     }
