@@ -1124,7 +1124,16 @@ void fill_times(const TwBucket<knode> nodesOnPath) const {
 
   #ifdef VRPMINTRACE
     DLOG(INFO) << "Updated travel_Time";
-    //dump_travel_Time();
+    int rcSize = original.size();
+    DLOG(INFO) << "Begin travel_Time matrix";
+    for ( int i = 0; i < rcSize; i++ ) {
+      std::stringstream row;
+      for ( int j = 0; j < rcSize; j++ ) {
+          row << "\t"<< travel_Time[i][j];
+      }
+      DLOG(INFO) << row.str() << std::endl;
+    }
+    DLOG(INFO) << "End travel_Time matrix";
   #endif
 
   #ifdef VRPMINTRACE
@@ -3320,7 +3329,7 @@ private:
     for ( int i = 0; i < rcSize; i++ ) {
       std::stringstream row;
       for ( int j = 0; j < rcSize; j++ ) {
-          row << travel_Time[i][j] << "\t";
+          row  << "\t" << travel_Time[i][j];
       }
       DLOG(INFO) << row.str() << std::endl;
     }
