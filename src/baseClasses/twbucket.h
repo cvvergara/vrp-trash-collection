@@ -88,7 +88,7 @@ class TwBucket {
          || to.isNotCompatibleIJ(from)
          || to.isNotCompatibleIJ(middle))
        return VRP_MAX();
-         
+
 
     double travelTimePrevFromMiddle = TravelTime(prev, from , middle);
     double travelTimeFromMiddle = travelTimePrevFromMiddle - travelTimePrevFrom;
@@ -114,8 +114,8 @@ class TwBucket {
     return arrive_to - depart_from;
   }
 
-  /*! @name timePCN = time previous-current-next 
-     simulates the following order of nodes in the path: 
+  /*! @name timePCN = time previous-current-next
+     simulates the following order of nodes in the path:
          prev from middle to
    *
    * \return  the time that takes to depart from "from" and arrive to "to" passing thru "middle"
@@ -188,7 +188,7 @@ class TwBucket {
                      path[from].travelTime());
   }
   /*! \brief  simulates an insertion of two nodes a node at the end of the bucket
-         namely node and dump 
+         namely node and dump
 
      previous path:
        last dump
@@ -204,7 +204,7 @@ class TwBucket {
  private:
   /*! @name TravelTime inline functions
     \brief useful inlines to fetch the travel time from Node to Node
-   
+
    2 flavors:
       parameters are nodes
       parameters are node Nid (internal node id)
@@ -442,7 +442,7 @@ class TwBucket {
     double delta = getDeltaTime(node, pos, pos1);
 
     if ((path[pos - 1].getDepartureTime() + TravelTime[ path[pos - 1].nid() ] [node.nid() ])
-         > node.closes()) 
+         > node.closes())
       return VRP_MAX();
 
     if (pos == size()) return delta;
@@ -555,7 +555,7 @@ class TwBucket {
   // ---------------- other tools ----------------------------------
 
   /*! \brief \returns the distance from a point to the segmnet (\b pos, \b pos+1)
-   
+
     \warning assert(pos + 1 < path.size());
     \warning assert(path.size() > 1);
 
@@ -597,7 +597,7 @@ class TwBucket {
   /*! \brief Using nid as node identifiers with title "Twbucket".  */
   void dump() const {dump("Twbucket");}
 
-  /*! \brief Using nid as node identifiers with title "Twbucket".  
+  /*! \brief Using nid as node identifiers with title "Twbucket".
    * \param[in] title Title to print with the output of the Twbucket.
    */
   void dump(const std::string &title) const {
@@ -643,7 +643,7 @@ class TwBucket {
   */
   ///@{
   /*! \brief \param[in] node uses the \b nid of the node*/
-  bool hasNid(const knode &node) const { 
+  bool hasNid(const knode &node) const {
     return hasNid(node.nid());
   }
   /*! \brief \param[in] id Uses the \b nid */
@@ -735,7 +735,7 @@ class TwBucket {
     assert(size());
     return last().duration();
   }
-  
+
   /*! \brief \returns the total wait time of the path.  */
   double totWaitTime() const {
     assert(size());
@@ -951,7 +951,7 @@ class TwBucket {
     assert(atPos <= path.size());
     for (UINT i = 0; i < nodes.size(); i++) {
       path.insert(path.begin() + atPos + i, nodes[i]);
-    } 
+    }
     return true;
   }
 
@@ -983,7 +983,7 @@ class TwBucket {
     \param[in] fromPos Position of the start of the range to be erased.
     \param[in] toPos Position of the last in the range to be erased.
 
-    \warning Notice that the right side of the range is not included 
+    \warning Notice that the right side of the range is not included
     when  ( fromPos < toPos )  range erased: [fromPos,toPos)
     when  ( fromPos > toPos )  range erased: [toPos,fromPos)
 
