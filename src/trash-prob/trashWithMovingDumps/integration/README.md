@@ -116,11 +116,11 @@ sudo apt-get install libgd2-xpm libgd2-xpm-dev
 
 With your extension built and installed as above. you can now create a database and add the extensions to it.
 
-\code{.bash}
+```{.bash}
 createdb -U postgres -h localhost mytestdb
 psql -U postgres -h localhost mytestdb -c "create extension postgis"
 psql -U postgres -h localhost mytestdb -c "create extension vrptools"
-\endcode
+```
 
 If you built using the ``WITH_OSRM`` rather than the ``WITH_OSRMCLIENT``, then you will also need to load. This also presumes that you have downloaded and built the osrm-tools postgresql extension which can be found at: https://github.com/woodbri/osrm-tools/ in the postgresql directory.
 
