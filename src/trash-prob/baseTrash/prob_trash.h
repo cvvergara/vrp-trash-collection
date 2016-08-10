@@ -33,8 +33,8 @@ protected:
   typedef  unsigned long int UID ;
   typedef  unsigned long int POS ;
   typedef  unsigned long int UINT;
-  inline double _MAX() {return ( std::numeric_limits<double>::max() ); };
-  inline double _MIN() {return ( - std::numeric_limits<double>::max() ); };
+  inline double _MAX() {return ( std::numeric_limits<double>::max() ); }
+  inline double _MIN() {return ( - std::numeric_limits<double>::max() ); }
 
 
   //    Trashnode depot;
@@ -67,12 +67,12 @@ public:
   }
 
   //    Trashnode getdepot() const { return depot;};
-  Prob_trash() {};
+  Prob_trash() {}
   Prob_trash( const char *infile );
   Prob_trash( const std::string &infile );
   void loadProblem( const std::string &infile );
 
-  unsigned int getNodeCount() const {return datanodes.size();};
+  unsigned int getNodeCount() const { return datanodes.size(); }
 
   bool checkIntegrity() const;
 
@@ -101,7 +101,6 @@ public:
 #endif
 
 
-
 private:
   void load_depots( std::string infile );
   void load_dumps( std::string infile );
@@ -109,9 +108,6 @@ private:
   void load_endings( std::string infile );
   void load_otherlocs( std::string infile );
   void load_trucks( std::string infile );
-
-
-
 };
 
 #endif
