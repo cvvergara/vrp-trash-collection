@@ -49,14 +49,14 @@ public:
   void clear() {
     Prob_trash::clear();
     fleet.clear();
-  };
+  }
 
-  Solution( const Prob_trash &P ): Prob_trash( P ) {};
+  Solution( const Prob_trash &P ): Prob_trash( P ) {}
   Solution( const std::string &infile, const std::vector<int> &solution );
   Solution( const std::string &infile, const std::string &soliFile );
 
 
-  void setweights( double _w1, double _w2, double _w3 ) {w1 = _w1; w2 = _w2; w3 = _w3;};
+  void setweights( double _w1, double _w2, double _w3 ) {w1 = _w1; w2 = _w2; w3 = _w3;}
   void dumproutes();
   void tau() ;
   void plot( std::string file, std::string title );
@@ -71,7 +71,7 @@ public:
   double getCost() const ;
   double getCostOsrm();
   double getDistance() const ;
-  int getFleetSize() const { return fleet.size(); };
+  int getFleetSize() const { return fleet.size(); }
   double getAverageRouteDurationLength();
   void dumpSolutionForPg () const;
 
@@ -87,12 +87,12 @@ public:
     }
 
     return *this;
-  };
+  }
 
   bool operator == ( Solution &another ) const {
     return fleet.size() == another.fleet.size() &&
            std::abs( totalCost - another.totalCost ) < EPSILON;
-  };
+  }
 
   bool solutionEquivalent ( Solution &another )  {
     computeCosts();
@@ -100,11 +100,11 @@ public:
     return fleet.size() == another.fleet.size() &&
            std::abs( totalCost - another.totalCost ) < EPSILON;
 
-  };
+  }
 
   bool operator <  ( Solution &another ) const {
     return fleet.size() < another.fleet.size() || totalCost < another.totalCost;
-  };
+  }
 
 
   bool applyInsMove( const Move &move ) ;

@@ -96,16 +96,16 @@ public:
   {
     route_parameters.geometry = want;
     route_parameters.compression = false;
-  };
+  }
   void setWantGeometryText( bool want )
   {
     route_parameters.geometry = want;
     route_parameters.compression = true;
-  };
-  void usePenalty( bool desition ) { addPenalty = desition; };
-  bool getPenalty() const { return addPenalty; };
-  void useOsrm( bool desition ) { use = desition; };
-  bool getUse( ) const { return use; };
+  }
+  void usePenalty( bool desition ) { addPenalty = desition; }
+  bool getPenalty() const { return addPenalty; }
+  void useOsrm( bool desition ) { use = desition; }
+  bool getUse( ) const { return use; }
   bool getOsrmViaroute();
   bool getOsrmTime( double lat1, double lon1 , double lat2, double lon2,
                     double &time );
@@ -123,15 +123,37 @@ public:
   bool getOsrmHints( std::deque<std::string> &hints );
   bool getOsrmStreetNames( std::deque<std::string> &names);
   bool getOsrmNamesOnRoute( std::deque<std::string> &names);
-  int getStatus() const { return status; };
-  int getConnection() const { return connectionAvailable; };
-  std::string getErrorMsg() const { return err_msg; };
-  std::string getHttpContent() const { return httpContent; };
+  int getStatus() const { return status; }
+  int getConnection() const { return connectionAvailable; }
+  std::string getErrorMsg() const { return err_msg; }
+  std::string getHttpContent() const { return httpContent; }
   bool testOsrmClient(
     double x1, double y1,
     double x2, double y2,
     double x3, double y3);
-
+  /*!
+   * \brief Get coordinates of the neareast fisical node (OSRM node) for a point
+   *
+   * \param[in] Point latitude.
+   * \param[in] Point longitude.
+   * \param[out] Node latitude.
+   * \param[out] Node longitude.
+   * \return true on succes.
+   */
+  bool getOsrmLocate(double ilat, double ilon , double &olat, double &olon);
+  /*!
+   * \brief Get coordinates of the nearest point (virtual node) in the nearest edge (OSRM) for a point and edege name
+   *
+   * \param[in] Point latitude.
+   * \param[in] Point longitude.
+   * \param[out] Virtual node (in edge) latitude.
+   * \param[out] Virtual node (in edge) longitude.
+   * \param[out] Edge name.
+   * \return true on succes.
+   */
+  bool getOsrmNearest(double ilat, double ilon ,
+    double &olat, double &olon, unsigned int &one_way,
+    unsigned int &forward_id, unsigned int &reverse_id, unsigned int &street_id);
 
 private:
   bool getTime( rapidjson::Document &jtree, double &time );
@@ -152,7 +174,7 @@ public:
                  << "\nerr_msg: " << err_msg
                  << "\ncoordinates.size(): " << route_parameters.coordinates.size()
                  << "\nhttpContent: " << httpContent;
-  };
+  }
 #endif
 };
 
