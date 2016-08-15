@@ -842,7 +842,9 @@ void getNodesOnPath(
   osrmi->clear();
 
   // buld call
+#if 0
   osrmi->setWantGeometry(true);
+#endif
   std::deque< Node > call;
   for (unsigned int i = 0; i < truck.size(); ++i) {
       call.push_back(truck[i]);

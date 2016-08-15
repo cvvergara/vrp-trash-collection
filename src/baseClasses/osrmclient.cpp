@@ -11,21 +11,46 @@
  * the terms of the MIT License. Please file LICENSE for details.
  *
  ********************************************************************VRP*/
+
+#include "osrmclient.h"
+
+#include "osrm/match_parameters.hpp"
+#include "osrm/nearest_parameters.hpp"
+#include "osrm/route_parameters.hpp"
+#include "osrm/table_parameters.hpp"
+#include "osrm/trip_parameters.hpp"
+
+#include "osrm/coordinate.hpp"
+#include "osrm/engine_config.hpp"
+#include "osrm/json_container.hpp"
+
+#include "osrm/osrm.hpp"
+#include "osrm/status.hpp"
+
+#include <exception>
+#include <iostream>
+#include <string>
+#include <utility>
+
+
+
+#if 0
 #include <osrm/osrm.hpp>
 #include <osrm/libosrm_config.hpp>
+#include "osrm/engine_config.hpp"
 #include "renderer.hpp"
 
 #include <climits>
 #include <sstream>
 #include <string>
 #include <cstring>
+#endif
 
 #ifdef DOVRPLOG
 #include "logger.h"
 #endif
 
 
-#include "osrmclient.h"
 
 #ifdef DOSTATS
 #include "timer.h"
@@ -33,7 +58,7 @@
 #endif
 
 OsrmClient *OsrmClient::p_osrm = NULL;
-OSRM *OsrmClient::routing_machine = NULL;
+osrm::OSRM *OsrmClient::routing_machine = NULL;
 bool OsrmClient::connectionAvailable = true;
 
 OsrmClient::OsrmClient(const OsrmClient &other) {
@@ -53,6 +78,7 @@ OsrmClient::OsrmClient() {
 #endif
 
   try {
+#if 0
     // No server paths needed (shared memory)
     ServerPaths server_paths;
     // Develop branch
@@ -64,17 +90,27 @@ OsrmClient::OsrmClient() {
     // Default
     losrm_config.max_locations_map_matching = -1;
     OsrmClient::routing_machine = new OSRM( losrm_config );
-  } catch ( std::exception &e ) {
-    status = -1;
-    err_msg = std::string( "OsrmClient::OsrmClient caught exception: " ) + e.what();
-#ifdef DOSTATS
-    STATS->inc( err_msg );
-    STATS->addto( "OsrmClient::OsrmClient Cumulative time", timer.duration() );
 #endif
-    connectionAvailable = false;
-    return;
+
+    osrm::engine::EngineConfig config;
+    config.storage_config = {"foo"};
+    config.use_shared_memory = false;
+
+    // Routing machine with several services (such as Route, Table, Nearest, Trip, Match)
+    routing_machine = new osrm::OSRM{config};
+
+  } catch ( std::exception &e ) {
+      status = -1;
+      err_msg = std::string( "OsrmClient::OsrmClient caught exception: " ) + e.what();
+#ifdef DOSTATS
+      STATS->inc( err_msg );
+      STATS->addto( "OsrmClient::OsrmClient Cumulative time", timer.duration() );
+#endif
+      connectionAvailable = false;
+      return;
   };
 
+#if 0
   route_parameters.zoom_level = 18;
   route_parameters.print_instructions = true;
   route_parameters.alternate_route = false;
@@ -85,6 +121,7 @@ OsrmClient::OsrmClient() {
   route_parameters.output_format = "json";
   route_parameters.jsonp_parameter = "";
   route_parameters.language = "";
+#endif
 
   status = 0;
   use = false;
@@ -101,24 +138,27 @@ OsrmClient::OsrmClient() {
  */
 void OsrmClient::clear()
 {
-  if ( not connectionAvailable ) return;
+    if ( not connectionAvailable ) return;
 
-  if ( not use ) return;
+    if ( not use ) return;
 
 #ifdef DOSTATS
-  Timer timer;
+    Timer timer;
 #endif
-  route_parameters.coordinates.clear();
-  route_parameters.hints.clear();
-  route_parameters.geometry = false;
-  route_parameters.compression = false;
-  httpContent = "";
-  err_msg = "";
+    route_parameters.coordinates.clear();
+    route_parameters.hints.clear();
+#if 0
+    route_parameters.geometry = false;
+    route_parameters.compression = false;
+    httpContent = "";
+#endif
+    httpContent.values.clear();
+    err_msg = "";
 
-  if ( status > 0 ) status = 0;
+    if ( status > 0 ) status = 0;
 
 #ifdef DOSTATS
-  STATS->addto( "OsrmClient::Clear Cumulative time", timer.duration() );
+    STATS->addto( "OsrmClient::Clear Cumulative time", timer.duration() );
 #endif
 }
 
@@ -131,18 +171,21 @@ void OsrmClient::clear()
  */
 void OsrmClient::addViaPoint( double lat, double lon )
 {
-  if ( not connectionAvailable ) return;
+    if ( not connectionAvailable ) return;
 
-  if ( not use ) return;
+    if ( not use ) return;
 
 #ifdef DOSTATS
-  Timer timer;
+    Timer timer;
 #endif
-  FixedPointCoordinate p( lat * COORDINATE_PRECISION,
-                          lon * COORDINATE_PRECISION );
-  route_parameters.coordinates.push_back( p );
+#if 0
+    FixedPointCoordinate p( lat * COORDINATE_PRECISION,
+            lon * COORDINATE_PRECISION );
+    route_parameters.coordinates.push_back( p );
+#endif
+    route_parameters.coordinates.push_back({osrm::util::FloatLongitude{lon}, osrm::util::FloatLatitude{lat}});
 #ifdef DOSTATS
-  STATS->addto( "OsrmClient::addViaPoint Cumulative time", timer.duration() );
+    STATS->addto( "OsrmClient::addViaPoint Cumulative time", timer.duration() );
 #endif
 }
 
@@ -153,17 +196,21 @@ void OsrmClient::addViaPoint( double lat, double lon )
  */
 void OsrmClient::addViaPoint( const Node &node )
 {
-  if ( not connectionAvailable ) return;
+    if ( not connectionAvailable ) return;
 
-  if ( not use ) return;
+    if ( not use ) return;
 
 #ifdef DOSTATS
-  Timer timer;
+    Timer timer;
 #endif
-  addViaPoint( node.y(), node.x() );
-  route_parameters.hints.push_back( node.hint() );
+
+    addViaPoint( node.y(), node.x() );
+#if 0
+    route_parameters.hints.push_back( node.hint() );
+#endif
+
 #ifdef DOSTATS
-  STATS->addto( "OsrmClient::addViaPoint Cumulative time", timer.duration() );
+    STATS->addto( "OsrmClient::addViaPoint Cumulative time", timer.duration() );
 #endif
 }
 
@@ -174,123 +221,130 @@ void OsrmClient::addViaPoint( const Node &node )
  */
 void OsrmClient::addViaPoints( const std::deque<Node> &path )
 {
-  if ( not connectionAvailable ) return;
+    if ( not connectionAvailable ) return;
 
-  if ( not use ) return;
+    if ( not use ) return;
 
-  std::deque<Node>::const_iterator it;
+    std::deque<Node>::const_iterator it;
 
-  for ( it = path.begin(); it != path.end(); ++it )
-    addViaPoint( *it );
+    for ( it = path.begin(); it != path.end(); ++it )
+        addViaPoint( *it );
 }
 
 bool OsrmClient::getOsrmTime( double lat1, double lon1 , double lat2,
-                              double lon2, double &time )
+        double lon2, double &time )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not use ) return false;
+    if ( not use ) return false;
 
 #ifdef DOSTATS
-  STATS->inc( "OsrmClient::getOsrmTime (2 points) " );
+    STATS->inc( "OsrmClient::getOsrmTime (2 points) " );
 #endif
-  clear();
-  addViaPoint( lat1, lon1 );
-  addViaPoint( lat2, lon2 );
+    clear();
+    addViaPoint( lat1, lon1 );
+    addViaPoint( lat2, lon2 );
 
-  if ( getOsrmViaroute() ) return getOsrmTime( time );
+    if ( getOsrmViaroute() ) return getOsrmTime( time );
 
-  return false;
+    return false;
 }
 
 bool OsrmClient::getOsrmTime( double lat1, double lon1 , double lat2,
-                              double lon2, const  std::string &hint1, const std::string &hint2,
-                              double &time )
+        double lon2, const  std::string &hint1, const std::string &hint2,
+        double &time )
 {
-  if ( not connectionAvailable ) return false;
-  if ( not use ) return false;
+    if ( not connectionAvailable ) return false;
+    if ( not use ) return false;
 
 #ifdef DOSTATS
-  STATS->inc( "OsrmClient::getOsrmTime (2 points) " );
+    STATS->inc( "OsrmClient::getOsrmTime (2 points) " );
 #endif
-  clear();
-  addViaPoint( lat1, lon1 );
-  addViaPoint( lat2, lon2 );
-  route_parameters.hints.push_back( hint1 );
-  route_parameters.hints.push_back( hint2 );
+    clear();
+    addViaPoint( lat1, lon1 );
+    addViaPoint( lat2, lon2 );
+#if 0
+    route_parameters.hints.push_back( hint1 );
+    route_parameters.hints.push_back( hint2 );
+#endif
 
-  if ( getOsrmViaroute() ) return getOsrmTime( time );
+    if ( getOsrmViaroute() ) return getOsrmTime( time );
 
-  return false;
+    return false;
 }
 
 bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
-                              double &time )
+        double &time )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not use ) return false;
+    if ( not use ) return false;
 
 #ifdef DOSTATS
-  STATS->inc( "OsrmClient::getOsrmTime (2 nodes) " );
+    STATS->inc( "OsrmClient::getOsrmTime (2 nodes) " );
 #endif
-  clear();
-  addViaPoint( node1 );
-  addViaPoint( node2 );
-  route_parameters.hints.push_back( node1.hint() );
-  route_parameters.hints.push_back( node2.hint() );
+    clear();
+    addViaPoint( node1 );
+    addViaPoint( node2 );
+#if 0
+    route_parameters.hints.push_back( node1.hint() );
+    route_parameters.hints.push_back( node2.hint() );
+#endif
 
-  if ( getOsrmViaroute() ) return  getOsrmTime( time );
+    if ( getOsrmViaroute() ) return  getOsrmTime( time );
 
-  return false;
+    return false;
 }
 
 bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
-                              const Node &node3, double &time )
+        const Node &node3, double &time )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not use ) return false;
+    if ( not use ) return false;
 
 #ifdef DOSTATS
-  STATS->inc( "OsrmClient::getOsrmTime (3 nodes) " );
+    STATS->inc( "OsrmClient::getOsrmTime (3 nodes) " );
 #endif
-  clear();
-  addViaPoint( node1 );
-  addViaPoint( node2 );
-  addViaPoint( node3 );
-  route_parameters.hints.push_back( node1.hint() );
-  route_parameters.hints.push_back( node2.hint() );
-  route_parameters.hints.push_back( node3.hint() );
+    clear();
+    addViaPoint( node1 );
+    addViaPoint( node2 );
+    addViaPoint( node3 );
+#if 0
+    route_parameters.hints.push_back( node1.hint() );
+    route_parameters.hints.push_back( node2.hint() );
+    route_parameters.hints.push_back( node3.hint() );
+#endif
+    if ( getOsrmViaroute() ) return getOsrmTime( time );
 
-  if ( getOsrmViaroute() ) return getOsrmTime( time );
-
-  return false;
+    return false;
 }
 
 bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
-                              const Node &node3, const Node &node4, double &time )
+        const Node &node3, const Node &node4, double &time )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not use ) return false;
+    if ( not use ) return false;
 
 #ifdef DOSTATS
-  STATS->inc( "OsrmClient::getOsrmTime (4 nodes) " );
+    STATS->inc( "OsrmClient::getOsrmTime (4 nodes) " );
 #endif
-  clear();
-  addViaPoint( node1 );
-  addViaPoint( node2 );
-  addViaPoint( node3 );
-  addViaPoint( node4 );
-  route_parameters.hints.push_back( node1.hint() );
-  route_parameters.hints.push_back( node2.hint() );
-  route_parameters.hints.push_back( node3.hint() );
-  route_parameters.hints.push_back( node4.hint() );
+    clear();
+    addViaPoint( node1 );
+    addViaPoint( node2 );
+    addViaPoint( node3 );
+    addViaPoint( node4 );
+#if 0
+    route_parameters.hints.push_back( node1.hint() );
+    route_parameters.hints.push_back( node2.hint() );
+    route_parameters.hints.push_back( node3.hint() );
+    route_parameters.hints.push_back( node4.hint() );
+#endif
 
-  if ( getOsrmViaroute() ) return getOsrmTime( time );
+    if ( getOsrmViaroute() ) return getOsrmTime( time );
 
-  return false;
+    return false;
 }
 
 /*!
@@ -299,77 +353,81 @@ bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
  */
 bool OsrmClient::getOsrmViaroute()
 {
-  if ( not connectionAvailable )
-  {
-        #ifdef OSRMCLIENT
-          DLOG(INFO) << "Not connectionAvailable";
-        #endif
-      return false;
-  }
+    if ( not connectionAvailable )
+    {
+#ifdef OSRMCLIENT
+        DLOG(INFO) << "Not connectionAvailable";
+#endif
+        return false;
+    }
 
-  if ( not use )
-  {
-        #ifdef OSRMCLIENT
-          DLOG(INFO) << "Not used";
-        #endif
-      return false;
-  }
+    if ( not use )
+    {
+#ifdef OSRMCLIENT
+        DLOG(INFO) << "Not used";
+#endif
+        return false;
+    }
 
 #ifdef DOSTATS
-  Timer timer;
-  STATS->inc( "OsrmClient::getOsrmViaRoute (does the work) " );
+    Timer timer;
+    STATS->inc( "OsrmClient::getOsrmViaRoute (does the work) " );
 #endif
 
-  if ( route_parameters.coordinates.size() < 2 ) {
-    err_msg = "OsrmClient:getOsrmViaroute must be called with two ro more viapoints!";
+    if ( route_parameters.coordinates.size() < 2 ) {
+        err_msg = "OsrmClient:getOsrmViaroute must be called with two ro more viapoints!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
-    STATS->addto( "OsrmClient::getOsrmViaRoute (does the work) Cumulative time",
-                  timer.duration() );
-#endif
-    return false;
-  }
-
-  if ( status == -1 ) {
-    err_msg = "OsrmClient:getOsrmViaroute Failed to connect to server!";
-#ifdef DOSTATS
-    STATS->inc( err_msg );
-    STATS->addto( "OsrmClient::getOsrmViaRoute (does the work) Cumulative time",
-                  timer.duration() );
-#endif
-    return false;
-  }
-
-  err_msg = "";
-  //http::Reply osrm_reply;
-  osrm::json::Object json_result;
-
-  try {
-    routing_machine->RunQuery( route_parameters, json_result );
-  } catch ( std::exception &e ) {
-    err_msg = std::string( "OsrmClient:getOsrmViaRoute caught exception: " )
-              + e.what();
-    connectionAvailable = false;
-#ifdef DOSTATS
-    STATS->inc( err_msg );
-    STATS->addto( "OsrmClient::getOsrmViaRoute (does the work) Cumulative time",
-                  timer.duration() );
-#endif
-    return false;
-  }
-
-  httpContent = "";
-
-  std::stringstream tmp_ss;
-  tmp_ss << json_result;
-  httpContent = tmp_ss.str();
-
-  status = 1;
-#ifdef DOSTATS
-  STATS->addto( "OsrmClient::getOsrmViaRoute (does the work) Cumulative time",
+        STATS->inc( err_msg );
+        STATS->addto( "OsrmClient::getOsrmViaRoute (does the work) Cumulative time",
                 timer.duration() );
 #endif
-  return true;
+        return false;
+    }
+
+    if ( status == -1 ) {
+        err_msg = "OsrmClient:getOsrmViaroute Failed to connect to server!";
+#ifdef DOSTATS
+        STATS->inc( err_msg );
+        STATS->addto( "OsrmClient::getOsrmViaRoute (does the work) Cumulative time",
+                timer.duration() );
+#endif
+        return false;
+    }
+
+    err_msg = "";
+    //http::Reply osrm_reply;
+    osrm::json::Object json_result;
+
+    try {
+        routing_machine->Route( route_parameters, json_result );
+    } catch ( std::exception &e ) {
+        err_msg = std::string( "OsrmClient:getOsrmViaRoute caught exception: " )
+            + e.what();
+        connectionAvailable = false;
+#ifdef DOSTATS
+        STATS->inc( err_msg );
+        STATS->addto( "OsrmClient::getOsrmViaRoute (does the work) Cumulative time",
+                timer.duration() );
+#endif
+        return false;
+    }
+
+#if 0
+    httpContent = "";
+    httpContentvalues.clear();
+
+    std::stringstream tmp_ss;
+    tmp_ss << json_result;
+    httpContent = tmp_ss.str();
+#endif
+    httpContent = json_result;
+
+    status = 1;
+#ifdef DOSTATS
+    STATS->addto( "OsrmClient::getOsrmViaRoute (does the work) Cumulative time",
+            timer.duration() );
+#endif
+    return true;
 }
 
 /*!
@@ -377,155 +435,176 @@ bool OsrmClient::getOsrmViaroute()
  * \param[out] time The OSRM travel time in decimal minutes.
  * \return True if an error was encountered and err_msg will be set. False if ok.
  */
-bool OsrmClient::getOsrmTime( double &time )
-{
-  if ( not connectionAvailable ) return false;
+bool OsrmClient::getOsrmTime(double &time) {
+    if (not connectionAvailable) return false;
 
-  if ( not use ) return false;
+    if (not use) return false;
 
 #ifdef DOSTATS
-  Timer timer;
-  STATS->inc( "OsrmClient::getOsrmTime (does the work)" );
+    Timer timer;
+    STATS->inc( "OsrmClient::getOsrmTime (does the work)" );
 #endif
 
-  if ( status != 1 or httpContent.size() == 0 ) {
-    err_msg = "OsrmClient:getOsrmTime does not have a valid OSRM response!";
+    if (status != 1 or httpContent.values.size() == 0) {
+        err_msg = "OsrmClient:getOsrmTime does not have a valid OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
-    STATS->addto( "OsrmClient::getOsrmTime (errors) Cumulative time:",
-                  timer.duration() );
-#endif
-    return false;
-  }
-
-  rapidjson::Document jsondoc;
-  jsondoc.Parse( httpContent.c_str() );
-
-  if ( jsondoc.HasParseError() ) {
-    err_msg = "OsrmClient:getOsrmTime invalid json document in OSRM response!";
-#ifdef DOSTATS
-    STATS->inc( err_msg );
-    STATS->addto( "OsrmClient::getOsrmTime (errors) Cumulative time:",
-                  timer.duration() );
-#endif
-    return false;
-  }
-
-  if ( not getTime( jsondoc, time ) ) {
-#ifdef DOSTATS
-    STATS->addto( "OsrmClient::getOsrmTime (errors) Cumulative time:",
-                  timer.duration() );
-#endif
-    return false;
-  }
-
-#ifdef DOSTATS
-  STATS->addto( "OsrmClient::getOsrmTime (does the work) Cumulative time:",
+        STATS->inc( err_msg );
+        STATS->addto( "OsrmClient::getOsrmTime (errors) Cumulative time:",
                 timer.duration() );
 #endif
-  return true;
+        return false;
+    }
+
+    auto &routes = httpContent.values["routes"].get<osrm::json::Array>();
+
+    // Let's just use the first route
+    auto &route = routes.values.at(0).get<osrm::json::Object>();
+    time = route.values["duration"].get<osrm::json::Number>().value;
+
+    if (time == 0) return false;
+    return true;
+#if 0
+    rapidjson::Document jsondoc;
+    jsondoc.Parse( httpContent.c_str() );
+
+    if ( jsondoc.HasParseError() ) {
+        err_msg = "OsrmClient:getOsrmTime invalid json document in OSRM response!";
+#ifdef DOSTATS
+        STATS->inc( err_msg );
+        STATS->addto( "OsrmClient::getOsrmTime (errors) Cumulative time:",
+                timer.duration() );
+#endif
+        return false;
+    }
+
+    if ( not getTime( jsondoc, time ) ) {
+#ifdef DOSTATS
+        STATS->addto( "OsrmClient::getOsrmTime (errors) Cumulative time:",
+                timer.duration() );
+#endif
+        return false;
+    }
+
+#ifdef DOSTATS
+    STATS->addto( "OsrmClient::getOsrmTime (does the work) Cumulative time:",
+            timer.duration() );
+#endif
+    return true;
+#endif
 }
 
 
 bool OsrmClient::getOsrmTimes( std::deque<double> &times )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not use ) return false;
+    if ( not use ) return false;
 
 #ifdef DOSTATS
-  Timer timer;
-  STATS->inc( "OsrmClient::getOsrmTimes (does the work)" );
+    Timer timer;
+    STATS->inc( "OsrmClient::getOsrmTimes (does the work)" );
 #endif
 
-  if ( status != 1 or httpContent.size() == 0 ) {
-    err_msg = "OsrmClient:getOsrmTimes does not have a valid OSRM response!";
+    if ( status != 1 or httpContent.values.size() == 0 ) {
+        err_msg = "OsrmClient:getOsrmTimes does not have a valid OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
-    STATS->addto( "OsrmClient::getOsrmTimes (errors) Cumulative time:",
-                  timer.duration() );
-#endif
-    return false;
-  }
-
-  rapidjson::Document jsondoc;
-  jsondoc.Parse( httpContent.c_str() );
-
-  if ( jsondoc.HasParseError() ) {
-    err_msg = "OsrmClient:getOsrmTimes invalid json document in OSRM response!";
-#ifdef DOSTATS
-    STATS->inc( err_msg );
-    STATS->addto( "OsrmClient::getOsrmTimes (errors) Cumulative time:",
-                  timer.duration() );
-#endif
-    return false;
-  }
-
-  if ( not getTimes( jsondoc, times ) ) {
-#ifdef DOSTATS
-    STATS->addto( "OsrmClient::getOsrmTimes (errors) Cumulative time:",
-                  timer.duration() );
-#endif
-    return false;
-  }
-
-#ifdef DOSTATS
-  STATS->addto( "OsrmClient::getOsrmTimes (does the work) Cumulative time:",
+        STATS->inc( err_msg );
+        STATS->addto( "OsrmClient::getOsrmTimes (errors) Cumulative time:",
                 timer.duration() );
 #endif
-  return true;
+        return false;
+    }
+
+    auto &annotations = httpContent.values["annotations"].get<osrm::json::Object>();
+    auto &durations = annotations.values["duration"].get<osrm::json::Array>();
+
+    for (const auto & e: durations.values) {
+        times.push_back(e.get<osrm::json::Number>().value);
+    }
+
+    return true;
+
+#if 0
+    rapidjson::Document jsondoc;
+    jsondoc.Parse( httpContent.c_str() );
+
+    if ( jsondoc.HasParseError() ) {
+        err_msg = "OsrmClient:getOsrmTimes invalid json document in OSRM response!";
+#ifdef DOSTATS
+        STATS->inc( err_msg );
+        STATS->addto( "OsrmClient::getOsrmTimes (errors) Cumulative time:",
+                timer.duration() );
+#endif
+        return false;
+    }
+
+    if ( not getTimes( jsondoc, times ) ) {
+#ifdef DOSTATS
+        STATS->addto( "OsrmClient::getOsrmTimes (errors) Cumulative time:",
+                timer.duration() );
+#endif
+        return false;
+    }
+
+#ifdef DOSTATS
+    STATS->addto( "OsrmClient::getOsrmTimes (does the work) Cumulative time:",
+            timer.duration() );
+#endif
+    return true;
+#endif
 }
 
 
+#if 0
 bool OsrmClient::getOsrmPenalty( double &penalty )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not use ) return false;
+    if ( not use ) return false;
 
 #ifdef DOSTATS
-  Timer timer;
-  STATS->inc( "OsrmClient::getOsrmTurns" );
+    Timer timer;
+    STATS->inc( "OsrmClient::getOsrmTurns" );
 #endif
 
-  if ( status != 1 or httpContent.size() == 0 ) {
-    err_msg = "OsrmClient:getOsrmTurns does not have a valid OSRM response!";
+    if ( status != 1 or httpContent.values.size() == 0 ) {
+        err_msg = "OsrmClient:getOsrmTurns does not have a valid OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
-    STATS->addto( "OsrmClient::getOsrmTurns (interface) Cumultaive time:",
-                  timer.duration() );
-#endif
-    return false;
-  }
-
-  rapidjson::Document jsondoc;
-  jsondoc.Parse( httpContent.c_str() );
-
-  if ( jsondoc.HasParseError() ) {
-    err_msg = "OsrmClient:getOsrmTurns (interface) invalid json document in OSRM response!";
-#ifdef DOSTATS
-    STATS->inc( err_msg );
-    STATS->addto( "OsrmClient::getOsrmTurns (interface) Cumultaive time:",
-                  timer.duration() );
-#endif
-    return false;
-  }
-
-  if ( not getPenalty( jsondoc, penalty ) ) {
-#ifdef DOSTATS
-    STATS->addto( "OsrmClient::getOsrmTurns (interface) Cumultaive time:",
-                  timer.duration() );
-#endif
-    return false;
-  }
-
-#ifdef DOSTATS
-  STATS->addto( "OsrmClient::getOsrmTurns (interface) Cumulative time:",
+        STATS->inc( err_msg );
+        STATS->addto( "OsrmClient::getOsrmTurns (interface) Cumultaive time:",
                 timer.duration() );
 #endif
-  return true;
-}
+        return false;
+    }
 
+    rapidjson::Document jsondoc;
+    jsondoc.Parse( httpContent.c_str() );
+
+    if ( jsondoc.HasParseError() ) {
+        err_msg = "OsrmClient:getOsrmTurns (interface) invalid json document in OSRM response!";
+#ifdef DOSTATS
+        STATS->inc( err_msg );
+        STATS->addto( "OsrmClient::getOsrmTurns (interface) Cumultaive time:",
+                timer.duration() );
+#endif
+        return false;
+    }
+
+    if ( not getPenalty( jsondoc, penalty ) ) {
+#ifdef DOSTATS
+        STATS->addto( "OsrmClient::getOsrmTurns (interface) Cumultaive time:",
+                timer.duration() );
+#endif
+        return false;
+    }
+
+#ifdef DOSTATS
+    STATS->addto( "OsrmClient::getOsrmTurns (interface) Cumulative time:",
+            timer.duration() );
+#endif
+    return true;
+}
+#endif
 
 /*!
  * \brief Extract the geometry from the OSRM response if it was requested.
@@ -534,394 +613,419 @@ bool OsrmClient::getOsrmPenalty( double &penalty )
  */
 bool OsrmClient::getOsrmGeometry( std::deque<Node> &geom )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not use ) return false;
+    if ( not use ) return false;
 
 #ifdef DOSTATS
-  Timer timer;
-  STATS->inc( "OsrmClient::getOsrmGeometry (does the work) " );
+    Timer timer;
+    STATS->inc( "OsrmClient::getOsrmGeometry (does the work) " );
 #endif
 
-  if ( status != 1 or httpContent.size() == 0 ) {
-    err_msg = "OsrmClient::getOsrmGeometry does not have a valid OSRM response!";
+    if ( status != 1 or httpContent.values.size() == 0 ) {
+        err_msg = "OsrmClient::getOsrmGeometry does not have a valid OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  rapidjson::Document jsondoc;
-  jsondoc.Parse( httpContent.c_str() );
+    // TODO figure out how to get the geometries
+#if 0
+    auto &annotations = httpContent.values["annotations"].get<osrm::json::Object>();
+    auto &geometries = annotations.values["nodes"].get<osrm::json::Array>();
 
-  if ( jsondoc.HasParseError() ) {
-    err_msg = "OsrmClient:getOsrmGeometry invalid json document in OSRM response!";
+    for (const auto & e: geometries.values) {
+        times.push_back(e.get<osrm::json::Number>().value);
+    }
+#endif
+
+    return true;
+
+#if 0
+    rapidjson::Document jsondoc;
+    jsondoc.Parse( httpContent.c_str() );
+
+    if ( jsondoc.HasParseError() ) {
+        err_msg = "OsrmClient:getOsrmGeometry invalid json document in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  if ( not getGeom( jsondoc, geom ) ) {
-    return false;
-  }
+    if ( not getGeom( jsondoc, geom ) ) {
+        return false;
+    }
 
-  return true;
+    return true;
+#endif
 }
 
 
 bool OsrmClient::getOsrmGeometryText( std::string &geomText )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not use ) return false;
+    if ( not use ) return false;
 
 #ifdef DOSTATS
-  Timer timer;
-  STATS->inc( "OsrmClient::getOsrmGeometry (does the work) " );
+    Timer timer;
+    STATS->inc( "OsrmClient::getOsrmGeometry (does the work) " );
 #endif
 
-  if ( status != 1 or httpContent.size() == 0 ) {
-    err_msg = "OsrmClient::getOsrmGeometry does not have a valid OSRM response!";
+    if ( status != 1 or httpContent.values.size() == 0 ) {
+        err_msg = "OsrmClient::getOsrmGeometry does not have a valid OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-}
+        return false;
+    }
 
-  rapidjson::Document jsondoc;
-  jsondoc.Parse( httpContent.c_str() );
+    // TODO figure out how to get the geometries
+#if 0
+    rapidjson::Document jsondoc;
+    jsondoc.Parse( httpContent.c_str() );
 
-  if ( jsondoc.HasParseError() ) {
-    err_msg = "OsrmClient:getOsrmGeometry invalid json document in OSRM response!";
+    if ( jsondoc.HasParseError() ) {
+        err_msg = "OsrmClient:getOsrmGeometry invalid json document in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  if ( not getGeomText( jsondoc, geomText ) ) {
-    return false;
-  }
-
-  return true;
+    if ( not getGeomText( jsondoc, geomText ) ) {
+        return false;
+    }
+#endif
+    return true;
 }
 
 
 bool OsrmClient::getOsrmHints( std::deque<std::string> &hints )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not use ) return false;
+    if ( not use ) return false;
 
 #ifdef DOSTATS
-  Timer timer;
-  STATS->inc( "OsrmClient::getOsrmHints (interface) " );
+    Timer timer;
+    STATS->inc( "OsrmClient::getOsrmHints (interface) " );
 #endif
 
-  if ( status != 1 or httpContent.size() == 0 ) {
-    err_msg = "OsrmClient::getOsrmHints (interface) does not have a valid OSRM response!";
+    if ( status != 1 or httpContent.values.size() == 0 ) {
+        err_msg = "OsrmClient::getOsrmHints (interface) does not have a valid OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  rapidjson::Document jsondoc;
-  jsondoc.Parse( httpContent.c_str() );
+    // TODO figure out how to get the hints
+    
+#if 0
+    rapidjson::Document jsondoc;
+    jsondoc.Parse( httpContent.c_str() );
 
-  if ( jsondoc.HasParseError() ) {
-    err_msg = "OsrmClient:getOsrmHints (interface) invalid json document in OSRM response!";
+    if ( jsondoc.HasParseError() ) {
+        err_msg = "OsrmClient:getOsrmHints (interface) invalid json document in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  if ( not getHints( jsondoc, hints ) ) {
-    return false;
-  }
-
-  return true;
+    if ( not getHints( jsondoc, hints ) ) {
+        return false;
+    }
+#endif
+    return true;
 }
 
 
 bool OsrmClient::getOsrmStreetNames( std::deque<std::string> &names )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not use ) return false;
+    if ( not use ) return false;
 
 #ifdef DOSTATS
-  Timer timer;
-  STATS->inc( "OsrmClient::getOsrmStreetNames (interface) " );
+    Timer timer;
+    STATS->inc( "OsrmClient::getOsrmStreetNames (interface) " );
 #endif
 
-  if ( status != 1 or httpContent.size() == 0 ) {
-    err_msg = "OsrmClient::getOsrmStreetNames (interface) does not have a valid OSRM response!";
+    if ( status != 1 or httpContent.values.size() == 0 ) {
+        err_msg = "OsrmClient::getOsrmStreetNames (interface) does not have a valid OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  rapidjson::Document jsondoc;
-  jsondoc.Parse( httpContent.c_str() );
+    // TODO figure out how to get the names
+#if 0
+    rapidjson::Document jsondoc;
+    jsondoc.Parse( httpContent.c_str() );
 
-  if ( jsondoc.HasParseError() ) {
-    err_msg = "OsrmClient:getOsrmStreetNames (interface) invalid json document in OSRM response!";
+    if ( jsondoc.HasParseError() ) {
+        err_msg = "OsrmClient:getOsrmStreetNames (interface) invalid json document in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  if ( not getNames( jsondoc, names ) ) {
-    return false;
-  }
-
-  return true;
+    if ( not getNames( jsondoc, names ) ) {
+        return false;
+    }
+#endif
+    return true;
 }
 
 
 bool OsrmClient::getOsrmNamesOnRoute( std::deque<std::string> &names )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not use ) return false;
+    if ( not use ) return false;
 
 #ifdef DOSTATS
-  Timer timer;
-  STATS->inc( "OsrmClient::getOsrmNamesOnRoute (interface) " );
+    Timer timer;
+    STATS->inc( "OsrmClient::getOsrmNamesOnRoute (interface) " );
 #endif
 
-  if ( status != 1 or httpContent.size() == 0 ) {
-    err_msg = "OsrmClient::getOsrmNamesOnRoute (interface) does not have a valid OSRM response!";
+    if ( status != 1 or httpContent.values.size() == 0 ) {
+        err_msg = "OsrmClient::getOsrmNamesOnRoute (interface) does not have a valid OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  rapidjson::Document jsondoc;
-  jsondoc.Parse( httpContent.c_str() );
+    // TODO figure out how to get the names
+    
+#if 0
+    rapidjson::Document jsondoc;
+    jsondoc.Parse( httpContent.c_str() );
 
-  if ( jsondoc.HasParseError() ) {
-    err_msg = "OsrmClient:getOsrmNamesOnRoute (interface) invalid json document in OSRM response!";
+    if ( jsondoc.HasParseError() ) {
+        err_msg = "OsrmClient:getOsrmNamesOnRoute (interface) invalid json document in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  if ( not getNamesOnRoute( jsondoc, names ) ) {
-    return false;
-  }
-
-  return true;
+    if ( not getNamesOnRoute( jsondoc, names ) ) {
+        return false;
+    }
+#endif
+    return true;
 }
 
 //! testOsrmClient
 /*!
-    returns false when something failes
-    #1 use: must be true
-    #2 connection
+  returns false when something failes
+#1 use: must be true
+#2 connection
 */
 bool OsrmClient::testOsrmClient(
-    double x1, double y1,
-    double x2, double y2,
-    double x3, double y3) {
+        double x1, double y1,
+        double x2, double y2,
+        double x3, double y3) {
 #ifdef DOVRPLOG
     DLOG( INFO ) << "testing OsrmClient class";
 #endif
 
-  if (!use) return false;
+    if (!use) return false;
 #ifdef DOVRPLOG
     DLOG( INFO ) << "#1 OsrmClient set to Use";
 #endif
 
-  if (!connectionAvailable) return false;
+    if (!connectionAvailable) return false;
 #ifdef DOVRPLOG
     DLOG( INFO ) << "#2 OsrmClient Connection available";
 #endif
 
 
-  if ( getStatus() == -1 ) {
+    if ( getStatus() == -1 ) {
 #ifdef DOVRPLOG
-    DLOG( WARNING ) << getErrorMsg();
+        DLOG( WARNING ) << getErrorMsg();
 #endif
-    return false;
-  }
+        return false;
+    }
 
 #ifdef DOVRPLOG
     DLOG( INFO ) << "#3 Status != -1";
 #endif
 
-  std::deque<std::string> hints;
-  double penalty;
-  bool oldPenalty = addPenalty;
-  double time;
-  std::string hint1;
-  std::string hint2;
+    std::deque<std::string> hints;
+    double penalty;
+    bool oldPenalty = addPenalty;
+    double time;
+    std::string hint1;
+    std::string hint2;
 
-  // test 4
-  if (getOsrmTime(x1, y1, x2, y2, time)) {
+    // test 4
+    if (getOsrmTime(x1, y1, x2, y2, time)) {
 #ifdef DOVRPLOG
-    DLOG( INFO ) << "#4 test time:" << time;
+        DLOG( INFO ) << "#4 test time:" << time;
 #endif
-  } else {
+    } else {
 #ifdef DOVRPLOG
-    DLOG( INFO ) << "#4 test time FAIL";
+        DLOG( INFO ) << "#4 test time FAIL";
 #endif
-    return false;
-  }
+        return false;
+    }
 
 
-  // test 5
-  if (getOsrmHints(hints)) {
-    hint1 = hints[0];
-    hint2 = hints[1];
+    // test 5
+    if (getOsrmHints(hints)) {
+        hint1 = hints[0];
+        hint2 = hints[1];
 #ifdef DOVRPLOG
-    DLOG( INFO ) << "#5 get stored hints";
-    DLOG( INFO ) << "#5 hint1" << hint1;
-    DLOG( INFO ) << "#5 hint2" << hint2;
+        DLOG( INFO ) << "#5 get stored hints";
+        DLOG( INFO ) << "#5 hint1" << hint1;
+        DLOG( INFO ) << "#5 hint2" << hint2;
 #endif
-  } else {
+    } else {
 #ifdef DOVRPLOG
-    DLOG( INFO ) << "#5 get stored hints FAIL";
+        DLOG( INFO ) << "#5 get stored hints FAIL";
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  // test 6
-  hint1="";
-  hint2="";
-  if (getOsrmTime(x1, y1, x2, y2, hint1, hint2, time)) {
+    // test 6
+    hint1="";
+    hint2="";
+    if (getOsrmTime(x1, y1, x2, y2, hint1, hint2, time)) {
 #ifdef DOVRPLOG
-    DLOG( INFO ) << "#6 get hint and time:" << time;
-    DLOG( INFO ) << "#6 time:" << time;
-    DLOG( INFO ) << "#6 hint1" << hint1;
-    DLOG( INFO ) << "#6 hint2" << hint2;
+        DLOG( INFO ) << "#6 get hint and time:" << time;
+        DLOG( INFO ) << "#6 time:" << time;
+        DLOG( INFO ) << "#6 hint1" << hint1;
+        DLOG( INFO ) << "#6 hint2" << hint2;
 #endif
-  } else {
+    } else {
 #ifdef DOVRPLOG
-      DLOG( INFO ) << "#6 get hint and time FAIL";
+        DLOG( INFO ) << "#6 get hint and time FAIL";
 #endif
-      return false;
-  }
+        return false;
+    }
 
-//TODO make a test for testing penalties
+    //TODO make a test for testing penalties
 #if 0
-  // test 7
-  if ( not getOsrmPenalty( penalty ) )
-    return false;
+    // test 7
+    if ( not getOsrmPenalty( penalty ) )
+        return false;
 
-  addPenalty = true;
+    addPenalty = true;
 
-  if ( getOsrmTime( -34.8917, -56.167694, -34.890816, -56.165529, time ) ) {
+    if ( getOsrmTime( -34.8917, -56.167694, -34.890816, -56.165529, time ) ) {
 #ifdef DOVRPLOG
-    DLOG( INFO ) << "test time: " << time;
-#endif
-  } else return false;
-
-  getOsrmPenalty( penalty );
-
-  if ( getOsrmHints( hints ) ) {
-    std::string hint1 = hints[0];
-    std::string hint2 = hints[1];
-
-    if ( getOsrmTime( -34.8917, -56.167694, -34.890816, -56.165529, hint1, hint2,
-                      time ) ) {
-#ifdef DOVRPLOG
-      DLOG( INFO ) << "test time: " << time;
+        DLOG( INFO ) << "test time: " << time;
 #endif
     } else return false;
-  } else return false;
 
-  addPenalty = oldPenalty;
-#endif
+    getOsrmPenalty( penalty );
 
-  // more tests
-  clear();
-  addViaPoint(x1, y1);
-  addViaPoint(x2, y2);
-  addViaPoint(x3, y3);
-  addViaPoint(x1, y1);
+    if ( getOsrmHints( hints ) ) {
+        std::string hint1 = hints[0];
+        std::string hint2 = hints[1];
 
-
-  std::deque<double> times;
-  // test 7 (with three points)
-  if (!getOsrmViaroute()) {
+        if ( getOsrmTime( -34.8917, -56.167694, -34.890816, -56.165529, hint1, hint2,
+                    time ) ) {
 #ifdef DOVRPLOG
-    DLOG(INFO) << "#7 getOsrmViaroute Failed!" << std::endl;
+            DLOG( INFO ) << "test time: " << time;
 #endif
-    return false;
-  }
+        } else return false;
+    } else return false;
 
-  //test 8 (times array)
-  if (getOsrmTimes(times)) {
-#ifdef DOVRPLOG
-      DLOG(INFO) << "#8 Times:" << std::endl;
-      for (int i=0; i<times.size(); i++)
-          DLOG(INFO) << "i: " << i << ", time: " << times[i] << std::endl;
+    addPenalty = oldPenalty;
 #endif
-  }
-  else {
-#ifdef DOVRPLOG
-      DLOG(INFO) << "#8 getOsrmTimes Failed!";
-#endif
-      return false;
-  }
 
-  //test 8 (hints array)
-  if (getOsrmHints(hints)) {
-#ifdef DOVRPLOG
-      DLOG(INFO) << "#9 Hints:" << std::endl;
-      for (int i=0; i<hints.size(); i++)
-          DLOG(INFO) << "i: " << i << ", hint: " << hints[i] << std::endl;
-#endif
-  }
-  else {
-#ifdef DOVRPLOG
-      DLOG(INFO) << "#9 getOsrmHints Failed!" << std::endl;
-#endif
-      return false;
-  }
-
-  std::deque<std::string> names;
-  if ( getOsrmStreetNames( names ) ) {
-#ifdef DOVRPLOG
-      DLOG(INFO) << "#10 StreetNames:" << std::endl;
-      for (int i=0; i<names.size(); i++)
-          DLOG(INFO) << "i: " << i << ", name: " << names[i] << std::endl;
-#endif
-  }
-  else {
-#ifdef DOVRPLOG
-      DLOG(INFO) << "#10 getOsrmStreetNames Failed!" << std::endl;
-#endif
-      return false;
-  }
+    // more tests
+    clear();
+    addViaPoint(x1, y1);
+    addViaPoint(x2, y2);
+    addViaPoint(x3, y3);
+    addViaPoint(x1, y1);
 
 
-  names.clear();
-  if ( osrmi->getOsrmNamesOnRoute( names ) ) {
+    std::deque<double> times;
+    // test 7 (with three points)
+    if (!getOsrmViaroute()) {
 #ifdef DOVRPLOG
-    DLOG(INFO) << "#11 NamesOnRoute:" << std::endl;
-    for (int i=0; i<names.size(); i++)
-        DLOG(INFO) << "i: " << i << ", name: " << names[i] << std::endl;
+        DLOG(INFO) << "#7 getOsrmViaroute Failed!" << std::endl;
 #endif
-  } else {
+        return false;
+    }
+
+    //test 8 (times array)
+    if (getOsrmTimes(times)) {
 #ifdef DOVRPLOG
-    DLOG(INFO) << "#11 getOsrmNamesOnRoute Failed!" << std::endl;
+        DLOG(INFO) << "#8 Times:" << std::endl;
+        for (int i=0; i<times.size(); i++)
+            DLOG(INFO) << "i: " << i << ", time: " << times[i] << std::endl;
 #endif
-    return false;
-  }
+    }
+    else {
+#ifdef DOVRPLOG
+        DLOG(INFO) << "#8 getOsrmTimes Failed!";
+#endif
+        return false;
+    }
+
+    //test 8 (hints array)
+    if (getOsrmHints(hints)) {
+#ifdef DOVRPLOG
+        DLOG(INFO) << "#9 Hints:" << std::endl;
+        for (int i=0; i<hints.size(); i++)
+            DLOG(INFO) << "i: " << i << ", hint: " << hints[i] << std::endl;
+#endif
+    }
+    else {
+#ifdef DOVRPLOG
+        DLOG(INFO) << "#9 getOsrmHints Failed!" << std::endl;
+#endif
+        return false;
+    }
+
+    std::deque<std::string> names;
+    if ( getOsrmStreetNames( names ) ) {
+#ifdef DOVRPLOG
+        DLOG(INFO) << "#10 StreetNames:" << std::endl;
+        for (int i=0; i<names.size(); i++)
+            DLOG(INFO) << "i: " << i << ", name: " << names[i] << std::endl;
+#endif
+    }
+    else {
+#ifdef DOVRPLOG
+        DLOG(INFO) << "#10 getOsrmStreetNames Failed!" << std::endl;
+#endif
+        return false;
+    }
 
 
-  return true;
+    names.clear();
+    if ( osrmi->getOsrmNamesOnRoute( names ) ) {
+#ifdef DOVRPLOG
+        DLOG(INFO) << "#11 NamesOnRoute:" << std::endl;
+        for (int i=0; i<names.size(); i++)
+            DLOG(INFO) << "i: " << i << ", name: " << names[i] << std::endl;
+#endif
+    } else {
+#ifdef DOVRPLOG
+        DLOG(INFO) << "#11 getOsrmNamesOnRoute Failed!" << std::endl;
+#endif
+        return false;
+    }
+
+
+    return true;
 }
 
+#if 0
 bool OsrmClient::getOsrmLocate(double ilat, double ilon, double &olat, double &olon)
 {
     std::string oldService; //! backup service
@@ -930,52 +1034,63 @@ bool OsrmClient::getOsrmLocate(double ilat, double ilon, double &olat, double &o
     std::string errorMsg; //!
     rapidjson::Document jsonDoc;
     osrm::json::Object jsonResult; //! json result
+#if 0
     // TODO: Is backup realy necesary
     std::vector<FixedPointCoordinate> coordBackup;
+#endif
 
     if ( not connectionAvailable ) return false;
 
     if ( not use ) return false;
 
-  #ifdef DOSTATS
+#ifdef DOSTATS
     Timer timer;
     STATS->inc( "OsrmClient::getOsrmLocate (does the work) " );
-  #endif
+#endif
 
+#if 0
     // Backup current service name
     oldService = route_parameters.service;
+#endif
     errorMsg = "";
 
     try {
-      // Set service to use
-      route_parameters.service = "locate";
-      // Add point
-      FixedPointCoordinate p(
-          ilat * COORDINATE_PRECISION,
-          ilon * COORDINATE_PRECISION
-      );
-      coordBackup = route_parameters.coordinates;
-      route_parameters.coordinates.clear();
-      route_parameters.coordinates.push_back(p);
-      // std::cout << route_parameters.coordinates.size() << std::endl;
-      // Ask OSRM
-      routing_machine->RunQuery( route_parameters, jsonResult );
-      // Restore points
-      route_parameters.coordinates = coordBackup;
-      // Restore service
-      route_parameters.service = oldService;
+#if 0
+        // Set service to use
+        route_parameters.service = "locate";
+        // Add point
+        FixedPointCoordinate p(
+                ilat * COORDINATE_PRECISION,
+                ilon * COORDINATE_PRECISION
+                );
+#endif
+        auto coordBackup = route_parameters.coordinates;
+        route_parameters.coordinates.clear();
+        route_parameters.coordinates.push_back({osrm::util::FloatLongitude{ilon}, osrm::util::FloatLatitude{ilat}});
+        // std::cout << route_parameters.coordinates.size() << std::endl;
+        // Ask OSRM
+        routing_machine->Route( route_parameters, jsonResult );
+        // Restore points
+        route_parameters.coordinates = coordBackup;
+#if 0
+        // Restore service
+        route_parameters.service = oldService;
+#endif
     } catch ( std::exception &e ) {
-      errorMsg = std::string( "OsrmClient:getOsrmLocate caught exception: " )
-                + e.what();
-      connectionAvailable = false;
-  #ifdef DOSTATS
-      STATS->inc( errorMsg );
-      STATS->addto( "OsrmClient::getOsrmLocate (does the work) Cumulative time",
-                    timer.duration() );
-  #endif
-      // Restore service
-      route_parameters.service = oldService;
-      return false;
+        errorMsg = std::string( "OsrmClient:getOsrmLocate caught exception: " )
+            + e.what();
+        connectionAvailable = false;
+#ifdef DOSTATS
+        STATS->inc( errorMsg );
+        STATS->addto( "OsrmClient::getOsrmLocate (does the work) Cumulative time",
+                timer.duration() );
+#endif
+
+#if 0
+        // Restore service
+        route_parameters.service = oldService;
+#endif
+        return false;
     }
 
     //rContent = "";
@@ -989,11 +1104,11 @@ bool OsrmClient::getOsrmLocate(double ilat, double ilon, double &olat, double &o
     // http://127.0.0.1:5000/locate?loc=-34.8993,-56.1296
     // locate returns -> {"mapped_coordinate":[-34.899513,-56.129681],"status":0}
     if ( not jsonDoc.HasMember( "mapped_coordinate" ) ) {
-      errorMsg = "OsrmClient:getOsrmLocate failed to find 'mapped_coordinate' key in OSRM response!";
-  #ifdef DOSTATS
-      STATS->inc( err_msg );
-  #endif
-      return false;
+        errorMsg = "OsrmClient:getOsrmLocate failed to find 'mapped_coordinate' key in OSRM response!";
+#ifdef DOSTATS
+        STATS->inc( err_msg );
+#endif
+        return false;
     }
 
     // extract the latitude and longitude
@@ -1001,9 +1116,10 @@ bool OsrmClient::getOsrmLocate(double ilat, double ilon, double &olat, double &o
     olon = ( double ) jsonDoc["mapped_coordinate"][1].GetDouble(); // / COORDINATE_PRECISION;
     return true;
 }
+#endif
 
 bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &olon,
-    unsigned int &one_way, unsigned int &forward_id, unsigned int &reverse_id, unsigned int &street_id)
+        unsigned int &one_way, unsigned int &forward_id, unsigned int &reverse_id, unsigned int &street_id)
 {
     std::string oldService; //! backup service
     std::stringstream tmpSS; //!
@@ -1011,52 +1127,71 @@ bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &
     std::string errorMsg; //!
     rapidjson::Document jsonDoc;
     osrm::json::Object jsonResult; //! json result
+#if 0
     // TODO: Is backup realy necesary
     std::vector<FixedPointCoordinate> coordBackup;
+#endif
 
     if ( not connectionAvailable ) return false;
 
     if ( not use ) return false;
+    return false;
 
-  #ifdef DOSTATS
+    // TODO figure out how to do this
+#if 0
+
+#ifdef DOSTATS
     Timer timer;
     STATS->inc( "OsrmClient::getOsrmLocate (does the work) " );
-  #endif
+#endif
 
+#if 0
     // Backup current service name
     oldService = route_parameters.service;
     errorMsg = "";
+#endif
 
     try {
-      // Set service to use
-      route_parameters.service = "nearest";
-      // Add point
-      FixedPointCoordinate p(
-          ilat * COORDINATE_PRECISION,
-          ilon * COORDINATE_PRECISION
-      );
-      coordBackup = route_parameters.coordinates;
-      route_parameters.coordinates.clear();
-      route_parameters.coordinates.push_back(p);
-      // std::cout << route_parameters.coordinates.size() << std::endl;
-      // Ask OSRM
-      routing_machine->RunQuery( route_parameters, jsonResult );
-      // Restore points
-      route_parameters.coordinates = coordBackup;
-      // Restore service
-      route_parameters.service = oldService;
+        // Set service to use
+#if 0
+        route_parameters.service = "nearest";
+#endif
+        // Add point
+#if 0
+        FixedPointCoordinate p(
+                ilat * COORDINATE_PRECISION,
+                ilon * COORDINATE_PRECISION
+                );
+#endif
+        auto coordBackup = route_parameters.coordinates;
+        route_parameters.coordinates.clear();
+        route_parameters.coordinates.push_back({osrm::util::FloatLongitude{ilon}, osrm::util::FloatLatitude{ilat}});
+#if 0
+        route_parameters.coordinates.push_back(p);
+#endif 
+        // std::cout << route_parameters.coordinates.size() << std::endl;
+        // Ask OSRM
+        routing_machine->Nearest( route_parameters, jsonResult );
+        // Restore points
+        route_parameters.coordinates = coordBackup;
+#if 0
+        // Restore service
+        route_parameters.service = oldService;
+#endif
     } catch ( std::exception &e ) {
-      errorMsg = std::string( "OsrmClient:getOsrmNearest caught exception: " )
-                + e.what();
-      connectionAvailable = false;
-  #ifdef DOSTATS
-      STATS->inc( errorMsg );
-      STATS->addto( "OsrmClient::getOsrmNearest (does the work) Cumulative time",
-                    timer.duration() );
-  #endif
-      // Restore service
-      route_parameters.service = oldService;
-      return false;
+        errorMsg = std::string( "OsrmClient:getOsrmNearest caught exception: " )
+            + e.what();
+        connectionAvailable = false;
+#ifdef DOSTATS
+        STATS->inc( errorMsg );
+        STATS->addto( "OsrmClient::getOsrmNearest (does the work) Cumulative time",
+                timer.duration() );
+#endif
+        // Restore service
+#if 0
+        route_parameters.service = oldService;
+#endif
+        return false;
     }
 
     //rContent = "";
@@ -1092,24 +1227,24 @@ bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &
             return true;
         } else {
             errorMsg = "OsrmClient:getOsrmNearest failed. Bad status 'status' in OSRM response!";
-        #ifdef DOSTATS
+#ifdef DOSTATS
             STATS->inc( err_msg );
-        #endif
-          return false;
+#endif
+            return false;
         }
     } else {
         errorMsg = "OsrmClient:getOsrmNearest failed to find 'status' key in OSRM response!";
-    #ifdef DOSTATS
+#ifdef DOSTATS
         STATS->inc( err_msg );
-    #endif
+#endif
         return false;
     }
+#endif
 }
-
 
 // --------- private ----------------
 
-
+#if 0
 /*!
  * \brief Parse the actual json document and extract the OSRM Travel time.
  * \param[in] jsondoc The json parse tree pointer.
@@ -1118,47 +1253,49 @@ bool OsrmClient::getOsrmNearest(double ilat, double ilon, double &olat, double &
  */
 bool OsrmClient::getTime( rapidjson::Document &jsondoc, double &time )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not jsondoc.HasMember( "route_summary" ) ) {
-    err_msg = "OsrmClient:getTime failed to find 'route_summary' key in OSRM response!";
+    if ( not jsondoc.HasMember( "route_summary" ) ) {
+        err_msg = "OsrmClient:getTime failed to find 'route_summary' key in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  // find the 'total_time' in the 'route_summary'
-  if ( not jsondoc["route_summary"].HasMember( "total_time" ) ) {
-    err_msg = "OsrmClient:getTime failed to find 'total_time' key in OSRM response!";
+    // find the 'total_time' in the 'route_summary'
+    if ( not jsondoc["route_summary"].HasMember( "total_time" ) ) {
+        err_msg = "OsrmClient:getTime failed to find 'total_time' key in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  // extract the total_time and convert from seconds to minutes
-  time = ( double ) jsondoc["route_summary"]["total_time"].GetDouble() / 60.0;
+    // extract the total_time and convert from seconds to minutes
+    time = ( double ) jsondoc["route_summary"]["total_time"].GetDouble() / 60.0;
 
 #ifdef OSRMCLIENTTRACE
-  /*
-  DLOG( INFO ) << "OsrmClient:getTime - json: " << httpContent << std::endl;
-  DLOG( INFO ) << "OsrmClient:getTime - time: " << time << " min" << std::endl;
-  */
+    /*
+       DLOG( INFO ) << "OsrmClient:getTime - json: " << httpContent << std::endl;
+       DLOG( INFO ) << "OsrmClient:getTime - time: " << time << " min" << std::endl;
+       */
 #endif
 
-  double penalty;
+    double penalty;
 
-  if ( addPenalty and getPenalty( jsondoc, penalty ) ) time += penalty;
+    if ( addPenalty and getPenalty( jsondoc, penalty ) ) time += penalty;
 
 #ifdef OSRMCLIENTTRACE
-  /*
-  DLOG( INFO ) << "OsrmClient:getTime - time + penalty: " << time << " min" << std::endl;
-  */
+    /*
+       DLOG( INFO ) << "OsrmClient:getTime - time + penalty: " << time << " min" << std::endl;
+       */
 #endif
 
-  return true;
+    return true;
 }
+#endif
+
 
 /*!
  * \brief Parse the actual json document and extract via point times
@@ -1168,49 +1305,49 @@ bool OsrmClient::getTime( rapidjson::Document &jsondoc, double &time )
  */
 bool OsrmClient::getTimes( rapidjson::Document &jsondoc, std::deque<double> &times )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not jsondoc.HasMember( "route_instructions" ) ) {
-    err_msg = "OsrmClient:getTimes failed to find 'route_instructions' key in OSRM response!";
+    if ( not jsondoc.HasMember( "route_instructions" ) ) {
+        err_msg = "OsrmClient:getTimes failed to find 'route_instructions' key in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  const rapidjson::Value& instructions = jsondoc["route_instructions"];
+    const rapidjson::Value& instructions = jsondoc["route_instructions"];
 
-  // find the 'total_time' in the 'route_summary'
-  if ( not instructions.IsArray() or instructions.Size() < 2 ) {
-    err_msg = "OsrmClient:getTimes route_instructions is not an array of at least 2 in OSRM response!";
+    // find the 'total_time' in the 'route_summary'
+    if ( not instructions.IsArray() or instructions.Size() < 2 ) {
+        err_msg = "OsrmClient:getTimes route_instructions is not an array of at least 2 in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  // extract the total_time and convert from seconds to minutes
-  times.clear();
-  double time = 0.0;        // accumulate times
-  times.push_back( time );  // push the start time is always 0.0
-  for (rapidjson::SizeType i=0; i<instructions.Size(); i++) {
-    const char * inst = instructions[i][0].GetString();
-    if ( not strcmp(inst, "9") or not strcmp(inst, "15") )
-      times.push_back( time );
-    time += ( double ) instructions[i][4].GetDouble() / 60.0;
-  }
+    // extract the total_time and convert from seconds to minutes
+    times.clear();
+    double time = 0.0;        // accumulate times
+    times.push_back( time );  // push the start time is always 0.0
+    for (rapidjson::SizeType i=0; i<instructions.Size(); i++) {
+        const char * inst = instructions[i][0].GetString();
+        if ( not strcmp(inst, "9") or not strcmp(inst, "15") )
+            times.push_back( time );
+        time += ( double ) instructions[i][4].GetDouble() / 60.0;
+    }
 
 #ifdef OSRMCLIENTTRACE
-  /*
-  DLOG( INFO ) << "OsrmClient:getTime - json: " << httpContent << std::endl;
-  std::stringstream tmp2_ss;
-  for (int i=0; i<times.size(); i++)
-    tmp2_ss << times[i] << ", ";
-  DLOG( INFO ) << "OsrmClient:getTime - times: " << tmp2_ss.str() << " min" << std::endl;
-  */
+    /*
+       DLOG( INFO ) << "OsrmClient:getTime - json: " << httpContent << std::endl;
+       std::stringstream tmp2_ss;
+       for (int i=0; i<times.size(); i++)
+       tmp2_ss << times[i] << ", ";
+       DLOG( INFO ) << "OsrmClient:getTime - times: " << tmp2_ss.str() << " min" << std::endl;
+       */
 #endif
 
-  return true;
+    return true;
 }
 
 
@@ -1221,33 +1358,33 @@ bool OsrmClient::getTimes( rapidjson::Document &jsondoc, std::deque<double> &tim
  * \return True if an error and err_msg will be set. False otherwise.
  */
 bool OsrmClient::getGeom( rapidjson::Document &jsondoc,
-                          std::deque<Node> &geom )
+        std::deque<Node> &geom )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  // clear the path
-  geom.clear();
+    // clear the path
+    geom.clear();
 
-  // find the route 'geometry' key in the response
-  const rapidjson::Value &jgeom = jsondoc["route_geometry"];
+    // find the route 'geometry' key in the response
+    const rapidjson::Value &jgeom = jsondoc["route_geometry"];
 
-  if ( not jgeom.IsArray() ) {
-    err_msg = "OsrmClient:getGeom failed to find 'geometry' key in OSRM response!";
+    if ( not jgeom.IsArray() ) {
+        err_msg = "OsrmClient:getGeom failed to find 'geometry' key in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  for ( rapidjson::Value::ConstValueIterator itr = jgeom.Begin();
-        itr != jgeom.End(); ++itr ) {
+    for ( rapidjson::Value::ConstValueIterator itr = jgeom.Begin();
+            itr != jgeom.End(); ++itr ) {
 
-    // osrm returns [lat, lon], node expects [lon, lat]
-    Node n( (*itr)[1].GetDouble(), (*itr)[0].GetDouble() );
-    geom.push_back( n );
-  }
+        // osrm returns [lat, lon], node expects [lon, lat]
+        Node n( (*itr)[1].GetDouble(), (*itr)[0].GetDouble() );
+        geom.push_back( n );
+    }
 
-  return true;
+    return true;
 }
 
 
@@ -1258,197 +1395,199 @@ bool OsrmClient::getGeom( rapidjson::Document &jsondoc,
  * \return True if an error and err_msg will be set. False otherwise.
  */
 bool OsrmClient::getGeomText( rapidjson::Document &jsondoc,
-                          std::string &geomText )
+        std::string &geomText )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not jsondoc.HasMember("route_geometry") and
-       not jsondoc["route_geometry"].IsString() ) {
-    err_msg = "OsrmClient:getGeomText failed to find 'geometry' key in OSRM response!";
+    if ( not jsondoc.HasMember("route_geometry") and
+            not jsondoc["route_geometry"].IsString() ) {
+        err_msg = "OsrmClient:getGeomText failed to find 'geometry' key in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  // find the route 'geometry' key in the response
-  geomText = jsondoc["route_geometry"].GetString();
+    // find the route 'geometry' key in the response
+    geomText = jsondoc["route_geometry"].GetString();
 
-  return true;
+    return true;
 }
 
 
 bool OsrmClient::getHints( rapidjson::Document &jsondoc,
-                           std::deque<std::string> &hints )
+        std::deque<std::string> &hints )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  hints.clear();
+    hints.clear();
 
-  // find the route 'hint_data' key in the response
-  const rapidjson::Value &jHintData = jsondoc["hint_data"];
+    // find the route 'hint_data' key in the response
+    const rapidjson::Value &jHintData = jsondoc["hint_data"];
 
-  if ( not jHintData.IsObject() ) {
-    err_msg = "OsrmClient:getHints (private)  failed to find 'hint_data' key in OSRM response!";
+    if ( not jHintData.IsObject() ) {
+        err_msg = "OsrmClient:getHints (private)  failed to find 'hint_data' key in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  const rapidjson::Value &jLocations = jHintData["locations"];
+    const rapidjson::Value &jLocations = jHintData["locations"];
 
-  if ( not jLocations.IsArray() ) {
-    err_msg = "OsrmClient:getHints (private)  failed to find 'locations' key in OSRM response!";
+    if ( not jLocations.IsArray() ) {
+        err_msg = "OsrmClient:getHints (private)  failed to find 'locations' key in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
 
-  std::string hint;
+    std::string hint;
 
-  for ( rapidjson::Value::ConstValueIterator itr = jLocations.Begin();
-        itr != jLocations.End(); ++itr) {
+    for ( rapidjson::Value::ConstValueIterator itr = jLocations.Begin();
+            itr != jLocations.End(); ++itr) {
 
-    hint = std::string( itr->GetString() );
-    hints.push_back( hint );
+        hint = std::string( itr->GetString() );
+        hints.push_back( hint );
 
-  }
+    }
 
-  return true;
+    return true;
 }
 
 
 bool OsrmClient::getNames( rapidjson::Document &jsondoc,
-                           std::deque<std::string> &names )
+        std::deque<std::string> &names )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not jsondoc.HasMember( "route_instructions" ) ) {
-    err_msg = "OsrmClient:getNames failed to find 'route_instructions' key in OSRM response!";
+    if ( not jsondoc.HasMember( "route_instructions" ) ) {
+        err_msg = "OsrmClient:getNames failed to find 'route_instructions' key in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  const rapidjson::Value& instructions = jsondoc["route_instructions"];
+    const rapidjson::Value& instructions = jsondoc["route_instructions"];
 
-  // find the 'total_time' in the 'route_summary'
-  if ( not instructions.IsArray() or instructions.Size() < 2 ) {
-    err_msg = "OsrmClient:getNames route_instructions is not an array of at least 2 in OSRM response!";
+    // find the 'total_time' in the 'route_summary'
+    if ( not instructions.IsArray() or instructions.Size() < 2 ) {
+        err_msg = "OsrmClient:getNames route_instructions is not an array of at least 2 in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
+        return false;
+    }
 
-  // extract the total_time and convert from seconds to minutes
-  names.clear();
-  names.push_back( instructions[0][1].GetString() );
-  for (rapidjson::SizeType i=0; i<instructions.Size(); i++) {
-    const char * inst = instructions[i][0].GetString();
-    if ( not strcmp(inst, "9") )
-      names.push_back( instructions[i][1].GetString() );
-    else if (not strcmp(inst, "15") and i-1 > 0)
-      names.push_back( instructions[i-1][1].GetString() );
-  }
+    // extract the total_time and convert from seconds to minutes
+    names.clear();
+    names.push_back( instructions[0][1].GetString() );
+    for (rapidjson::SizeType i=0; i<instructions.Size(); i++) {
+        const char * inst = instructions[i][0].GetString();
+        if ( not strcmp(inst, "9") )
+            names.push_back( instructions[i][1].GetString() );
+        else if (not strcmp(inst, "15") and i-1 > 0)
+            names.push_back( instructions[i-1][1].GetString() );
+    }
 
-  return true;
+    return true;
 }
 
 
 bool OsrmClient::getNamesOnRoute( rapidjson::Document &jsondoc,
-                           std::deque<std::string> &names )
+        std::deque<std::string> &names )
 {
-  if ( not connectionAvailable ) return false;
+    if ( not connectionAvailable ) return false;
 
-  if ( not jsondoc.HasMember( "route_instructions" ) ) {
-    err_msg = "OsrmClient:getNames failed to find 'route_instructions' key in OSRM response!";
+    if ( not jsondoc.HasMember( "route_instructions" ) ) {
+        err_msg = "OsrmClient:getNames failed to find 'route_instructions' key in OSRM response!";
 #ifdef DOSTATS
-    STATS->inc( err_msg );
+        STATS->inc( err_msg );
 #endif
-    return false;
-  }
-
-  const rapidjson::Value& instructions = jsondoc["route_instructions"];
-
-  // find the 'total_time' in the 'route_summary'
-  if ( not instructions.IsArray() or instructions.Size() < 2 ) {
-    err_msg = "OsrmClient:getNames route_instructions is not an array of at least 2 in OSRM response!";
-#ifdef DOSTATS
-    STATS->inc( err_msg );
-#endif
-    return false;
-  }
-
-  // extract the total_time and convert from seconds to minutes
-  names.clear();
-  for (rapidjson::SizeType i=0; i<instructions.Size(); i++) {
-    const char * name = instructions[i][1].GetString();
-    if ( strlen(name) )
-      names.push_back( name );
-  }
-
-  return true;
-}
-
-
-bool OsrmClient::getPenalty( rapidjson::Document &jsondoc,
-                             double &penalty )   //in munutes
-{
-  if ( not connectionAvailable ) return false;
-
-  int turn;
-
-  std::string  trace;
-
-  penalty = 0;
-
-  // find the route 'hint_data' key in the response
-  const rapidjson::Value &jInstructionsArray = jsondoc["route_instructions"];
-
-  if ( not jInstructionsArray.IsArray() ) {
-    err_msg = "OsrmClient:getTurns (private) failed to find 'route_instructions' key in OSRM response!";
-#ifdef DOSTATS
-    STATS->inc( err_msg );
-#endif
-    return false;
-  }
-
-  for (rapidjson::Value::ConstValueIterator itr = jInstructionsArray.Begin();
-       itr != jInstructionsArray.End(); ++itr) {
-
-    turn = strtol( (*itr)[0].GetString(), NULL, 10 );
-
-    trace = std::string( (*itr)[0].GetString() );
-#ifdef DOVRPLOG
-    DLOG( INFO ) << "InstructionsData " << trace;
-    DLOG( INFO ) << "Instruction " << turn;
-#endif
-
-    switch ( turn ) {
-    case 2: penalty += 0.05; break; //slight right
-
-    case 3: penalty += 0.10; break; //right
-
-    case 4: penalty += 0.3 ; break; //sharp right
-
-    case 5: penalty += 1;  break; //uturn
-
-    case 8: penalty += 0.05; break; //slight left
-
-    case 7: penalty += 0.10; break; //left
-
-    case 6: penalty += 0.3 ; break; //sharp left
+        return false;
     }
 
-  }
+    const rapidjson::Value& instructions = jsondoc["route_instructions"];
+
+    // find the 'total_time' in the 'route_summary'
+    if ( not instructions.IsArray() or instructions.Size() < 2 ) {
+        err_msg = "OsrmClient:getNames route_instructions is not an array of at least 2 in OSRM response!";
+#ifdef DOSTATS
+        STATS->inc( err_msg );
+#endif
+        return false;
+    }
+
+    // extract the total_time and convert from seconds to minutes
+    names.clear();
+    for (rapidjson::SizeType i=0; i<instructions.Size(); i++) {
+        const char * name = instructions[i][1].GetString();
+        if ( strlen(name) )
+            names.push_back( name );
+    }
+
+    return true;
+}
+
+
+#if 0
+bool OsrmClient::getPenalty( rapidjson::Document &jsondoc,
+        double &penalty )   //in munutes
+{
+    if ( not connectionAvailable ) return false;
+
+    int turn;
+
+    std::string  trace;
+
+    penalty = 0;
+
+    // find the route 'hint_data' key in the response
+    const rapidjson::Value &jInstructionsArray = jsondoc["route_instructions"];
+
+    if ( not jInstructionsArray.IsArray() ) {
+        err_msg = "OsrmClient:getTurns (private) failed to find 'route_instructions' key in OSRM response!";
+#ifdef DOSTATS
+        STATS->inc( err_msg );
+#endif
+        return false;
+    }
+
+    for (rapidjson::Value::ConstValueIterator itr = jInstructionsArray.Begin();
+            itr != jInstructionsArray.End(); ++itr) {
+
+        turn = strtol( (*itr)[0].GetString(), NULL, 10 );
+
+        trace = std::string( (*itr)[0].GetString() );
+#ifdef DOVRPLOG
+        DLOG( INFO ) << "InstructionsData " << trace;
+        DLOG( INFO ) << "Instruction " << turn;
+#endif
+
+        switch ( turn ) {
+            case 2: penalty += 0.05; break; //slight right
+
+            case 3: penalty += 0.10; break; //right
+
+            case 4: penalty += 0.3 ; break; //sharp right
+
+            case 5: penalty += 1;  break; //uturn
+
+            case 8: penalty += 0.05; break; //slight left
+
+            case 7: penalty += 0.10; break; //left
+
+            case 6: penalty += 0.3 ; break; //sharp left
+        }
+
+    }
 
 #ifdef DOVRPLOG
-  DLOG( INFO ) << "Penalty " << penalty;
+    DLOG( INFO ) << "Penalty " << penalty;
 #endif
-  return true;
+    return true;
 }
+#endif

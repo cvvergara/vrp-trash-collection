@@ -14,6 +14,7 @@ Step 2 above, takes the library file, our class header files, the osrm client fi
 There are two Makefiles that manage the build process.
 
 ### Makefile for the core library classes
+
 ``Makefile`` manages build the core vehicle_routing_problem source for Step 1 above. *Read* this file and make changes to the defines as needed. We recommend the settings for production use:
 
 ```shell
@@ -57,7 +58,12 @@ This is required if you have WITH_OSRMCLIENT set.
 
 Note we built and tested against a fairly old version of osrm-backend as defined by the git checkout command below. osrm-backend is rapidly changing so we recommend that you use the the command below and NOT a newer or older version without testing and verifing that it works as expected.
 
+To install the dependencies (on Ubuntu):
+https://github.com/Project-OSRM/osrm-backend/wiki/Building-on-Ubuntu
+
+
 ```shell
+
 git clone https://github.com/Project-OSRM/osrm-backend.git
 cd orsm-backend
  # git checkout 8f18ba3 -b orsm-tools   # old version
@@ -71,6 +77,8 @@ sudo make install
 ```
 
 ### rapidjson
+
+NOTE: Maybe its not needed anymore, OSRM has its own json stuff
 
 This is required if you have WITH_OSRMCLIENT set.
 
@@ -92,7 +100,7 @@ This is an application logging facility. If you use any of the options in the ma
 It can be found here: https://code.google.com/p/google-glog/
 
 ```shell
-wget https://code.google.com/p/google-glog/downloads/detail?name=glog-0.3.3.tar.gz
+wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/google-glog/glog-0.3.3.tar.gz
 tar xzf glog-0.3.3.tar.gz
 cd glog-0.3.3
 ./configure
@@ -100,11 +108,26 @@ make
 sudo make install
 ```
 
-NOTE: the make file assumes that this is installed in /usr/local/.
-If this is not the case please change ``Makefile``.
+NOTE: adjust the makefile for the insttallation if needed
+
+/usr/local/.
+
+NOTE: the one that works with is from imaptools:
+
+```shell
+wget http://imaptools.com:8080/dl/vrp-google-glog.tgz
+tar xzf vrp-google-glog.tgz
+cd vrp-google-glog.tgz
+./configure
+make
+sudo make install
+```
+
 
 
 ### libgd2-xpm, libgd2-xpm-dev
+
+# not used anymore
 
 This is required if you have WITH_PLOT set in Makefile. On Ubuntu and Debian where can be installed from the system package mamager.
 

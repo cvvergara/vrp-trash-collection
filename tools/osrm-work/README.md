@@ -1,13 +1,13 @@
 # OSRM back-end server for VRP
 
-We use the OSRM server for computing routes and travel time in some of our
+OSRM server is used for computing routes and travel times in some of our
 vehicle routing problem solvers. This requires setting up a OSRM server and
 preparing data for it. The goal of this document is to walk throught the
 steps to get it built and run locally.
 
 ## Building OSRM
 
-I use an older version of git at commit fbbd6ca because I'm running Ubuntu
+I use an older version of git at commit fbbd6ca because I'm (Steve) running Ubuntu
 12.04 LTS but I think you can use up to tag v0.3.10.
 
 https://github.com/Project-OSRM/osrm-backend/wiki/Building-on-Ubuntu
@@ -33,7 +33,7 @@ This will create and install:
  * osrm-datastore - tool for managing OSRM instances in memory
 
 
-We will only work with the first three of these.
+We (Steve?) will only work with the first three of these.
 
 ## Download data, extract and prepare it
 
@@ -56,7 +56,7 @@ If you need another country just remane the directory to the appropiate name, an
 
 ```
 cd /path/for/osrm-data/
-cp -r /path/to/vehicle-routing-problems-clone/osrm-work/uruguay/ .
+cp -r /path/to/vehicle-routing-problems-clone/tools/osrm-work/uruguay/ .
 cd uruguay
 sh ./wget-latest-uruguay
 ./do-prepare

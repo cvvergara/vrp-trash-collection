@@ -6,7 +6,9 @@ CPP = g++
 # when blank, even when set to compile with OSRM it will compile without osrm
 #OSRMBACKEND_DIR = $(HOME)/work/osrm-backend/
 #OSRMBACKEND_DIR = /home/fpacheco/workspace/idm/osrm-backend
-OSRMBACKEND_DIR = /usr/local/include/osrm
+#OSRMBACKEND_DIR = /usr/local/include/osrm
+OSRMBACKEND_DIR = /home/vicky/vrp-prerequisites/osrm-backend/include -I/home/vicky/vrp-prerequisites/osrm-backend/third_party/
+#OSRMBACKEND_DIR =
  
 BASETRASH = baseTrash
 BASECLASSES = baseClasses
@@ -128,17 +130,18 @@ else
 OSRMCLIENT_HEADER =$(BASECLASSES_DIR)/osrmclient.h
 OSRMCLIENT_CFLAGS = -std=c++11 -DOSRMCLIENT -I$(OSRMBACKEND_DIR)
 OSRMCLIENT_LIBS = -L/usr/local/lib -lboost_filesystem -lboost_iostreams -lboost_program_options -lboost_regex \
-	-lboost_system -lboost_thread -lpthread -lOSRM -lz -lrt \
+	-lboost_system -lboost_thread -lpthread -losrm -lz -lrt \
 	-lboost_filesystem -lboost_iostreams -lboost_program_options -lboost_regex -lboost_system -lboost_thread -lpthread -lstxxl
 endif
 
 
 
 INCLUDES = -I$(BASECLASSES_DIR) -I$(BASETRASH_DIR) -I$(INITTRASH_DIR) -I$(SOLVERTRASH_DIR) -I. 
-CPPCOMPILEFLAGS = -Wreorder -Wall -Wextra -Wdouble-promotion 
-CPPCOMPILEFLAGS =
-CPPFLAGS = -g -O0 -MMD  -MP -fPIC $(CPPCOMPILEFLAGS) $(OSRMCLIENT_CFLAGS) $(DEFINES) $(STATS_CFLAGS) $(PLOT_CFLAGS) $(LOGGER_CFLAGS) $(DEBUG_CFLAGS) $(TRACE_CFLAGS)
-LDFLAGS = -L/usr/lib/x86_64-linux-gnu -lgd $(INCLUDES) -L$(BASECLASSES) -L$(BASETRASH) -L$(INITTRASH)  $(JSON_LIBS) $(OSRMCLIENT_LIBS) $(LOGGER_LIBS)
+CPPCOMPILEFLAGS = -Wreorder -Wall -Wextra -Wdouble-promotion -fmax-errors=10 
+CPPCOMPILEFLAGS = -fmax-errors=10
+CPPFLAGS = -g -O0 -MMD  -MP -fPIC $(CPPCOMPILEFLAGS) $(OSRMCLIENT_CFLAGS) $(DEFINES) $(STATS_CFLAGS) $(PLOT_CFLAGS) $(LOGGER_CFLAGS) $(DEBUG_CFLAGS) $(TRACE_CFLAGS) 
+#LDFLAGS = -L/usr/lib/x86_64-linux-gnu -lgd $(INCLUDES) -L$(BASECLASSES) -L$(BASETRASH) -L$(INITTRASH)  $(JSON_LIBS) $(OSRMCLIENT_LIBS) $(LOGGER_LIBS)
+LDFLAGS = -L/usr/lib/x86_64-linux-gnu  $(INCLUDES) -L$(BASECLASSES) -L$(BASETRASH) -L$(INITTRASH)  $(JSON_LIBS) $(OSRMCLIENT_LIBS) $(LOGGER_LIBS)
 
 CPPFLAGS_OUT = $(INCLUDES) $(OSRMCLIENT_CFLAGS) $(DEFINES) $(STATS_CFLAGS) $(PLOT_CFLAGS) $(LOGGER_CFLAGS) $(DEBUG_CFLAGS) $(TRACE_CFLAGS)
 LDFLAGS_OUT = -L$(BASECLASSES) -L$(BASETRASH) -L$(INITTRASH)  $(OSRMCLIENT_LIBS) $(LOGGER_LIBS)
