@@ -27,8 +27,10 @@
 #include "logger.h"
 #endif
 
+#if 0
 #include "node.h"
-
+#include "tweval.h"
+#endif
 
 // load our assert to throw macros and tell rapidjson to use them
 #include "vrp_assert.h"
@@ -38,6 +40,8 @@
 #include "timer.h"
 #include "stats.h"
 
+class Tweval;
+class Node;
 
 /*! \class OsrmClient
  * \brief This class provides a shared memory connection to OSRM.
@@ -61,127 +65,143 @@ class OsrmClient {
  private:
 
      osrm::engine::api::RouteParameters route_parameters;   ///< The OSRM request structure
-     int status;                         ///< Current state of the object
-     std::string
-         err_msg;                ///< An error message if an error is reported.
-     osrm::json::Object httpContent;            ///< the json response document
-     static bool
-         connectionAvailable;           ///< once set to false, it doesnt try to make a connection
+     int status;          ///< Current state of the object
+     std::string err_msg; ///< An error message if an error is reported.
+     osrm::json::Object jsonResult;   ///< the json response document
+     static bool connectionAvailable; ///< once set to false, it doesnt try to make a connection
      static osrm::OSRM  *routing_machine;
      static OsrmClient *p_osrm;
      OsrmClient();
-     OsrmClient( const OsrmClient &other );
-     OsrmClient &operator=( const OsrmClient & );
-     bool use, addPenalty;
+     OsrmClient(const OsrmClient &other) = delete;
+     OsrmClient &operator=(const OsrmClient &) = delete;
+     bool use;
 
  public:
-     static OsrmClient *Instance() {
-         if ( !p_osrm ) // Only allow one instance of class to be generated.
-             p_osrm = new OsrmClient;
 
+     /*! @brief Only allow one instance of class to be generated.  */
+     static OsrmClient *Instance() {
+         if (!p_osrm) {
+             p_osrm = new OsrmClient;
+         } else {
+         }
          return p_osrm;
      }
 
-     void clear();
-     void addViaPoint( double lat, double lon );
-     void addViaPoint( const Node &node );
-     void addViaPoints( const std::deque<Node> &path );
+     bool getOsrmViaroute();
+     void useOsrm(bool desition) {use = desition;}
+     bool getUse() const {return use;}
+
 
      /*!
-      * \brief Set whether you want the path geometry returned.
-      *
-      * This should be left as False because it is much faster it you
-      * do not need the geometry. It defaults to false.
-      *
-      * \param[in] want True or False if you want the geometry returned.
+      *  @brief Reset the OsrmClient to a clean state.
       */
-#if 0
-     void setWantGeometry( bool want )
-     {
-         route_parameters.geometry = want;
-         route_parameters.compression = false;
-     }
-     void setWantGeometryText( bool want )
-     {
-         route_parameters.geometry = want;
-         route_parameters.compression = true;
-     }
+     void clear();
+
+
+
+     /*!
+      * \brief Add a location in WGS84 to the OSRM request.
+      * \param[in] node of type @ref Node
+      */
+     void addViaPoint(const Node &node);
+     void addViaPoint(const std::deque<Node> &path);
+
+
+     /*!
+      * \brief Get the OSRM travel time for the requested route.
+      * \param[out] time The OSRM travel time in decimal minutes.
+      * \return True if an error was encountered and err_msg will be set. False if ok.
+      */
+     bool getOsrmTime(double &time);
+     bool getOsrmTime(const Node &node1, const Node &node2, double &time);
+     bool getOsrmTimes(std::deque<double> &times);
+
+     /*!
+      * \brief Extract the geometry from the OSRM response.
+      * \param[out] geom A std::deque<Node> with each point in the path set as a \ref Node.
+      * \return True if an error was encountered and err_msg will be set. False if ok.
+      */
+     bool getOsrmGeometry(std::deque<Node> &geom);
+
+     /*!
+      * \brief Extract the geometry from the OSRM response.
+      * \param[out] hints A std::deque<getOsrmGeometry> with each point in the path set as a \ref Node.
+      * \return True if an error was encountered and err_msg will be set. False if ok.
+      */
+     bool getOsrmHints(std::deque<std::string> &hints);
+
+     bool getOsrmStreetNames(std::deque<std::string> &names);
+#if 1
+     bool getOsrmNamesOnRoute(std::deque<std::string> &names);
 #endif
-     void usePenalty( bool desition ) { addPenalty = desition; }
-     bool getPenalty() const { return addPenalty; }
-     void useOsrm( bool desition ) { use = desition; }
-     bool getUse( ) const { return use; }
-     bool getOsrmViaroute();
-     bool getOsrmTime( double lat1, double lon1 , double lat2, double lon2,
-             double &time );
-     bool getOsrmTime( double lat1, double lon1 , double lat2, double lon2,
-             const std::string &hint1, const std::string &hint2, double &time );
-     bool getOsrmTime( const Node &node1, const Node &node2, double &time );
-     bool getOsrmTime( const Node &node1, const Node &node2, const Node &node3,
-             double &time );
-     bool getOsrmTime( const Node &node1, const Node &node2, const Node &node3,
-             const Node &node4, double &time );
-     bool getOsrmTime( double &time );
-     bool getOsrmTimes( std::deque<double> &times );
-     bool getOsrmGeometry( std::deque<Node> &geom );
-     bool getOsrmGeometryText( std::string &geomText );
-     bool getOsrmHints( std::deque<std::string> &hints );
-     bool getOsrmStreetNames( std::deque<std::string> &names);
-     bool getOsrmNamesOnRoute( std::deque<std::string> &names);
      int getStatus() const { return status; }
-     int getConnection() const { return connectionAvailable; }
+     int getConnection() const {return connectionAvailable; }
      std::string getErrorMsg() const { return err_msg; }
-     osrm::json::Object getHttpContent() const { return httpContent; }
+     osrm::json::Object getHttpContent() const { return jsonResult; }
      bool testOsrmClient(
              double x1, double y1,
              double x2, double y2,
              double x3, double y3);
-     /*!
-      * \brief Get coordinates of the neareast fisical node (OSRM node) for a point
-      *
-      * \param[in] Point latitude.
-      * \param[in] Point longitude.
-      * \param[out] Node latitude.
-      * \param[out] Node longitude.
-      * \return true on succes.
-      */
-     bool getOsrmLocate(double ilat, double ilon , double &olat, double &olon);
-     /*!
-      * \brief Get coordinates of the nearest point (virtual node) in the nearest edge (OSRM) for a point and edege name
-      *
-      * \param[in] Point latitude.
-      * \param[in] Point longitude.
-      * \param[out] Virtual node (in edge) latitude.
-      * \param[out] Virtual node (in edge) longitude.
-      * \param[out] Edge name.
-      * \return true on succes.
-      */
-     bool getOsrmNearest(double ilat, double ilon ,
-             double &olat, double &olon, unsigned int &one_way,
-             unsigned int &forward_id, unsigned int &reverse_id, unsigned int &street_id);
+
+    /*!  @brief Get coordinates of the nearest point (virtual node) in the nearest edge (OSRM) for a point and edege name
+      
+       Get node coordinates from return json and set
+       GET "http://localhost:5000/nearest/v1/driving/-56.1743363,-34.9137291"
+
+       ~~~~{.c}
+       {
+           "waypoints": [
+               {
+                   "hint": "VTIAgMe0AIDwJwAAFAAAADAAAAAAAAAAAAAAAGGPAACz7wAAEgAAAAjZpvwAQuv9ANmm_D9C6_0AAAEBwvX4oQ==",
+                   "distance": 7.045144,
+                   "name": "Doctor Luis Piera",
+                   "location": [
+                       -56.174328,
+                       -34.913792
+                   ]
+               }
+           ],
+           "code": "Ok"
+       }
+       ~~~~
+       
+
+       @param[in] iNode Point @ref Node.
+       @param[out] oNode TODO verify what it returns  type: @ref Node.
+       @param[out] distance in meters
+       @param[out] street name
+       */
+
+     bool getOsrmNearest(
+             const Tweval &iNode,
+             Node &oNode,
+             double &distance,
+             std::string street);
 
  private:
-     bool getTime( rapidjson::Document &jtree, double &time );
-     bool getTimes( rapidjson::Document &jsondoc, std::deque<double> &times );
-     bool getGeom( rapidjson::Document &jtree, std::deque<Node> &geom );
-     bool getGeomText( rapidjson::Document &jtree, std::string &geomText );
-     bool getHints( rapidjson::Document &jtree, std::deque<std::string> &hints );
-     bool getNames( rapidjson::Document &jtree, std::deque<std::string> &names );
-     bool getNamesOnRoute( rapidjson::Document &jsondoc, std::deque<std::string> &names );
-#if 0
-     bool getOsrmPenalty( double &penalty );
-     bool getPenalty( rapidjson::Document &jtree, double &penalty );
-#endif
+
+     void addViaPoint(double lat, double lon);
+
+     bool getOsrmTime(
+             double lat1, double lon1 ,
+             double lat2, double lon2,
+             const std::string &hint1, const std::string &hint2,
+             double &time);
+
+     bool getOsrmTime(
+             double lat1, double lon1,
+             double lat2, double lon2,
+             double &time);
 
  public:
 #ifdef DOVRPLOG
      void dump() {
-         DLOG( INFO ) << "----- OsrmClient ----------"
+         DLOG(INFO) << "----- OsrmClient ----------"
              << "\nstatus: " << status
              << "\nerr_msg: " << err_msg
              << "\ncoordinates.size(): " << route_parameters.coordinates.size();
 #if 0
-             << "\nhttpContent: " << httpContent;
+         << "\nhttpContent: " << httpContent;
 #endif
      }
 #endif

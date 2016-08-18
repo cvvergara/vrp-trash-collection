@@ -260,7 +260,7 @@ void CostVehicle::setCost(const Trashnode &last) {
   double deltaForcedWaitTime = realForcedWaitTime - forcedWaitTime;
   //>0 the latest the truck can arrive is better
   double deltaArrivalEclosesLast = realArrivalEclosesLast -
-                                   arrivalEclosesLast;
+                                   arrivalEclosesLast(this->last());
   // >0 el viaje del dump al contenedor es mas largo que
   // lo esperado (worse)
   double deltattDC = realttDC - ttDC;
@@ -278,7 +278,6 @@ void CostVehicle::setCost(const Trashnode &last) {
                << "deltaArrivalEclosesLast    " << deltaArrivalEclosesLast    << "\n"
                << "deltaForcedWaitTime    " << deltaForcedWaitTime    << "\n"
                << "deltan    " << deltan    << "\n"
-               << "deltaZ    " << deltaZ    << "\n"
                << "deltaRealTotalTime    " << deltaRealTotalTime    << "\n"
                << "deltaz1    " << deltaz1    << "\n"
                << "deltaz2    " << deltaz2    << "\n";

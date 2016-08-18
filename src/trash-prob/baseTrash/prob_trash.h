@@ -26,15 +26,14 @@
 #include "twpath.h"
 #include "twc.h"
 
-class Prob_trash
-{
+class Prob_trash {
 protected:
-  typedef  TwBucket<Trashnode> Bucket;
-  typedef  unsigned long int UID ;
-  typedef  unsigned long int POS ;
-  typedef  unsigned long int UINT;
-  inline double _MAX() {return ( std::numeric_limits<double>::max() ); }
-  inline double _MIN() {return ( - std::numeric_limits<double>::max() ); }
+  typedef TwBucket<Trashnode> Bucket;
+  typedef unsigned long int UID;
+  typedef unsigned long int POS;
+  typedef unsigned long int UINT;
+  inline double _MAX() {return (std::numeric_limits<double>::max()); }
+  inline double _MIN() {return (-std::numeric_limits<double>::max()); }
 
 
   //    Trashnode depot;
@@ -68,46 +67,48 @@ public:
 
   //    Trashnode getdepot() const { return depot;};
   Prob_trash() {}
-  Prob_trash( const char *infile );
-  Prob_trash( const std::string &infile );
-  void loadProblem( const std::string &infile );
+  Prob_trash(const char *infile);
+  Prob_trash(const std::string &infile);
+  void loadProblem(const std::string &infile);
 
   unsigned int getNodeCount() const { return datanodes.size(); }
 
   bool checkIntegrity() const;
 
 
-  double distance( int n1, int n2 ) const;
-  double nodeDemand( int i ) const;
-  double nodeServiceTime( int i ) const;
-  bool earlyArrival( int nid, double D ) const;
-  bool lateArrival( int nid, double D ) const;
+  double distance(int n1, int n2) const;
+  double nodeDemand(int i) const;
+  double nodeServiceTime(int i) const;
+  bool earlyArrival(int nid, double D) const;
+  bool lateArrival(int nid, double D) const;
 
   void twcijDump() const;
 
 
 #ifdef DOVRPLOG
-  void nodesdump();
-  void nodesdumpeval();
-  void dump();
+  void nodesdump() const;
+  void nodesdumpeval() const;
+  void dump() const;
+#if 0
   void dumpdataNodes() const;
   void dumpDepots() const;
   void dumpDumps() const;
   void dumpPickups() const;
 #endif
+#endif
 
 #ifdef DOPLOT
-  void plot( Plot<Trashnode> &graph );
+  void plot(Plot<Trashnode> &graph);
 #endif
 
 
 private:
-  void load_depots( std::string infile );
-  void load_dumps( std::string infile );
-  void load_pickups( std::string infile );
-  void load_endings( std::string infile );
-  void load_otherlocs( std::string infile );
-  void load_trucks( std::string infile );
+  void load_depots(std::string infile);
+  void load_dumps(std::string infile);
+  void load_pickups(std::string infile);
+  void load_endings(std::string infile);
+  void load_otherlocs(std::string infile);
+  void load_trucks(std::string infile);
 };
 
 #endif

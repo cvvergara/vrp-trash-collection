@@ -34,12 +34,11 @@
 #include "truckManyVisitsDump.h"
 #include "fleetOpt.h"
 
-//#include "tabuopt.h"
-
 
 void Usage()
 {
   std::cout << "Usage: trash file (no extension)\n";
+  std::cout << "trash file data_path\n";
 }
 
 
@@ -93,64 +92,73 @@ int main(int argc, char **argv)
    DLOG(INFO) << "log file started for: " << infile;
 #endif
 
-#ifdef OSRMCLIENT
-    osrmi->useOsrm(true);
-    bool testResult = osrmi->testOsrmClient(
-          -34.905113, -56.157043,
-          -34.906807, -56.158463,
-          -34.9076,   -56.157028
-    );
-   // remove the following comment when testing OSRM only
-   // assert(true==false);        
-#ifdef VRPMINTRACE
-    if (testResult)
-     DLOG(INFO) << "osrm test passed";
-   else
-     DLOG(INFO) << "osrm test FAIL";
-#endif  // VRPMINTRACE
-#endif  // OSRMCLIENT
-   
-    
-    int iteration = 50;
-    double best_cost = 9999999;
 
-    TruckManyVisitsDump tp(infile);
-    tp.process(0);
-    DLOG(INFO) << "Initial solution: 0 is best";
-
-    Solution best_sol(tp);
-    best_cost = best_sol.getCostOsrm();
-
-    for (int icase = 1; icase < 7; ++icase) {
-      DLOG(INFO) << "initial solution: " << icase;
-      tp.process(icase);
-      if (best_cost > tp.getCostOsrm()) {
-        DLOG(INFO) << "initial solution: " << icase << " is best";
-        best_cost = tp.getCostOsrm();
-        best_sol = tp;
-      }
-    }
-    
-
-    Optimizer optSol(best_sol, iteration);
-    if (best_cost > optSol.getCostOsrm()) {
-        best_cost = optSol.getCostOsrm();
-        best_sol = optSol;
-    }
-
-
-
-#ifdef VRPMINTRACE
-    best_sol.dumpCostValues();
-    best_sol.tau();
+   /* testing the server before using */
+   { 
+       osrmi->useOsrm(true);
+       bool testResult = osrmi->testOsrmClient(
+               -34.87198931958, -56.190261840820305,
+               -34.88156563691107, -56.17189407348633,
+               -34.90634621832085, -56.16365432739258
+               );
+       assert(testResult == true);
+   }
+#if 0
+   /* set to 1 when testing OSRM only */
+   assert(true==false);        
 #endif
 
-    best_sol.dumpSolutionForPg();
-    twc->cleanUp();
+
+
+
+   int iteration = 50;
+   double best_cost = 9999999;
+
+   /* 
+    * Initializing the problem
+    */
+   TruckManyVisitsDump tp(infile);
+
+
+   tp.process(0);
+
+   STATS_PRINT("stats");
+   assert(true==false);        
+
+   DLOG(INFO) << "Initial solution: 0 is best";
+   Solution best_sol(tp);
+   best_cost = best_sol.getCostOsrm();
+
+   for (int icase = 1; icase < 7; ++icase) {
+       DLOG(INFO) << "initial solution: " << icase;
+       tp.process(icase);
+       if (best_cost > tp.getCostOsrm()) {
+           DLOG(INFO) << "initial solution: " << icase << " is best";
+           best_cost = tp.getCostOsrm();
+           best_sol = tp;
+       }
+   }
+
+
+   Optimizer optSol(best_sol, iteration);
+   if (best_cost > optSol.getCostOsrm()) {
+       best_cost = optSol.getCostOsrm();
+       best_sol = optSol;
+   }
+
+
+
+#ifdef VRPMINTRACE
+   best_sol.dumpCostValues();
+   best_sol.tau();
+#endif
+
+   best_sol.dumpSolutionForPg();
+   twc->cleanUp();
 
   } catch (const std::exception &e) {
-    std::cerr << e.what() << std::endl;
-    return 1;
+      std::cerr << e.what() << std::endl;
+      return 1;
   }
 
   return 0;

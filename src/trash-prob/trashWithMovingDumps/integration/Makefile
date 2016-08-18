@@ -25,8 +25,8 @@ BIN_DIR = ./bin
 
 # setting NO_TRACE = <something>  invalidates the other traces
 NO_TRACE =
-TRACE_MIN = yes
-TRACE_ALL = 
+TRACE_MIN =
+TRACE_ALL =
 
 ifeq ("$(NO_TRACE)", "")
   ifeq ("$(TRACE_ALL)", "")
@@ -121,18 +121,12 @@ endif
 
 
 
-
-ifeq ("$(WITH_OSRMCLIENT)", "")
-OSRMCLIENT_CFLAGS =
-OSRMCLIENT_LIBS =
-OSRMCLIENT_HEADER =
-else
+# allways with osrmClient
 OSRMCLIENT_HEADER =$(BASECLASSES_DIR)/osrmclient.h
-OSRMCLIENT_CFLAGS = -std=c++11 -DOSRMCLIENT -I$(OSRMBACKEND_DIR)
+OSRMCLIENT_CFLAGS = -std=c++1y -DOSRMCLIENT -I$(OSRMBACKEND_DIR)
 OSRMCLIENT_LIBS = -L/usr/local/lib -lboost_filesystem -lboost_iostreams -lboost_program_options -lboost_regex \
 	-lboost_system -lboost_thread -lpthread -losrm -lz -lrt \
 	-lboost_filesystem -lboost_iostreams -lboost_program_options -lboost_regex -lboost_system -lboost_thread -lpthread -lstxxl
-endif
 
 
 

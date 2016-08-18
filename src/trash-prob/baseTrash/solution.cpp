@@ -695,11 +695,10 @@ void Solution::dumpFleet() const
 }
 
 
-void Solution::dump() const
-{
-  dumpDepots();
-  dumpDumps();
-  dumpPickups();
+void Solution::dump() const {
+  depots.dump("----------- depots -----------");
+  dumps.dump("----------- dumps -----------");
+  pickups.dump("----------- pickups -----------");
   dumpFleet();
   dumpSummary();
 }
