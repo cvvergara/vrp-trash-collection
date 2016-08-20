@@ -103,40 +103,6 @@ public:
 
 
 
-#if 0
-  // CREATED, somhow tested but at the end these functions are NOT USED
-  // insertion will not be performed
-  //  return false if TV or CV is generated
-  bool eval_insertSteadyDumps( const Trashnode &node, POS at ) const;
-
-  // insertion will be performed and return false if TV or CV is generated
-  bool e_insertMoveDumps( const Trashnode &node, POS at );
-  bool e_insertSteadyDumps( const Trashnode &node, POS at );
-  bool e_insert( const Trashnode &node, POS at ) { return  e_insertMoveDumps( node, at ); };
-
-
-  // Very TIGHT insertion
-  // insertion will not be performed if
-  //      TV and CV are  generated
-  //  true- insertion was done
-  //  false- not inserted
-  bool e_insertMoveDumpsTight( const Trashnode &node, POS at );
-  bool e_insertSteadyDumpsTight( const Trashnode &node, POS at );
-  bool e_insertTight( const Trashnode &node, POS at ) { return  e_insertMoveDumpsTight( node, at ); };
-  // END TODO LIST
-
-  long int eval_insertMoveDumps( const Trashnode &node, std::deque<Move> &moves,
-                                 POS fromTruck, POS formPos, POS toTruck, double savings, double factor ) const;
-  long int eval_intraSwapMoveDumps( std::deque<Move> &moves, POS  truckPos,
-                                    POS fromPos ) const ;
-  bool e_insertDumpInPath( const Trashnode &going );
-
-  bool deltaTimeGeneratesTV( const Trashnode &dump, const Trashnode &node ) const;
-  bool deltaCargoGeneratesCV( const Trashnode &node, POS pos ) const;
-  bool deltaCargoGeneratesCV_AUTO( const Trashnode &node, POS pos ) const;
-  bool deltaTimeGeneratesTV( const Trashnode &node, POS pos ) const;
-  bool deltaTimeGeneratesTV_AUTO( const Trashnode &node, POS pos ) const;
-  #endif
 
 };
 

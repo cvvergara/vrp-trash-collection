@@ -29,7 +29,6 @@
 #include "phantomnode.h"
 
 class Prob_trash {
-=======
 
 // Children class can acces to protected!
 protected:

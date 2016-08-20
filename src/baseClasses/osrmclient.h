@@ -27,12 +27,6 @@
 #include "logger.h"
 #endif
 
-#if 0
-#include "node.h"
-#include "tweval.h"
-#endif
-// #include "twnode.h"
-
 
 // load our assert to throw macros and tell rapidjson to use them
 #include "vrp_assert.h"
@@ -42,7 +36,6 @@
 #include "timer.h"
 #include "stats.h"
 
-class Tweval;
 class Node;
 
 /*! \class OsrmClient
@@ -103,7 +96,7 @@ class OsrmClient {
 
      /*!
       * \brief Add a location in WGS84 to the OSRM request.
-      * \param[in] node of type @ref Node
+      * \param[in] node of type @ref Twnode
       */
      void addViaPoint(const Node &node);
      void addViaPoint(const std::deque<Node> &path);
@@ -120,22 +113,22 @@ class OsrmClient {
 
      /*!
       * \brief Extract the geometry from the OSRM response.
-      * \param[out] geom A std::deque<Node> with each point in the path set as a \ref Node.
+      * \param[out] geom A std::deque<Twnode> with each point in the path set as a \ref Twnode.
       * \return True if an error was encountered and err_msg will be set. False if ok.
       */
      bool getOsrmGeometry(std::deque<Node> &geom);
 
      /*!
       * \brief Extract the geometry from the OSRM response.
-      * \param[out] hints A std::deque<getOsrmGeometry> with each point in the path set as a \ref Node.
+      * \param[out] hints A std::deque<getOsrmGeometry> with each point in the path set as a \ref Twnode.
       * \return True if an error was encountered and err_msg will be set. False if ok.
       */
      bool getOsrmHints(std::deque<std::string> &hints);
 
      bool getOsrmStreetNames(std::deque<std::string> &names);
-#if 1
+
      bool getOsrmNamesOnRoute(std::deque<std::string> &names);
-#endif
+
      int getStatus() const { return status; }
      int getConnection() const {return connectionAvailable; }
      std::string getErrorMsg() const { return err_msg; }
@@ -168,15 +161,15 @@ class OsrmClient {
        ~~~~
        
 
-       @param[in] iNode Point @ref Node.
-       @param[out] oNode TODO verify what it returns  type: @ref Node.
+       @param[in] iTwnode Point @ref Twnode.
+       @param[out] oTwnode TODO verify what it returns  type: @ref Twnode.
        @param[out] distance in meters
        @param[out] street name
        */
 
      bool getOsrmNearest(
-             const Tweval &iNode,
-             Node &oNode,
+             const Node &iTwnode,
+             Node &oTwnode,
              double &distance,
              std::string street);
 

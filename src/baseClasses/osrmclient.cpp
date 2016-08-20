@@ -35,8 +35,7 @@
 #include <utility>
 
 
-// #include "node.h"
-// #include "tweval.h"
+#include "node.h"
 
 
 
@@ -101,16 +100,6 @@ void OsrmClient::clear() {
 }
 
 
-#if 0
-/*!
- * \brief Add a \ref Node as a location to the OSRM request.
- * \param[in] node The Node to add, assumed to be in WGS84.
- */
-void OsrmClient::addViaPoint(const Twnode &node )
-{
-  if ( not connectionAvailable ) return;
->>>>>>> origin/right-side-montevideo
-#endif
 
 /*******************************************************************
  *
@@ -139,13 +128,13 @@ void OsrmClient::addViaPoint(const std::deque<Node> &path) {
     for (auto const &p : path) addViaPoint(p);
 #if 0
 =======
-void OsrmClient::addViaPoints(const std::deque<Twnode> &path )
+void OsrmClient::addViaPoints(const std::deque<Node> &path )
 {
   if ( not connectionAvailable ) return;
 
   if ( not use ) return;
 
-  std::deque<Twnode>::const_iterator it;
+  std::deque<Node>::const_iterator it;
 
   for ( it = path.begin(); it != path.end(); ++it )
     addViaPoint( *it );
@@ -183,20 +172,10 @@ bool OsrmClient::getOsrmTime(
 bool OsrmClient::getOsrmTime(double &time) {
     STATS_INC("OsrmClient::getOsrmTime(double &time)");
 
-<<<<<<< HEAD
     time == 0;
     if (!connectionAvailable || !use) {
         return false;
     }
-=======
-  return false;
-}
-
-bool OsrmClient::getOsrmTime( const Twnode &node1, const Twnode &node2,
-                              double &time )
-{
-  if ( not connectionAvailable ) return false;
->>>>>>> origin/right-side-montevideo
 
     /*
      * extracting the duration
@@ -216,8 +195,8 @@ bool OsrmClient::getOsrmTime( const Twnode &node1, const Twnode &node2,
 #if 0
 <<<<<<< HEAD
 =======
-bool OsrmClient::getOsrmTime( const Twnode &node1, const Twnode &node2,
-                              const Twnode &node3, double &time )
+bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
+                              const Node &node3, double &time )
 {
   if ( not connectionAvailable ) return false;
 >>>>>>> origin/right-side-montevideo
@@ -253,8 +232,8 @@ bool OsrmClient::getOsrmTimes(std::deque<double> &times) {
 #if 0
 <<<<<<< HEAD
 =======
-bool OsrmClient::getOsrmTime( const Twnode &node1, const Twnode &node2,
-                              const Twnode &node3, const Twnode &node4, double &time )
+bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
+                              const Node &node3, const Node &node4, double &time )
 {
   if ( not connectionAvailable ) return false;
 
@@ -704,13 +683,13 @@ bool OsrmClient::getOsrmNearest(double ilon, double ilat, double &olon, double &
 }
 
 bool OsrmClient::getOsrmNearest(
-        const Tweval &iNode,
+        const Node &iNode,
         Node &oNode,
         double &distance,
         std::string street) {
     STATS_INC("OsrmClient::getOsrmNearest");
 
-    oNode = iNode;
+    oNode = Node(iNode.x(), iNode.y());
     street ="";
     if (!connectionAvailable || !use) {
         return false;
@@ -752,7 +731,7 @@ bool OsrmClient::getOsrmNearest(
     street = way.values["name"].get<osrm::json::String>().value;
     auto lat = location.values.at(0).get<osrm::json::Number>().value;
     auto lon = location.values.at(1).get<osrm::json::Number>().value;
-    Node n(lon, lat);
+    oNode = Node(lon, lat);
 }
 
 

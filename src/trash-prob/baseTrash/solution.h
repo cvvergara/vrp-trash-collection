@@ -145,7 +145,6 @@ public:
          return fleet.size() < another.fleet.size() || totalCost < another.totalCost;
      }
 
-// <<<<<<< HEAD
 
      bool applyInsMove( const Move &move ) ;
      bool applyInterSwMove( const Move &move ) ;
@@ -160,21 +159,6 @@ public:
 
 
      // Cost related
-#if 0
-     =======
-  bool applyInsMove( const Move &move ) ;
-  bool applyInterSwMove( const Move &move ) ;
-  bool applyIntraSwMove( const Move &move ) ;
-
-  int countPickups();
-    
-  // Cost related
-  int v_computeCosts();
-  void dumpCostValues();
-  void setInitialValues();
->>>>>>> origin/right-side-montevideo
-#endif
-
      int v_computeCosts();
      void dumpCostValues();
      void setInitialValues();
