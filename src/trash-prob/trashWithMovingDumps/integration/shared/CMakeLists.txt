@@ -87,7 +87,9 @@ set(OSRM_SOURCE_PATH "/disco_local/fpacheco/idm/right-side/osrm-backend")
 # Home
 #set(OSRM_SOURCE_PATH "/home/fpacheco/workspace/idm/right-side/osrm-backend")
 #set(OSRM_INCLUDE_DIRS ${OSRM_SOURCE_PATH}/build/libOSRM.a)
+#set(OSRM_SOURCE_PATH "/usr/local")
 set(OSRM_LIBRARIES ${OSRM_SOURCE_PATH}/build/libOSRM.a)
+#set(OSRM_LIBRARIES ${OSRM_SOURCE_PATH}/lib/libOSRM.a)
 ##
 
 ## Glog
@@ -126,6 +128,7 @@ set (BASECLASSES_SOURCES
     ../../../../baseClasses/md5.cpp
     ../../../../baseClasses/move.cpp
     ../../../../baseClasses/node.cpp
+    ../../../../baseClasses/phantomnode.cpp
     ../../../../baseClasses/osrmclient.cpp
     ../../../../baseClasses/signalhandler.cpp
     ../../../../baseClasses/stats.cpp
@@ -149,6 +152,7 @@ set (BASECLASSES_INCLUDE_FILES
     #../../../../baseClasses/config.h
     ../../../../baseClasses/md5.h
     ../../../../baseClasses/node.h
+    ../../../../baseClasses/phantomnode.h
     ../../../../baseClasses/pg_types_vrp.h
     ../../../../baseClasses/signalhandler.h
     ../../../../baseClasses/stats.h

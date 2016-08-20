@@ -31,6 +31,8 @@
 #include "node.h"
 #include "tweval.h"
 #endif
+// #include "twnode.h"
+
 
 // load our assert to throw macros and tell rapidjson to use them
 #include "vrp_assert.h"
@@ -193,7 +195,10 @@ class OsrmClient {
              double lat2, double lon2,
              double &time);
 
- public:
+
+public:
+
+
 #ifdef DOVRPLOG
      void dump() {
          DLOG(INFO) << "----- OsrmClient ----------"

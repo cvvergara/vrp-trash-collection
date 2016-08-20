@@ -35,8 +35,8 @@
 #include <utility>
 
 
-#include "node.h"
-#include "tweval.h"
+// #include "node.h"
+// #include "tweval.h"
 
 
 
@@ -55,6 +55,15 @@ OsrmClient *OsrmClient::p_osrm = NULL;
 osrm::OSRM *OsrmClient::routing_machine = NULL;
 bool OsrmClient::connectionAvailable = true;
 
+#if 0
+OsrmClient::OsrmClient(const OsrmClient &other) {
+  connectionAvailable = other.connectionAvailable;
+}
+
+OsrmClient &OsrmClient::operator=(const OsrmClient &other) {
+  connectionAvailable = other.connectionAvailable;
+}
+#endif
 
 /*!  @brief The OsrmClient constructor.  */
 OsrmClient::OsrmClient() {
@@ -92,7 +101,16 @@ void OsrmClient::clear() {
 }
 
 
-
+#if 0
+/*!
+ * \brief Add a \ref Node as a location to the OSRM request.
+ * \param[in] node The Node to add, assumed to be in WGS84.
+ */
+void OsrmClient::addViaPoint(const Twnode &node )
+{
+  if ( not connectionAvailable ) return;
+>>>>>>> origin/right-side-montevideo
+#endif
 
 /*******************************************************************
  *
@@ -119,6 +137,20 @@ void OsrmClient::addViaPoint(const std::deque<Node> &path) {
     STATS_INC("OsrmClient::addViaPoint(std::deque<Node> &)");
 
     for (auto const &p : path) addViaPoint(p);
+#if 0
+=======
+void OsrmClient::addViaPoints(const std::deque<Twnode> &path )
+{
+  if ( not connectionAvailable ) return;
+
+  if ( not use ) return;
+
+  std::deque<Twnode>::const_iterator it;
+
+  for ( it = path.begin(); it != path.end(); ++it )
+    addViaPoint( *it );
+>>>>>>> origin/right-side-montevideo
+#endif
 }
 
 /*******************************************************************
@@ -151,10 +183,20 @@ bool OsrmClient::getOsrmTime(
 bool OsrmClient::getOsrmTime(double &time) {
     STATS_INC("OsrmClient::getOsrmTime(double &time)");
 
+<<<<<<< HEAD
     time == 0;
     if (!connectionAvailable || !use) {
         return false;
     }
+=======
+  return false;
+}
+
+bool OsrmClient::getOsrmTime( const Twnode &node1, const Twnode &node2,
+                              double &time )
+{
+  if ( not connectionAvailable ) return false;
+>>>>>>> origin/right-side-montevideo
 
     /*
      * extracting the duration
@@ -171,6 +213,15 @@ bool OsrmClient::getOsrmTime(double &time) {
     return true;
 }
 
+#if 0
+<<<<<<< HEAD
+=======
+bool OsrmClient::getOsrmTime( const Twnode &node1, const Twnode &node2,
+                              const Twnode &node3, double &time )
+{
+  if ( not connectionAvailable ) return false;
+>>>>>>> origin/right-side-montevideo
+#endif
 
 bool OsrmClient::getOsrmTimes(std::deque<double> &times) {
     STATS_INC("OsrmClient::getOsrmTimes(td::deque<double> &times");
@@ -199,6 +250,17 @@ bool OsrmClient::getOsrmTimes(std::deque<double> &times) {
     return true;
 }
 
+#if 0
+<<<<<<< HEAD
+=======
+bool OsrmClient::getOsrmTime( const Twnode &node1, const Twnode &node2,
+                              const Twnode &node3, const Twnode &node4, double &time )
+{
+  if ( not connectionAvailable ) return false;
+
+  if ( not use ) return false;
+>>>>>>> origin/right-side-montevideo
+#endif
 
 /*******************************************************************
  *
@@ -461,6 +523,21 @@ bool OsrmClient::testOsrmClient(
     addViaPoint(x3, y3);
     addViaPoint(x1, y1);
 
+#if 0
+<<<<<<< HEAD
+=======
+bool OsrmClient::getOsrmLocate(double ilon, double ilat, double &olon, double &olat)
+{
+    std::string oldService; //! backup service
+    std::stringstream tmpSS; //!
+    // std::string rContent; //!
+    std::string errorMsg; //!
+    rapidjson::Document jsonDoc;
+    osrm::json::Object jsonResult; //! json result
+    // TODO: Is backup realy necesary
+    std::vector<FixedPointCoordinate> coordBackup;
+>>>>>>> origin/right-side-montevideo
+#endif
 
     // test 7 (with four points)
     if (!getOsrmViaroute()) {
@@ -527,6 +604,21 @@ bool OsrmClient::testOsrmClient(
             DLOG(INFO) << "geometry: " << g.x() << ", " << g.y() << std::endl;
         }
     }
+#if 0
+=======
+bool OsrmClient::getOsrmNearest(double ilon, double ilat, double &olon, double &olat,
+    unsigned int &one_way, unsigned int &forward_id, unsigned int &reverse_id, unsigned int &forward_wt, unsigned int &reverse_wt, unsigned int &street_id)
+{
+    std::string oldService; //! backup service
+    std::stringstream tmpSS; //!
+    // std::string rContent; //!
+    std::string errorMsg; //!
+    rapidjson::Document jsonDoc;
+    osrm::json::Object jsonResult; //! json result
+    // TODO: Is backup realy necesary
+    std::vector<FixedPointCoordinate> coordBackup;
+>>>>>>> origin/right-side-montevideo
+#endif
 
     do {
         Node v(1.0, 1.0);
@@ -552,7 +644,6 @@ bool OsrmClient::testOsrmClient(
 
 
 
-#if 0
     //test 11 (names on route)
     {
         std::deque<std::string> names;
@@ -561,12 +652,52 @@ bool OsrmClient::testOsrmClient(
             DLOG(INFO) << "#11 NamesOnRoute:" << std::endl;
             for (int i=0; i<names.size(); i++)
                 DLOG(INFO) << "i: " << i << ", name: " << names[i] << std::endl;
+#if 0
+=======
+    //rContent = "";
+    tmpSS << jsonResult;
+    //rContent = tmpSS.str();
+    jsonDoc.Parse( tmpSS.str().c_str() );
+
+    // Everything ok. Set status.
+    status = 1;
+    // Get node coordinates from return json and set
+    // http://127.0.0.1:5000/nearest?loc=-34.9137291,-56.1743363
+    // nearest returns -> {"name":"Doctor Luis Piera","mapped_coordinate":[-34.913792,-56.174328],"status":0}
+    if ( jsonDoc.HasMember( "status" ) ) {
+        int rStatus = ( int ) jsonDoc["status"].GetInt();
+        if (rStatus == 0) {
+            // extract the latitude and longitude
+            if ( jsonDoc.HasMember( "mapped_coordinate" ) ) {
+                olat = ( double ) jsonDoc["mapped_coordinate"][0].GetDouble();
+                olon = ( double ) jsonDoc["mapped_coordinate"][1].GetDouble();
+            }
+            if ( jsonDoc.HasMember( "one_way" ) ) {
+                one_way = ( unsigned int ) jsonDoc["one_way"].GetInt();
+            }
+            if ( jsonDoc.HasMember( "forward_node_id" ) ) {
+                forward_id = ( unsigned int ) jsonDoc["forward_node_id"].GetInt();
+            }
+            if ( jsonDoc.HasMember( "reverse_node_id" ) ) {
+                reverse_id = ( unsigned int ) jsonDoc["reverse_node_id"].GetInt();
+            }
+            if ( jsonDoc.HasMember( "forward_weight" ) ) {
+                forward_wt = ( unsigned int ) jsonDoc["forward_weight"].GetInt();
+            }
+            if ( jsonDoc.HasMember( "reverse_weight" ) ) {
+                reverse_wt = ( unsigned int ) jsonDoc["reverse_weight"].GetInt();
+            }
+            if ( jsonDoc.HasMember( "name_id" ) ) {
+                street_id = ( unsigned int ) jsonDoc["name_id"].GetInt();
+            }
+            return true;
+>>>>>>> origin/right-side-montevideo
+#endif
         } else {
             DLOG(INFO) << "#11 getOsrmNamesOnRoute Failed!" << std::endl;
             return false;
         }
     }
-#endif
 
     return true;
 

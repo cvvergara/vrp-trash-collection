@@ -101,8 +101,11 @@ bool VRPTools::readDataFromFiles(std::string fileBasePath)
 
 bool VRPTools::check()
 {
-    osrmi->useOsrm( mUseOsrm );
     if (mContainers && mOtherLocs && mTimeTable && mVehicles) {
+        // Backup
+        bool oldStateOsrm = osrmi->getUse();
+        osrmi->useOsrm( mUseOsrm );
+
         TrashProb prob(
             mContainers,
             mContainersCount,
@@ -125,16 +128,23 @@ bool VRPTools::check()
             //*data_err_msg = strdup( prob.getErrorsString().c_str() );
         }
         twc->cleanUp();
+
+        // Restore
+        osrmi->useOsrm( oldStateOsrm );
+
         return ret;
     } else {
         return false;
-    }
+    }    
 }
 
 void VRPTools::solve()
 {
-    osrmi->useOsrm( mUseOsrm );
     if (mContainers && mOtherLocs && mTimeTable && mVehicles) {
+
+        bool oldStateOsrm = osrmi->getUse();
+        osrmi->useOsrm( mUseOsrm );
+
         TrashProb prob(
             mContainers,
             mContainersCount,
@@ -205,6 +215,10 @@ void VRPTools::solve()
     #endif
         // Limpio
         twc->cleanUp();
+
+        // Restore
+        osrmi->useOsrm( oldStateOsrm );
+
     } else {
 
     }

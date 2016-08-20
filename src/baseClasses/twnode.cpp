@@ -109,7 +109,8 @@ void Twnode::set(int nid, int id, double x, double y, double demand,
 }
 void Twnode::set(int nid, int id, double x, double y, double demand,
                  double opens, double closes, double serviceTime,
-                 int streetId) {
+                 int streetId)
+{
   set_nid(nid);
   set_id(id);
   set_x(x);
@@ -130,7 +131,25 @@ Twnode::Twnode()
     opens_(0),
     closes_(0),
     serviceTime_(0),
-    streetId_(-1) {
+    streetId_(-1)
+{
+
+}
+
+
+Twnode::Twnode(UID nid, UID id, double x, double y)
+  : Node(),
+    type_(kUnknown),
+    demand_(0),
+    opens_(0),
+    closes_(0),
+    serviceTime_(0),
+    streetId_(-1)
+{
+    set_nid(nid);
+    set_id(id);
+    set_x(x);
+    set_y(y);
 }
 
 /*!

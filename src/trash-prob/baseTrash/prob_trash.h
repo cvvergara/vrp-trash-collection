@@ -20,13 +20,18 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <map>
 #include <math.h>
 
 #include "tripVehicle.h"
 #include "twpath.h"
 #include "twc.h"
+#include "phantomnode.h"
 
 class Prob_trash {
+=======
+
+// Children class can acces to protected!
 protected:
   typedef TwBucket<Trashnode> Bucket;
   typedef unsigned long int UID;
@@ -35,25 +40,23 @@ protected:
   inline double _MAX() {return (std::numeric_limits<double>::max()); }
   inline double _MIN() {return (-std::numeric_limits<double>::max()); }
 
-
   //    Trashnode depot;
-
-  Twpath<Trashnode> datanodes; //dissallowing set operations
-  Bucket otherlocs;
-  Bucket dumps;
-  Bucket depots;
-  Bucket pickups;
+  Twpath<Trashnode> datanodes;              ///< Pickups + otherlocs ()
+  Bucket otherlocs;                         ///< Dumps and depts information.
+  Bucket dumps;                             ///< Dumps sites.
+  Bucket depots;                            ///< PahntomNode information for pickups. UID is the id of pickups nodes.
+  Bucket pickups;                           ///< Clients. Containers.
+  std::map<UID,PhantomNode> phantomNodes;   ///< PahntomNode information for pickups. UID is the id of pickups nodes.
   Bucket endings;
   Bucket invalid;
-  std::deque<Vehicle> trucks;
+  std::deque<Vehicle> trucks;               ///< Veihcles information
   std::deque<Vehicle> invalidTrucks;
-  Trashnode C;
+  Trashnode C;                              ///< Nodo que tiene valores medios de coordenadas cargadas
 
   std::string datafile;
 
 
 public:
-
   void clear() {
     otherlocs.clear();
     dumps.clear();
@@ -83,7 +86,21 @@ public:
   bool lateArrival(int nid, double D) const;
 
   void twcijDump() const;
-
+  /*!
+   * \brief Get the phantom node for a pickup site
+   *
+   * \param[in] Node id of the pickup site
+   * \param[out] The Phatom Node.
+   * \return true on succes.
+   */
+  bool pickupHasPhantomNode (UID nodeId, PhantomNode &oPhantomNode) {
+      bool ret = false;
+      if( phantomNodes.find(nodeId) != phantomNodes.end()) {
+          ret = true;
+      }
+      oPhantomNode = phantomNodes[nodeId];
+      return ret;
+  }
 
 #ifdef DOVRPLOG
   void nodesdump() const;
@@ -103,12 +120,21 @@ public:
 
 
 private:
-  void load_depots(std::string infile);
-  void load_dumps(std::string infile);
-  void load_pickups(std::string infile);
-  void load_endings(std::string infile);
-  void load_otherlocs(std::string infile);
-  void load_trucks(std::string infile);
+  void load_depots( std::string infile );
+  void load_dumps( std::string infile );
+  void load_pickups( std::string infile );
+  void load_endings( std::string infile );
+  void load_otherlocs( std::string infile );
+  void load_trucks( std::string infile );
+  /*!
+   * \brief Set phantom nodes for pickups sites
+   *
+   * From pickup sites, this function use nearest and locate -from OSRM-
+   * and set the phantom node for pickups sites (in two ways segments) and
+   * before and after points to force right side pickup.
+   *
+   */
+  void setPhantomNodesForPickups();
 };
 
 #endif
