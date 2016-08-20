@@ -62,6 +62,7 @@ void CostVehicle::setInitialValues( const Trashnode &node,
 
   C = node;
   ttSC = twc->getAverageTime(depot, picks);
+  // assert(ttSC > 0);
   ttDC = twc->getAverageTime(dumpSite, picks);
   ttCD = twc->getAverageTime(picks, dumpSite);
   ttDE = twc->TravelTime(dumpSite.nid(), endingSite.nid());

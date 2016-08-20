@@ -651,7 +651,10 @@ template <class knode> class TWC {
      }
 
 
-     // the values for non containers to/from containers should be filled
+     /* @brief fills travel_Time depot -> containers and containers -> dump
+      *
+      * Also, if
+      */
      bool compulsory_fill() {
          DLOG(INFO) << "started compulsory fill";
          for (int i = original.size()-1; !original[i].isPickup(); --i) {
@@ -2521,6 +2524,7 @@ triplets:
           */
          double getAverageTime(const knode &from, const Bucket &to) const {
              STATS_INC("TWC::getAverageTime(const knode &from, const Bucket &to) from");
+             DLOG(INFO) "TWC::getAverageTime(const knode &from, const Bucket &to) from";
              assert(from.nid() < original.size());
              double time = 0;
              int j = from.nid();
@@ -2788,24 +2792,18 @@ triplets:
            */
          void loadAndProcess_travelTimes(
                  std::string infile,
-                 //                 const Bucket &datanodes,
                  const Bucket &invalid) {
              STATS_INC("TWC::loadAndProcess_travelTimes");
 
-#if 0
-             assert(!datanodes.empty());
+             DLOG(INFO) << "loading travel times of " << original.size() << " nodes"; 
+             assert(!original.empty());
 
-             original.clear();
-             original = datanodes;
-#endif
-             POS siz = original.size();
+             auto siz = original.size();
 
              std::ifstream in(infile.c_str());
              std::string line;
 
 
-             int64_t fromId;
-             int64_t toId;
              int64_t from, to;
              double time;
              int cnt = 0;
@@ -2823,8 +2821,8 @@ triplets:
 
                  if (invalid.hasId(from) || invalid.hasId(to)) continue;
 
-                 fromId = getNidFromId(from);
-                 toId = getNidFromId(to);
+                 auto fromId = getNidFromId(from);
+                 auto toId = getNidFromId(to);
 
                  if (fromId == -1 || toId == -1) continue;
 
@@ -2832,6 +2830,7 @@ triplets:
              }
 
              in.close();
+             compulsory_fill();
 
              twcij_calculate();
              assert(check_integrity());

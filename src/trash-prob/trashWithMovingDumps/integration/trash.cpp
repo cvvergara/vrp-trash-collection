@@ -120,7 +120,7 @@ int main(int argc, char **argv)
    TruckManyVisitsDump tp(infile);
 
 
-   tp.process(0);
+   tp.process(2);
 
    STATS_PRINT("stats");
    assert(true==false);        
