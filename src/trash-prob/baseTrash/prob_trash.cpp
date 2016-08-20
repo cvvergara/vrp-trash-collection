@@ -90,8 +90,6 @@ void Prob_trash::loadProblem(const std::string &infile)
     datanodes = nodes;
 
 
-
-
     twc->loadAndProcess_travelTimes(
             datafile + ".dmatrix-time.txt",
             datanodes,
@@ -99,8 +97,6 @@ void Prob_trash::loadProblem(const std::string &infile)
 
     load_trucks(datafile + ".vehicles.txt");
     
-
-
 
 
     twc->setHints(dumps);

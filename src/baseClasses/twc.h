@@ -3534,15 +3534,15 @@ triplets:
                 in.close();
 
                 compulsory_fill();
-
                 setPhantomNodes();
 
                 twcij_calculate();
 
-
                 assert(original == datanodes);
                 assert(check_integrity());
             }
+
+            
 
             /*! \brief Returns a constant reference to the travel time matrix. */
             const std::vector<std::vector<double> >& TravelTime() {
