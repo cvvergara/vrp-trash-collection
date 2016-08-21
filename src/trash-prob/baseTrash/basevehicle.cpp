@@ -335,6 +335,7 @@ void BaseVehicle::tau(const std::string &title) const {
   ss << endingSite.id();
   DLOG( INFO ) << ss.str();
 }
+
 void BaseVehicle::tau() const {
   tau("");
 }

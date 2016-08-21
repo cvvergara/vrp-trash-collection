@@ -52,8 +52,11 @@ void Prob_trash::loadProblem(const std::string &infile)
     load_pickups(datafile + ".containers.txt");
     load_otherlocs(datafile + ".otherlocs.txt");
 
-    intersection = otherlocs * pickups;
-    invalid = invalid + intersection;
+  // Mmmmmmhhhhhh
+  intersection = otherlocs * pickups;
+  invalid = invalid + intersection;
+  pickups = pickups - intersection;
+  nodes = nodes - intersection;
 
     if (!invalid.empty()) {
         invalid.dump("invalid");
@@ -87,15 +90,13 @@ void Prob_trash::loadProblem(const std::string &infile)
     datanodes = nodes;
 
 
-
-    twc->set_original(datanodes);
-
     twc->loadAndProcess_travelTimes(
             datafile + ".dmatrix-time.txt",
+            datanodes,
             invalid);
 
     load_trucks(datafile + ".vehicles.txt");
-
+    
 
     twc->setHints(dumps);
     twc->setHints(nodes);
@@ -103,11 +104,12 @@ void Prob_trash::loadProblem(const std::string &infile)
     twc->setHints(pickups);
     twc->setHints(endings);
 
-    twc->fill_travel_time_onTrip();
+    // twc->fill_travel_time_onTrip();
     twc->settCC(C, pickups);
 
 
     assert(!trucks.empty() && !depots.empty() && !dumps.empty() && !endings.empty());
+
 
     for (UINT i = 0; i < trucks.size(); i++) {
         trucks[i].setInitialValues(C, pickups);
@@ -166,7 +168,40 @@ void Prob_trash::load_trucks(std::string infile) {
 
 }
 
+void Prob_trash::setPhantomNodesForPickups()
+{
 
+}
+
+#if 0
+void Prob_trash::load_depots( std::string infile )
+{
+#ifdef VRPMINTRACE
+  DLOG( INFO ) << "Prob_trash:Load_depots" << infile;
+#endif
+  std::ifstream in( infile.c_str() );
+  std::string line;
+  int cnt = 0;
+
+  depots.clear();
+
+  while ( getline( in, line ) ) {
+    cnt++;
+
+    if ( line[0] == '#' ) continue;
+
+    Trashnode node( line );
+
+    if ( not node.isValid() or not node.isDepot() ) {
+#ifdef DOVRPLOG
+      DLOG( INFO ) << "ERROR: line: " << cnt << ": " << line;
+#endif
+      invalid.push_back( node );
+    } else {
+      depots.push_back( node );
+    }
+  }
+#endif
 void Prob_trash::load_otherlocs(std::string infile)
 {
     DLOG(INFO) << "Prob_trash:Load_otherlocs" << infile;
@@ -194,6 +229,16 @@ void Prob_trash::load_otherlocs(std::string infile)
     in.close();
 }
 
+#if 0
+void Prob_trash::load_dumps( std::string infile )   //1 dump problem
+{
+  std::ifstream in( infile.c_str() );
+  std::string line;
+  int cnt = 0;
+
+  // Delete previous
+  dumps.clear();
+>>>>>>> origin/right-side-montevideo
 
 
 void Prob_trash::load_pickups(std::string infile) {
@@ -207,7 +252,40 @@ void Prob_trash::load_pickups(std::string infile) {
     while (getline(in, line)) {
         cnt++;
 
+<<<<<<< HEAD
         if (line[0] == '#') continue;
+=======
+    if ( not node.isValid() or not node.isDump() ) {
+#ifdef DOVRPLOG
+      DLOG( INFO ) << "ERROR: line: " << cnt << ": " << line;
+#endif
+      invalid.push_back( node );
+    } else {
+      dumps.push_back( node );
+    }
+  }
+
+  in.close();
+}
+#endif
+
+
+void Prob_trash::load_pickups( std::string infile )
+{
+  std::ifstream in( infile.c_str() );
+  std::string line;
+  int cnt = 0;
+
+  // Delete previous
+  pickups.clear();
+
+  double st, op, cl, dm, x, y;
+  st = op = cl = dm = x = y = 0;
+
+  while ( getline( in, line ) ) {
+    cnt++;
+
+    if ( line[0] == '#' ) continue;
 
         Trashnode node(line);
         node.set_type(Twnode::kPickup);

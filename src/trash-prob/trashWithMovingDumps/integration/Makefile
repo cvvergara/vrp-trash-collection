@@ -82,7 +82,8 @@ ifeq ("$(WITH_STATS)", "")
 STATS_CFLAGS =
 STATS_HEADER =
 else
-STATS_HEADER = $(BASECLASSES_DIR)/stats.h $(BASECLASSES_DIR)/timer.h $(BASECLASSES_DIR)/singleton.h
+STATS_HEADER = $(BASECLASSES_DIR)/stats.h $(BASECLASSES_DIR)/timer.h
+#$(BASECLASSES_DIR)/singleton.h
 STATS_CFLAGS = -DDOSTATS
 endif
 
@@ -123,7 +124,7 @@ endif
 
 # allways with osrmClient
 OSRMCLIENT_HEADER =$(BASECLASSES_DIR)/osrmclient.h
-OSRMCLIENT_CFLAGS = -std=c++1y -DOSRMCLIENT -I$(OSRMBACKEND_DIR)
+OSRMCLIENT_CFLAGS = -std=c++14 -DOSRMCLIENT -I$(OSRMBACKEND_DIR)
 OSRMCLIENT_LIBS = -L/usr/local/lib -lboost_filesystem -lboost_iostreams -lboost_program_options -lboost_regex \
 	-lboost_system -lboost_thread -lpthread -losrm -lz -lrt \
 	-lboost_filesystem -lboost_iostreams -lboost_program_options -lboost_regex -lboost_system -lboost_thread -lpthread -lstxxl

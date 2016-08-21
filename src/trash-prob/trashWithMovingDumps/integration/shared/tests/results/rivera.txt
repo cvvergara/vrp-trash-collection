@@ -1,0 +1,5 @@
+20151008
+
+Original secuencia -> 1000001 4 8 11 9 2 6 5 1 3 10 7 1000002 1000001 
+
+Con cambios en void getNodesOnPath -> 

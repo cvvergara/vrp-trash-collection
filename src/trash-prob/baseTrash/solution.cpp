@@ -168,6 +168,7 @@ void Solution::dumpSolutionForPg () const
               "\t" << results[i].deltatime <<
               "\t" << results[i].cargo << std::endl;
               */
+  auto mapPhantomNodes = twc->getPhantomNodes();
 
   for ( UINT i = 0; i < fleet.size(); ++i ) {
     if ( fleet[i].size() <= 1 ) continue;
@@ -175,22 +176,81 @@ void Solution::dumpSolutionForPg () const
     std::cout <<
               "seq" <<
               "\tVID" <<
+              "\tx" <<
+              "\ty" <<
               "\tid" <<
               "\tntype" <<
               "\tDepart" <<
               "\tdTime" <<
               "\tdCargo" << std::endl;
     for ( UINT j = 0; j < fleet[i].size(); ++j ) {
-      seq++;
-      std::cout <<
-                 seq <<
-                "\t" << fleet[i].getVid() <<
-                "\t" << fleet[i][j].id() <<
-                "\t" << fleet[i][j].type() <<
-                "\t" << fleet[i][j].departureTime() <<
-                "\t" << fleet[i][j].deltaTime() <<
-                "\t" << fleet[i][j].demand() << std::endl;
+        seq++;
+        auto it = mapPhantomNodes.find(fleet[i][j].id());
+        if ( it!=mapPhantomNodes.end() ) {
+#ifdef REWRITE
+            /*
+             * This section use phantomnodes
+             *
+             * TODO n is not defined
+             *
+             */
+
+          Twnode before = Twnode(twc->IPNId(),it->second.reveNodeId(),it->second.beforePNode().x(),it->second.beforePNode().y());
+          n.set_type( Twnode::kPhantomNode );
+          Twnode after = Twnode(twc->IPNId(),it->second.forwNodeId(),it->second.afterPNode().x(),it->second.afterPNode().y());
+          n.set_type( Twnode::kPhantomNode );
+
+          //Print beforeNode
+          std::cout <<
+                     seq <<
+                    "\t" << fleet[i].getVid() <<
+                    "\t" << it->second.beforePNode().x() <<
+                    "\t" << it->second.beforePNode().y() <<
+                    "\t" << it->second.reveNodeId() <<
+                    "\t" << TWC::mIPNId <<
+                    "\t" << "" <<
+                    "\t" << "" <<
+                    "\t" << "" << std::endl;
+          //Print Node
+            std::cout <<
+                       seq <<
+                      "\t" << fleet[i].getVid() <<
+                      "\t" << fleet[i][j].x() <<
+                      "\t" << fleet[i][j].y() <<
+                      "\t" << fleet[i][j].id() <<
+                      "\t" << fleet[i][j].type() <<
+                      "\t" << fleet[i][j].departureTime() <<
+                      "\t" << fleet[i][j].deltaTime() <<
+                      "\t" << fleet[i][j].demand() << std::endl;
+            //Print afterNode
+            std::cout <<
+                       seq <<
+                      "\t" << fleet[i].getVid() <<
+                      "\t" << it->second.afterPNode().x() <<
+                      "\t" << it->second.afterPNode().y() <<
+                      "\t" << it->second.forwNodeId() <<
+                      "\t" << TWC::mIPNId <<
+                      "\t" << "" <<
+                      "\t" << "" <<
+                      "\t" << "" << std::endl;
+#endif
+        }
+        else
+        {
+            //Print Node
+              std::cout <<
+                         seq <<
+                        "\t" << fleet[i].getVid() <<
+                        "\t" << fleet[i][j].x() <<
+                        "\t" << fleet[i][j].y() <<
+                        "\t" << fleet[i][j].id() <<
+                        "\t" << fleet[i][j].type() <<
+                        "\t" << fleet[i][j].departureTime() <<
+                        "\t" << fleet[i][j].deltaTime() <<
+                        "\t" << fleet[i][j].demand() << std::endl;
+        }
     }
+
     seq++;
     std::cout <<
               seq  <<

@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( getOsrmNearest )
 {
     double ilat, ilon;
     double olat, olon;
-    unsigned int forw_id, reve_id, street_id;
+    unsigned int forw_id, reve_id, forw_wt, reve_wt, street_id;
     unsigned int one_way;
     double rolat, rolon;
 
@@ -60,11 +60,11 @@ BOOST_AUTO_TEST_CASE( getOsrmNearest )
     olat = -1.0;
     olon = -1.0;
     rolat = -34.913792;
-    rolon = -56.174328;    
+    rolon = -56.174328;
     //roname = "Doctor Luis Piera";
 
     osrmi->useOsrm(true);
-    osrmi->getOsrmNearest(ilat, ilon, olat, olon, one_way, forw_id, reve_id, street_id);
+    osrmi->getOsrmNearest(ilon, ilat, olon, olat, one_way, forw_id, reve_id, forw_wt, reve_wt, street_id);
     std::cout << olat << "|" << olon << "|" << one_way << "|" << forw_id << "|" << reve_id << "|" << street_id << std::endl;
     BOOST_REQUIRE_CLOSE( olat, rolat, 0.0001 );
     BOOST_REQUIRE_CLOSE( olon, rolon, 0.0001 );
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( getOsrmNearest )
     rolon = -56.174641;
     //roname = "Doctor Emilio Frugoni";
     osrmi->useOsrm(true);
-    osrmi->getOsrmNearest(ilat, ilon, olat, olon, one_way, forw_id, reve_id, street_id);
+    osrmi->getOsrmNearest(ilon, ilat, olon, olat, one_way, forw_id, reve_id, forw_wt, reve_wt, street_id);
     std::cout << olat << "|" << olon << "|" << one_way << "|" << forw_id << "|" << reve_id << "|" << street_id << std::endl;
     BOOST_REQUIRE_CLOSE( olat, rolat, 0.0001 );
     BOOST_REQUIRE_CLOSE( olon, rolon, 0.0001 );

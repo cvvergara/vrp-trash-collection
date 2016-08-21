@@ -134,6 +134,171 @@ class TwBucket {
      the other ones are variations on the parameters
      */
     ///@{
+#if 0
+=======
+  /*!
+    \param[in] prev:   prev node
+   * \param[in] from:   from node
+   * \param[in] middle: middle node
+   * \param[in] to:     to node
+   * \param[in] travelTimePrevFrom:   travel time from "prev" to "from" nodes
+  */
+  double  timePCN(const knode &prev, const knode &from, const knode &middle,
+                  const knode &to, double travelTimePrevFrom) const {
+    if ( from.isNotCompatibleIJ(prev)
+         || middle.isNotCompatibleIJ(prev)
+         || to.isNotCompatibleIJ(prev)
+         || middle.isNotCompatibleIJ(from)
+         || to.isNotCompatibleIJ(from)
+         || to.isNotCompatibleIJ(middle))
+       return VRP_MAX();
+
+
+    double travelTimePrevFromMiddle = TravelTime(prev, from , middle);
+    double travelTimeFromMiddle = travelTimePrevFromMiddle - travelTimePrevFrom;
+    double travelTimePrevFromMiddleTo = TravelTime(prev, from , middle, to);
+    double travelTimeMiddleTo  = travelTimePrevFromMiddleTo  - travelTimePrevFromMiddle;
+
+    double arrive_from = prev.departureTime() + travelTimePrevFrom;
+
+    if (from.lateArrival(arrive_from)) return VRP_MAX();
+    if (from.earlyArrival(arrive_from)) arrive_from = from.opens();
+
+    double depart_from = arrive_from + from.serviceTime();
+    double arrive_middle = arrive_from + from.serviceTime() + travelTimeFromMiddle;
+
+    if ( middle.lateArrival(arrive_middle) ) return VRP_MAX();
+    if ( middle.earlyArrival(arrive_middle) ) arrive_middle = middle.opens();
+
+    double arrive_to = arrive_middle + middle.serviceTime() + travelTimeMiddleTo;
+
+    if (to.lateArrival(arrive_to)) return VRP_MAX();
+    if (to.earlyArrival(arrive_to)) arrive_to = to.opens();
+
+    return arrive_to - depart_from;
+  }
+
+  /*! @name timePCN = time previous-current-next
+     simulates the following order of nodes in the path:
+         prev from middle to
+   *
+   * \return  the time that takes to depart from "from" and arrive to "to" passing thru "middle"
+   *
+   * \return  ttfm + serv(m) + ttmt = arrivalTime(next) - departureTime(prev) when passing thru curr
+   * \return infinity              if there is a TWV (time window violation)
+   *
+   * use when:
+       prev from   is a section of the path and "prev" is the previous node of "from"
+       from from   there is no previous container of from
+
+  A private function does all the work
+      the other ones are variations on the parameters
+  */
+  ///@{
+ public:
+  /*! \brief  the 3 nodes belong to the path */
+  double  timePCN(POS from, POS middle, POS to) const {
+    assert(from < path.size());
+    assert(middle < path.size());
+    assert(to < path.size());
+    assert(middle != from);
+    assert(middle != to);
+
+    if ( from == 0 )
+      return timePCN(path[from], path[from], path[middle], path[to], 0);
+    else
+      return timePCN(path[from - 1], path[from], path[middle], path[to],
+                     path[from].travelTime());
+  }
+
+  /*! \brief  first 2 nodes belong to the path and the third doesnt */
+  double timePCN(POS from, POS middle, const knode &dump) const {
+    assert(from < path.size());
+    assert(middle < path.size());
+    assert(middle != from);
+
+    if ( from == 0 )
+      return timePCN(path[from], path[from], path[middle], dump, 0);
+    else
+      return timePCN(path[from - 1], path[from], path[middle], dump,
+                     path[from].travelTime());
+  }
+
+  /*! \brief  \from node belong to the path and \middle and \dump dont */
+  double  timePCN(POS from, const knode &middle, const knode &dump) const {
+    assert(from < path.size());
+
+    if ( from == 0 )
+      return timePCN(path[from], path[from], middle, dump, 0);
+    else
+      return timePCN(path[from - 1], path[from], middle , dump,
+                     path[from].travelTime());
+  }
+
+  /*! \brief  simulates a replacement of a node in the bucket
+
+     previous path:
+       from from+1 from+2
+     simulated path:
+       from middle from+2
+  */
+  double timePCN(POS from, const knode &middle) const {
+    assert((from + 2) < path.size());
+
+    if ( from == 0 )
+      return timePCN(path[from], path[from], middle, path[from + 2], 0 );
+    else
+      return timePCN(path[from - 1], path[from], middle , path[from + 2],
+                     path[from].travelTime());
+  }
+  /*! \brief  simulates an insertion of two nodes a node at the end of the bucket
+         namely node and dump
+
+     previous path:
+       last dump
+     simulated path:
+       last node dump
+  */
+  double timePCN(const knode &node, const knode &dump) const{
+    knode last = path[path.size() - 1];
+    return timePCN(path.size()-1, node, dump);
+  }
+  ///@}
+
+ private:
+  /*! @name TravelTime inline functions
+    \brief useful inlines to fetch the travel time from Node to Node
+
+   2 flavors:
+      parameters are nodes
+      parameters are node Nid (internal node id)
+   No need to be within the bucket
+  */
+  ///@{
+  inline double TravelTime(const knode &from, const knode &to) const {
+    return TWC<knode>::Instance()->TravelTime( from.nid(), to.nid());
+  }
+  double TravelTime(const knode &from, const knode &middle,
+                    const knode &to) const {
+    return TWC<knode>::Instance()->TravelTime(from.nid(), middle.nid() , to.nid());
+  }
+  double TravelTime(const knode &prev, const knode &from, const knode &middle,
+                    const knode &to) const {
+    return TWC<knode>::Instance()->TravelTime(prev.nid(), from.nid(), middle.nid() , to.nid());
+  }
+
+  double TravelTime(UID i, UID j) const {
+    return TWC<knode>::Instance()->TravelTime(i, j);
+  }
+  double TravelTime(UID i, UID j, UID k) const {
+    return TWC<knode>::Instance()->TravelTime(i, j, k);
+  }
+  double TravelTime(UID i, UID j, UID k, UID l) const {
+    return TWC<knode>::Instance()->TravelTime(i, j, k, l);
+  }
+  ///@}
+>>>>>>> origin/right-side-montevideo
+#endif
 
  public:
     /*! \brief  the 3 nodes belong to the path */
@@ -515,6 +680,59 @@ class TwBucket {
         return delta;
     }
 
+<<<<<<< HEAD
+=======
+    double delta  =  TravelTime[prev][node.nid()]
+                     + node.getServiceTime()
+                     + TravelTime[node.nid()][next]
+                     - (path[pos1].getArrivalTime()
+                        - path[pos - 1].getDepartureTime());
+    return delta;
+  }
+
+  /*!
+   * \brief Compute the change in time when swapping node into pos in the path and do additional time violation checks.
+   *
+   * If the current path looks like prev -\> pos -\> pos1 then compute the
+   * the change in time of swapping node for the node at pos, so the new
+   * path would look like prev -\> node -\> pos1
+   *
+   * \param[in] node The node to evaluate if swapped with node at pos.
+   * \param[in] pos The position of the node to be swapped.
+   * \param[in] pos1 The next node following pos.
+   * \return The change in cost or infinity if a TWV would be generated.
+   */
+  double getDeltaTimeTVcheck(const knode &node, POS pos, POS pos1) const {
+    assert(pos1 <= path.size());
+    assert(pos > 0 && pos1 == (pos + 1));
+
+    double delta = getDeltaTime(node, pos, pos1);
+
+    if ((path[pos - 1].getDepartureTime() + TravelTime[ path[pos - 1].nid() ] [node.nid() ])
+         > node.closes())
+      return VRP_MAX();
+
+    if (pos == size()) return delta;
+
+    if (deltaGeneratesTV( delta, pos1 )) return VRP_MAX();
+
+    return delta;
+  }
+
+
+  /*!
+   * \brief Compute the change in time of inserting node before pos in the path.
+   *
+   * Simulate inserting node before pos in the path and compute the resulting
+   * change in time. No TW violations are checked.
+   *
+   * \param[in] node The node to be inserted in the simulation.
+   * \param[in] pos The position before which the node will be inserted.
+   * \return The change in travel time or infinity if the move is invalid.
+   */
+  double  getDeltaTime(const knode &node, POS pos) const {
+    assert(pos < path.size());
+>>>>>>> origin/right-side-montevideo
 
     /*!
      * \brief Check all nodes from pos to upto if adding delta would cause a violation.
@@ -987,9 +1205,15 @@ bool erase(const knode &node) {
   \param[in] fromPos Position of the start of the range to be erased.
   \param[in] toPos Position of the last in the range to be erased.
 
+<<<<<<< HEAD
   \warning Notice that the right side of the range is not included 
   when  ( fromPos < toPos )  range erased: [fromPos,toPos)
   when  ( fromPos > toPos )  range erased: [toPos,fromPos)
+=======
+    \warning Notice that the right side of the range is not included
+    when  ( fromPos < toPos )  range erased: [fromPos,toPos)
+    when  ( fromPos > toPos )  range erased: [toPos,fromPos)
+>>>>>>> origin/right-side-montevideo
 
   \warning If fromPos and toPos are reversed it will still erase the range.
   */

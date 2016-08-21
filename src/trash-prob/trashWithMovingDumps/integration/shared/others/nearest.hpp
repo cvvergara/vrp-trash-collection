@@ -74,7 +74,7 @@ template <class DataFacadeT> class NearestPlugin final : public BasePlugin
             // reply.status = http::Reply::ok;
             json_result.values["status"] = 0;
 
-            std::cout << "Hay " << number_of_results << " PhantomNodes." << std::endl;
+            // std::cout << "Hay " << number_of_results << " PhantomNodes." << std::endl;
 
             if (number_of_results > 1)
             {
@@ -87,7 +87,7 @@ template <class DataFacadeT> class NearestPlugin final : public BasePlugin
                     osrm::json::Array json_coordinate;
                     osrm::json::Object result;
 
-                    std::cout << "PhantomNode " << i << ": " << phantom_node_vector.at(i) << std::endl;
+                    //std::cout << "PhantomNode " << i << ": " << phantom_node_vector.at(i) << std::endl;
 
                     json_coordinate.values.push_back(phantom_node_vector.at(i).location.lat /
                                                      COORDINATE_PRECISION);
@@ -104,7 +104,7 @@ template <class DataFacadeT> class NearestPlugin final : public BasePlugin
             {
                 osrm::json::Array json_coordinate;
 
-                std::cout << "PhantomNode 0: " << phantom_node_vector.front() << std::endl;
+                //std::cout << "PhantomNode 0: " << phantom_node_vector.front() << std::endl;
 
                 json_coordinate.values.push_back(phantom_node_vector.front().location.lat /
                                                  COORDINATE_PRECISION);
