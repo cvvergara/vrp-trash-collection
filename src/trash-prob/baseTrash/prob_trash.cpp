@@ -98,14 +98,13 @@ void Prob_trash::loadProblem(const std::string &infile)
     load_trucks(datafile + ".vehicles.txt");
     
 
-
     twc->setHints(dumps);
     twc->setHints(nodes);
     twc->setHints(depots);
     twc->setHints(pickups);
     twc->setHints(endings);
 
-    twc->fill_travel_time_onTrip();
+    // twc->fill_travel_time_onTrip();
     twc->settCC(C, pickups);
 
 
