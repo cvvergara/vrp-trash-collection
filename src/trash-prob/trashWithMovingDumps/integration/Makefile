@@ -3,15 +3,12 @@ AR = ar
 RANLIB = ranlib
 CPP = g++
 
-
-
-
-CPP = g++
-
 # when blank, even when set to compile with OSRM it will compile without osrm
 #OSRMBACKEND_DIR = $(HOME)/work/osrm-backend/
 #OSRMBACKEND_DIR = /home/fpacheco/workspace/idm/osrm-backend
-OSRMBACKEND_DIR = /usr/local/include/osrm
+#OSRMBACKEND_DIR = /usr/local/include/osrm
+OSRMBACKEND_DIR = /home/vicky/vrp-prerequisites/osrm-backend/include -I/home/vicky/vrp-prerequisites/osrm-backend/third_party/
+#OSRMBACKEND_DIR =
  
 BASETRASH = baseTrash
 BASECLASSES = baseClasses
@@ -28,8 +25,8 @@ BIN_DIR = ./bin
 
 # setting NO_TRACE = <something>  invalidates the other traces
 NO_TRACE =
-TRACE_MIN = yes
-TRACE_ALL = 
+TRACE_MIN =
+TRACE_ALL =
 
 ifeq ("$(NO_TRACE)", "")
   ifeq ("$(TRACE_ALL)", "")
@@ -85,7 +82,8 @@ ifeq ("$(WITH_STATS)", "")
 STATS_CFLAGS =
 STATS_HEADER =
 else
-STATS_HEADER = $(BASECLASSES_DIR)/stats.h $(BASECLASSES_DIR)/timer.h $(BASECLASSES_DIR)/singleton.h
+STATS_HEADER = $(BASECLASSES_DIR)/stats.h $(BASECLASSES_DIR)/timer.h
+#$(BASECLASSES_DIR)/singleton.h
 STATS_CFLAGS = -DDOSTATS
 endif
 
@@ -124,26 +122,21 @@ endif
 
 
 
-
-ifeq ("$(WITH_OSRMCLIENT)", "")
-OSRMCLIENT_CFLAGS =
-OSRMCLIENT_LIBS =
-OSRMCLIENT_HEADER =
-else
+# allways with osrmClient
 OSRMCLIENT_HEADER =$(BASECLASSES_DIR)/osrmclient.h
-OSRMCLIENT_CFLAGS = -std=c++11 -DOSRMCLIENT -I$(OSRMBACKEND_DIR)
+OSRMCLIENT_CFLAGS = -std=c++14 -DOSRMCLIENT -I$(OSRMBACKEND_DIR)
 OSRMCLIENT_LIBS = -L/usr/local/lib -lboost_filesystem -lboost_iostreams -lboost_program_options -lboost_regex \
-	-lboost_system -lboost_thread -lpthread -lOSRM -lz -lrt \
+	-lboost_system -lboost_thread -lpthread -losrm -lz -lrt \
 	-lboost_filesystem -lboost_iostreams -lboost_program_options -lboost_regex -lboost_system -lboost_thread -lpthread -lstxxl
-endif
 
 
 
 INCLUDES = -I$(BASECLASSES_DIR) -I$(BASETRASH_DIR) -I$(INITTRASH_DIR) -I$(SOLVERTRASH_DIR) -I. 
-CPPCOMPILEFLAGS = -Wreorder -Wall -Wextra -Wdouble-promotion 
-CPPCOMPILEFLAGS =
-CPPFLAGS = -g -O0 -MMD  -MP -fPIC $(CPPCOMPILEFLAGS) $(OSRMCLIENT_CFLAGS) $(DEFINES) $(STATS_CFLAGS) $(PLOT_CFLAGS) $(LOGGER_CFLAGS) $(DEBUG_CFLAGS) $(TRACE_CFLAGS)
-LDFLAGS = -L/usr/lib/x86_64-linux-gnu -lgd $(INCLUDES) -L$(BASECLASSES) -L$(BASETRASH) -L$(INITTRASH)  $(JSON_LIBS) $(OSRMCLIENT_LIBS) $(LOGGER_LIBS)
+CPPCOMPILEFLAGS = -Wreorder -Wall -Wextra -Wdouble-promotion -fmax-errors=10 
+CPPCOMPILEFLAGS = -fmax-errors=10
+CPPFLAGS = -g -O0 -MMD  -MP -fPIC $(CPPCOMPILEFLAGS) $(OSRMCLIENT_CFLAGS) $(DEFINES) $(STATS_CFLAGS) $(PLOT_CFLAGS) $(LOGGER_CFLAGS) $(DEBUG_CFLAGS) $(TRACE_CFLAGS) 
+#LDFLAGS = -L/usr/lib/x86_64-linux-gnu -lgd $(INCLUDES) -L$(BASECLASSES) -L$(BASETRASH) -L$(INITTRASH)  $(JSON_LIBS) $(OSRMCLIENT_LIBS) $(LOGGER_LIBS)
+LDFLAGS = -L/usr/lib/x86_64-linux-gnu  $(INCLUDES) -L$(BASECLASSES) -L$(BASETRASH) -L$(INITTRASH)  $(JSON_LIBS) $(OSRMCLIENT_LIBS) $(LOGGER_LIBS)
 
 CPPFLAGS_OUT = $(INCLUDES) $(OSRMCLIENT_CFLAGS) $(DEFINES) $(STATS_CFLAGS) $(PLOT_CFLAGS) $(LOGGER_CFLAGS) $(DEBUG_CFLAGS) $(TRACE_CFLAGS)
 LDFLAGS_OUT = -L$(BASECLASSES) -L$(BASETRASH) -L$(INITTRASH)  $(OSRMCLIENT_LIBS) $(LOGGER_LIBS)
@@ -204,7 +197,7 @@ BASETRASH_HEADS = $(BASETRASH_HDS) $(BASECLASSES_HEADS)
 
 
 
-INITTRASH_SRCS =  $(INITTRASH_DIR)/feasableSolLoop.cpp  $(INITTRASH_DIR)/givenInitialSol.cpp
+INITTRASH_SRCS =  $(INITTRASH_DIR)/truckManyVisitsDump.cpp $(INITTRASH_DIR)/basicOperations.cpp  $(INITTRASH_DIR)/givenInitialSol.cpp
 INITTRASH_HDS = $(INITTRASH_SRCS:.cpp=.h)
 INITTRASH_OBJS = $(addprefix $(BUILD_DIR)/$(INITTRASH)/,$(notdir $(INITTRASH_SRCS:.cpp=.o)))
 INITTRASH_HEADS = $(INITTRASH_HDS)  $(BASECLASSES_HEADS)
@@ -218,14 +211,36 @@ SOLVERTRASH_HEADS = $(SOLVERTRASH_HDS)  $(BASECLASSES_HEADS)
 
 DEPS = $(addprefix $(BUILD_DIR)/,$(SRCS:.cpp=.d))
 
+.PHONY: help
 
-
+help:
+	@echo "make <target(s)>"
+	@echo "  where some targets are:"
+	@echo "  help - this message"
+	@echo "  all - compile"
+	@echo "  trash - build command line test tool"
+	@echo "  test - run the default test data (c_du_rm_cl_02)"
+	@echo "  test-a01 | a_du_rm_cl_01 - run this test data"
+	@echo "  test-a1533 | a_du_rm_cl_1533 - run this test data"
+	@echo "  test-a08 | a_du_rm_cl_08 - run this test data"
+	@echo "  test-c02 | c_du_rm_cl_02 - run this test data"
+	@echo "  test-ch03 | ch_du_rm_cl_03 - run this test data"
+	@echo "  test-ch05 | ch_du_rm_cl_05 - run this test data"
+	@echo "  test-d07 | d_du_rm_cl_07 - run this test data"
+	@echo "  test-g01 | g_du_rm_cl_01 - run this test data"
+	@echo "  test-all - run all test files"
+	@echo "  clean - clean the build dir"
+	@echo "  clean-all - clean all the build and source dirs"
+	@echo "  clean-logs - clean logs dirs"
 
 all:   $(OBJS) $(BASECLASSES_OBJS) $(BASETRASH_OBJS) $(INITTRASH_OBJS) $(SOLVERTRASH_OBJS) build/trash.o build/trash_given_sol.o ./build/libvrptools.a
 
 
 
 build/trash.o: trash.cpp $(OSRMCLIENT_HEADER) $(BASECLASSES_HEADS) $(BASETRASH_HEADS) $(INITTRASH_HEADS) $(SOLVERTRASH_HDS) $(HEADS)
+	$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
+
+build/trash_pg.o: trash_pg.cpp $(OSRMCLIENT_HEADER) $(BASECLASSES_HEADS) $(BASETRASH_HEADS) $(INITTRASH_HEADS) $(SOLVERTRASH_HDS) $(HEADS)
 	$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
 build/trash_given_sol.o: trash_given_sol.cpp $(OSRMCLIENT_HEADER) $(BASECLASSES_HEADS) $(BASETRASH_HEADS) $(INITTRASH_HEADS) $(SOLVERTRASH_HDS) $(HEADS)
@@ -260,17 +275,80 @@ build/initTrash/%.o: $(INITTRASH_DIR)/%.cpp  ../../$(INITTRASH)/%.h  $(BASECLASS
 build/solverTrash/%.o: $(SOLVERTRASH_DIR)/%.cpp  $(SOLVERTRASH_DIR)/%.h  $(BASECLASSES_HEADS) $(BASETRASH_HEADS) $(SOLVERTRASH_HEADS)
 	$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
+build/vrptools_wrapper.o: vrptools_wrapper.cpp vrptools.h $(BASECLASSES_HEADS) $(BASETRASH_HEADS) $(INITTRASH_HEADS) $(SOLVERTRASH_HEADS)
+	$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
+
 build/%.o: %.cpp %.h $(BASECLASSES_HEADS) $(BASETRASH_HEADS) $(INITTRASH_HEADS) $(SOLVERTRASH_HEADS)
 	$(CPP) $(CPPFLAGS) $(INCLUDES) -c $< -o $@
 
+.PHONY: trash
+
+trash: bin/trash bin/trashpg
+
 bin/trash: build/trash.o $(OBJS) $(BASECLASSES_OBJS) $(BASETRASH_OBJS) $(INITTRASH_OBJS) $(SOLVERTRASH_OBJS) $(BASECLASSES_HEADS) $(BASETRASH_HEADS) $(INITTRASH_HEADS) $(SOLVERTRASH_HEADS)
+	$(CPP) $(CPPFLAGS_OUT) $^ -o $@ $(LDFLAGS)
+
+bin/trashpg: build/trash_pg.o build/vrptools_wrapper.o $(OBJS) $(BASECLASSES_OBJS) $(BASETRASH_OBJS) $(INITTRASH_OBJS) $(SOLVERTRASH_OBJS) $(BASECLASSES_HEADS) $(BASETRASH_HEADS) $(INITTRASH_HEADS) $(SOLVERTRASH_HEADS)
 	$(CPP) $(CPPFLAGS_OUT) $^ -o $@ $(LDFLAGS)
 
 bin/trash_given_sol: build/trash_given_sol.o $(OBJS) $(BASECLASSES_OBJS) $(BASETRASH_OBJS) $(INITTRASH_OBJS) $(SOLVERTRASH_OBJS) $(BASECLASSES_HEADS) $(BASETRASH_HEADS) $(INITTRASH_HEADS) $(SOLVERTRASH_HEADS)
 	$(CPP) $(CPPFLAGS_OUT) $^ -o $@ $(LDFLAGS)
 
-test: ./bin/trash ../muni-b/muni-b.containers.txt ../muni-b/muni-b.otherlocs.txt ../muni-b/muni-b.dmatrix-time.txt ../muni-b/muni-b.vehicles.txt
-	./bin/trash ../muni-b/muni-b >./logs/muni-b.out
+.PHONY: test-a01 a_du_rm_cl_01 test-a08 a_du_rm_cl_08 test-c02 c_du_rm_cl_02 test-ch05 ch_du_rm_cl_05 test test-all test1 test-a1533 a_du_rm_cl_1533 test-g01 g_du_rm_cl_01 d_du_rm_cl_07 test-g07 test-ch03 ch_du_rm_cl_03 issue23 issue26 issue27
+
+issue27: ./bin/trash ../tests/issue27.containers.txt ../tests/issue27.dmatrix-time.txt ../tests/issue27.otherlocs.txt ../tests/issue27.vehicles.txt
+	-./bin/trash ../tests/$@ > /dev/null
+
+issue26: ./bin/trash ../tests/issue26.containers.txt ../tests/issue26.dmatrix-time.txt ../tests/issue26.otherlocs.txt ../tests/issue26.vehicles.txt
+	-./bin/trash ../tests/$@ > /dev/null
+
+issue23: ./bin/trash ../tests/issue23.containers.txt ../tests/issue23.dmatrix-time.txt ../tests/issue23.otherlocs.txt ../tests/issue23.vehicles.txt
+	-./bin/trash ../tests/$@ > /dev/null
+
+test-a1533: a_du_rm_cl_1533
+
+a_du_rm_cl_1533: ./bin/trash ../tests/a_du_rm_cl_1533.containers.txt ../tests/a_du_rm_cl_1533.dmatrix-time.txt ../tests/a_du_rm_cl_1533.otherlocs.txt ../tests/a_du_rm_cl_1533.vehicles.txt
+	-./bin/trash ../tests/$@ > /dev/null
+
+test-a01: a_du_rm_cl_01
+
+a_du_rm_cl_01: ./bin/trash ../tests/a_du_rm_cl_01.containers.txt ../tests/a_du_rm_cl_01.dmatrix-time.txt ../tests/a_du_rm_cl_01.otherlocs.txt ../tests/a_du_rm_cl_01.vehicles.txt
+	-./bin/trash ../tests/$@ > /dev/null
+
+test-a08: a_du_rm_cl_08
+
+a_du_rm_cl_08: ./bin/trash ../tests/a_du_rm_cl_08.containers.txt ../tests/a_du_rm_cl_08.dmatrix-time.txt ../tests/a_du_rm_cl_08.otherlocs.txt ../tests/a_du_rm_cl_08.vehicles.txt
+	-./bin/trash ../tests/$@ > /dev/null
+
+test-c02: c_du_rm_cl_02
+
+c_du_rm_cl_02: ./bin/trash ../tests/c_du_rm_cl_02.containers.txt ../tests/c_du_rm_cl_02.dmatrix-time.txt ../tests/c_du_rm_cl_02.otherlocs.txt ../tests/c_du_rm_cl_02.vehicles.txt
+	-./bin/trash ../tests/$@ > /dev/null
+
+test-ch03: ch_du_rm_cl_03
+
+ch_du_rm_cl_03: ./bin/trash ../tests/ch_du_rm_cl_03.containers.txt ../tests/ch_du_rm_cl_03.dmatrix-time.txt ../tests/ch_du_rm_cl_03.otherlocs.txt ../tests/ch_du_rm_cl_03.vehicles.txt
+	-./bin/trash ../tests/$@ > /dev/null
+
+test-ch05: ch_du_rm_cl_05
+
+ch_du_rm_cl_05: ./bin/trash ../tests/ch_du_rm_cl_05.containers.txt ../tests/ch_du_rm_cl_05.dmatrix-time.txt ../tests/ch_du_rm_cl_05.otherlocs.txt ../tests/ch_du_rm_cl_05.vehicles.txt
+	-./bin/trash ../tests/$@ > /dev/null
+
+test-g01: g_du_rm_cl_01
+
+g_du_rm_cl_01: ./bin/trash ../tests/g_du_rm_cl_01.containers.txt ../tests/g_du_rm_cl_01.dmatrix-time.txt ../tests/g_du_rm_cl_01.otherlocs.txt ../tests/g_du_rm_cl_01.vehicles.txt
+	-./bin/trash ../tests/$@ > /dev/null
+
+d_du_rm_cl_07: ./bin/trash ../tests/d_du_rm_cl_07.containers.txt ../tests/d_du_rm_cl_07.dmatrix-time.txt ../tests/d_du_rm_cl_07.otherlocs.txt ../tests/d_du_rm_cl_07.vehicles.txt
+	-./bin/trash ../tests/$@ > /dev/null
+
+test-d07: d_du_rm_cl_07
+
+
+test: g_du_rm_cl_01
+
+test-all: a_du_rm_cl_01 a_du_rm_cl_08 c_du_rm_cl_02 ch_du_rm_cl_03 ch_du_rm_cl_05 d_du_rm_cl_07 g_du_rm_cl_01
 
 test1: ./bin/trash_given_sol ../muni-b/muni-b.containers.txt ../muni-b/muni-b.otherlocs.txt ../muni-b/muni-b.dmatrix-time.txt ../muni-b/muni-b.vehicles.txt
 	./bin/trash_given_sol ../muni-b/muni-b >./logs/muni-b.out
@@ -296,7 +374,7 @@ callgrind-8: ./bin/trash ./montevideo/muni-b.*
 
 
 
-.PHONY: clean
+.PHONY: clean clean-all clean-logs
 
 clean:
 	rm -rf $(BIN_DIR)/trash $(BUILD_DIR)/*
@@ -309,12 +387,16 @@ clean:
 	mkdir -p $(BUILD_DIR)/$(BASECLASSES) $(BUILD_DIR)/$(BASETRASH) $(BUILD_DIR)/$(INITTRASH) $(BUILD_DIR)/$(SOLVERTRASH) ./logs
 
 
-cleanAll: clean
+clean-all: clean
 	$(MAKE) -C $(BASECLASSES_DIR) clean
 	$(MAKE) -C $(BASETRASH_DIR) clean
 	$(MAKE) -C $(INITTRASH_DIR) clean
 	$(MAKE) -C $(SOLVERTRASH_DIR) clean
 	rm ./bin/trash
+
+clean-logs:
+	sudo rm ./logs/*
+
 
 -include $(DEPS)
 

@@ -42,9 +42,12 @@ const Trashnode& CostVehicle::last() const {
   return path.size() > 1? path.last(): C;
 }
 double CostVehicle::shiftLength() const {return endTime - startTime; }
-/*! \brief Estimated number of nodes in each trip */
+
+/*! \brief Estimated number of containers in each trip */
 double CostVehicle::estimatedZ() const {return  floor(maxcapacity / C.demand()); }
-/*! \brief arrival time at endsite when departing from the average closing 
+int CostVehicle::estimatedN() const {return  N;}
+
+/*! \brief Arrival time at endsite when departing from the average closing 
   time of the nodes*/
 double CostVehicle::arrivalEclosesLast(const Trashnode &last) const {
    double value = last.closes() + last.serviceTime()
@@ -59,22 +62,44 @@ void CostVehicle::setInitialValues( const Trashnode &node,
 
   C = node;
   ttSC = twc->getAverageTime(depot, picks);
+  // assert(ttSC > 0);
   ttDC = twc->getAverageTime(dumpSite, picks);
   ttCD = twc->getAverageTime(picks, dumpSite);
-  ttDE = twc->TravelTime(dumpSite, endingSite);
-  ttCC = twc->TravelTime(C, C);
+  ttDE = twc->TravelTime(dumpSite.nid(), endingSite.nid());
+  ttCC = twc->TravelTime(C.nid(), C.nid());
+
   //double serviceE = endingSite.serviceTime();
   //shiftLength = endTime - startTime;
   //e_makeFeasable( 0 );
   double Z = estimatedZ();
   totalTime = 0;
-  N = -1;
+  double fixedTime = depot.serviceTime() // begining of trip
+                   + ttDE + serviceE();  // ending of trip 
+  double variableTime = 0.0;
+  totalTime = fixedTime + variableTime;
+  N = 0;
   do {
+    if (N == 0) { //first trip
+      variableTime =
+          C.opens() + ttSC
+          + estimatedZ() * C.serviceTime() 
+          + estimatedZ() * ttCC
+          + ttCD + dumpSite.serviceTime();
+    } else { // not first trip
+      variableTime =
+          ttDC   
+          + estimatedZ() * C.serviceTime() 
+          + estimatedZ() * ttCC
+          + ttCD + dumpSite.serviceTime();
+    }
+    totalTime += variableTime;
+#ifdef VRPMINTRACE
+DLOG(INFO) << "estimated number of trips N " << N;
+DLOG(INFO) << "totalTime " << totalTime;
+DLOG(INFO) << "arrivalEcloseslst(C) " << arrivalEclosesLast(C);
+#endif
     N++;
-    totalTime = depot.serviceTime()  + ttSC + ttDE + serviceE()
-                + N * Z * C.serviceTime() + N * ( Z - 1 ) * ttCC + ( N - 1 ) * ttDC
-                + N * ( dumpSite.serviceTime() + ttCD );
-  } while ( totalTime < arrivalEclosesLast(C) + serviceE() );
+  } while (totalTime + C.departureTime() < arrivalEclosesLast(C) + serviceE());
   // N has now the estimated number of trips
 
   //estimated:
@@ -106,21 +131,17 @@ void CostVehicle::setInitialValues( const Trashnode &node,
 };
 
 void CostVehicle::setCost(const Trashnode &last) {
-
   realttSC = path.size() > 1 ? path[1].totTravelTime()  : ttSC;
   ttSC = std::min( realttSC, ttSC );
 
-  realttCC = size() > 1 ? ( path.getTotTravelTime() - realttSC ) /
-             ( size() - 1 ) : ttCC;
+  realttCC = size() > 1 ? (path.getTotTravelTime() - realttSC) / (size() - 1) : ttCC;
   ttCC = std::min( realttCC, ttCC );
 
   realttCD = 0;
   realttDC = 0;
-  int realZ = 0;
 
   if ( path.dumpVisits() != 0 ) {
-    for ( UINT i = 1; i < path.size() - 1; i++ ) {
-      realZ++;
+    for (UINT i = 1; i < path.size() - 1; i++) {
 
       if ( path[i - 1].isDump() )
         realttCD += twc->TravelTime(path[i - 1], path[i]);
@@ -142,29 +163,28 @@ void CostVehicle::setCost(const Trashnode &last) {
   //>0 the latest the truck can arrive
   //arrivalEclosesLast = std::max( realArrivalEclosesLast, arrivalEclosesLast );
 
-  realForcedWaitTime = endTime - ( realArrivalEclosesLast  +  serviceE() );
-  forcedWaitTime = std::min ( realForcedWaitTime , forcedWaitTime );
+  realForcedWaitTime = endTime - (realArrivalEclosesLast  +  serviceE());
+  forcedWaitTime = std::min (realForcedWaitTime , forcedWaitTime);
 
-  n  = size() - 1 - ( realN() - 1 );
+  n  = size() - 1 - (realN() - 1);
   //>0 allways good, we have one more container (truck point fo view)
   double deltan = n - lastn;
   //setting this n as the last
   lastn = n;
 
-  if (Z == 0) Z = realZ;
-  z = ( realN() == 1 ) ?  n  : n % Z ;
+  if (Z == 0) Z = estimatedZ();
+  z = (realN() == 1)?  n: n % Z;
   //>0 good, we can work more containers/trip
   //double deltaZ = Z - z;
-  Z = std::max( Z, z );
 
   // ==0 we are in the limit of container pickup
   // >0 we need to pickup more containers
-  Zmissing = Z - z;
+  Zmissing = Z - z > 0? Z - z: 0;
 
   //its never negative
-  assert( Zmissing >= 0 );
+  assert(Zmissing >= 0);
 
-  realTotalTime = endingSite.arrivalTime();
+  realTotalTime = endingSite.arrivalTime() - path[0].departureTime();
   lastRealTotalTime = realTotalTime;
 
 #ifdef DOVRPLOG
@@ -179,7 +199,7 @@ void CostVehicle::setCost(const Trashnode &last) {
   //otherwise we are in a TWV and something is wrong on the calculation
   //assert ( realArrivalEclosesLast > realTotalTime );
 
-  realIdleTime =  realArrivalEclosesLast -  realTotalTime ;
+  realIdleTime =  shiftLength() -  realTotalTime ;
 
   realIdleTimeSCDE =  ( Zmissing > 0 ) ?
                       ( C.serviceTime() + realttCC ) * Zmissing :
@@ -241,7 +261,7 @@ void CostVehicle::setCost(const Trashnode &last) {
   double deltaForcedWaitTime = realForcedWaitTime - forcedWaitTime;
   //>0 the latest the truck can arrive is better
   double deltaArrivalEclosesLast = realArrivalEclosesLast -
-                                   arrivalEclosesLast;
+                                   arrivalEclosesLast(this->last());
   // >0 el viaje del dump al contenedor es mas largo que
   // lo esperado (worse)
   double deltattDC = realttDC - ttDC;
@@ -259,17 +279,12 @@ void CostVehicle::setCost(const Trashnode &last) {
                << "deltaArrivalEclosesLast    " << deltaArrivalEclosesLast    << "\n"
                << "deltaForcedWaitTime    " << deltaForcedWaitTime    << "\n"
                << "deltan    " << deltan    << "\n"
-               << "deltaZ    " << deltaZ    << "\n"
                << "deltaRealTotalTime    " << deltaRealTotalTime    << "\n"
                << "deltaz1    " << deltaz1    << "\n"
                << "deltaz2    " << deltaz2    << "\n";
 #endif
 
 
-  //workNotDonePerc = ( double ( realz1 + realz2 ) )  / ( double ( double(
-  //                      n ) + double( realz1 ) + double( realz2 ) ) );
-  //double workDonePerc = 1 - workNotDonePerc;
-  // v_cost =  realTotalTime * (1 + workNotDonePerc) + sumIdle * ( 1 + workDonePerc) + getDuration();
   v_cost = getDuration();
 };
 
@@ -315,34 +330,45 @@ void CostVehicle::dumpCostValues() const
 
 
   DLOG( INFO ) << "------Real  Values of current truck in the solution -------\n"
-               << "                   realttSC\t" << realttSC << "\n"
-               << "                   realttCC\t" << realttCC << "\n"
-               << "                   realttCD\t" << realttCD << "\n"
-               << "                   realttDC\t" << realttDC << "\n"
-               << "                   realttDE\t" << realttDE << "\n"
-               << "                 service(E)\t" << serviceE() << "\n"
-               << "                maxcapacity\t" << maxcapacity << "\n"
-               << "              C.getdemand()\t" << C.demand() << "\n"
-               << "         C.getservicetime()\t" << C.serviceTime()  << "\n"
-               << "                 C.closes()\t" << C.closes() << "\n"
-               << "    path[size()-1].closes()\t" << path[size() - 1].closes() << "\n"
-               << "  dumpSite.getservicetime()\t" << dumpSite.serviceTime()  << "\n"
-               << "dumpSite.getDepartureTime()\t" << dumpSite.departureTime() << "\n"
-               << "                      realN\t" << realN()  << "\n"
-               << "endingSite.getArrivalTime()\t" << endingSite.arrivalTime()  << "\n"
-               << "   depot.getDepartureTime()\t" << depot.departureTime() << "\n"
-               << "                       size\t" << size() << "\n"
-               //<<" \t"<<  <<"\n"
-               //<<" \t"<<  <<"\n"
-               //<<" \t"<<  <<"\n"
+               << "                   realttSC=\t" << realttSC << "\n"
+               << "                   realttCC=\t" << realttCC << "\n"
+               << "                   realttCD=\t" << realttCD << "\n"
+               << "                   realttDC=\t" << realttDC << "\n"
+               << "                   realttDE=\t" << realttDE << "\n"
+               << "                 service(E)=\t" << serviceE() << "\n"
+               << "                maxcapacity=\t" << maxcapacity << "\n"
+               << "                 C.demand()=\t" << C.demand() << "\n"
+               << "            C.servicetime()=\t" << C.serviceTime()  << "\n"
+               << "                 C.closes()=\t" << C.closes() << "\n"
+               << "    path[size()-1].closes()=\t" << path[size() - 1].closes() << "\n"
+               << "  dumpSite.getservicetime()=\t" << dumpSite.serviceTime()  << "\n"
+               << "dumpSite.getDepartureTime()=\t" << dumpSite.departureTime() << "\n"
+               << " (number of trips)    realN=\t" << realN()  << "\n"
+               << "endingSite.getArrivalTime()=\t" << endingSite.arrivalTime()  << "\n"
+               << "      depot.departureTime()=\t" << path[0].departureTime() << "\n"
+               << "                       size=\t" << size() << "\n"
 
-               << "                     Z =\t" << Z  <<
-               "\t= floor( maxcapacity/C.getdemand() )\t" << Z << "\n"
-               << "                     n =\t" << n  << "\t=size() - 1 - ( realN()-1 )  \t" <<
-               n << "\n"
-               << "                     z =\t" << z << "\t=(realN()==1)  z = n  : n % Z\t"  <<
-               z << "\n"
-               << "              Zmissing =\t" << Zmissing << "\t=Z-z\t" << Zmissing << "\n"
+               << "Average # of containers per trip\n"
+               << "                         Z =\t" << estimatedZ()
+               << "\t= floor( maxcapacity/C.demand())"
+               << "\t= floor( " << maxcapacity << "/" << C.demand() << ")\t"
+               << "\n"
+
+               << "                        z =\t" << z 
+               << "\t=(realN()==1)? n  : n % Z\t"  
+               << "\t=(" << realN() << "== 1) " << n << ": " << n % Z  
+               << "\n"
+
+               << "Number of containers that can still fit on last trip\n"
+               << "                 Zmissing =\t" << Zmissing
+               << "\t= Z - z"
+               << "\t= " << Z << " - " << z
+               << "\n"
+
+
+               << "                     n =\t" << n  << "\t=size() - 1 - (realN() - 1)  \t" << n << "\n"
+
+
                << "                realz1 =\t" << realz1 <<
                "\t== min ( floor ( realIdleTimeSCDE / (C.getservicetime() + realttCC) ) , Zmissing )\t"
                << realz1 << "\n"
@@ -351,15 +377,22 @@ void CostVehicle::dumpCostValues() const
 
                << "realArrivalEclosesLast =\t" << arrivalEclosesLast(this->last()) <<
                "\t=path[size()-1].closes() + realttCD + dumpSite.getservicetime() + realttDE \t"
+               << "\n"
+
                << "    realForcedWaitTime =\t" << realForcedWaitTime  <<
                "\t=shiftEnds -( realArrivalEclosesLast  +  serviceE() )\t" << realForcedWaitTime
                << "\n"
-               << "         realTotalTime =\t" << realTotalTime  <<
-               "\t=endingSite.getArrivalTime()\t" << realTotalTime << "\n"
 
+               << "         realTotalTime =\t" << realTotalTime  
+               << "\t =endingSite.arrivalTime()  - path[0].departureTime()\t"
+               << endingSite.arrivalTime() <<" - " << path[0].departureTime() 
+               << "\n"
 
-               << "          realIdleTime =\t" << realIdleTime <<
-               "\t=realArrivalEclosesLast -  realTotalTime\t" << realIdleTime << "\n"
+               << "          realIdleTime =\t" << realIdleTime 
+               << "\t = shiftLength  -  realTotalTime\t"
+               << shiftLength() << " - " << realTotalTime
+               << "\n"
+
                << "      realIdleTimeSCDE =\t" << realIdleTimeSCDE  <<
                "\t=( Zmissing>0 )?  (C.getservicetime() + realttCC ) * Zmissing :\n"
                "\t\t(Zmissing==0? C.closes() - ( depot.getDepartureTime() +  realttSC):0) ;\t"

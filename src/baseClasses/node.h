@@ -44,7 +44,7 @@ class Node {
   ///@{
   bool isLatLon() const {
     return (x_ < 180) && (x_ > -180)
-           && (y_ < 180) && (y_ > -180);
+           && (y_ < 90) && (y_ > -90);
   }
   bool isValid() const { return  valid_ > 0;}
   bool isSamePos(const Node &other) const { return distance(other) == 0; }
@@ -100,13 +100,17 @@ class Node {
   ///@}
 
   /** @name distanceToSegment */
-  /* Shortest distnace from pooit to a segment (v,w) */
+  /* Shortest distance from point to a segment (v,w) */
   ///@{
   double distanceToSegment(const Node &v, const Node &w) const;
   double distanceToSegment(const Node &v, const Node &w, Node &q) const;
   double distanceToSegment(double, double, double, double, double &,
                            double &) const;
   ///@}
+
+  bool isRightToSegment(const Node &lineBegin, const Node &lineEnd) const;
+
+  double positionAlongSegment(const Node &v, const Node &w, double tol) const;
 
   // dump
   void dump() const;

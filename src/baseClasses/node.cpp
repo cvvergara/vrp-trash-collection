@@ -19,8 +19,10 @@
 
 #ifdef DOVRPLOG
 #include "./logger.h"
+#include "./stats.h"
 #endif
 
+#include "./vrp_assert.h"
 #include "./node.h"
 
 
@@ -88,7 +90,8 @@ void Node::set(const std::string &line) {
 void Node::dump() const {
   DLOG(INFO) << nid_
              << ", " << x_
-             << ", " << y_;
+             << ", " << y_
+             << ", " << hint_;
 }
 #endif
 
@@ -200,22 +203,80 @@ double Node::distanceToSegment(const Node &v, const Node &w, Node &q) const {
   return distanceTo(projection);
 }
 
-/*! \brief Compute the shortest distance
-    * Compute the shortest distance and x,y position on the segment of the
-    * closest point.
+
+/*! @brief Compute position along the line segment
+ 
+   Check if the node is on the line segment
+   - return -1.0 if distance exceeds tolerance.
+   - return a value between = & 1 representing the
+     faction on the line segment
+ 
+    return is position as a percentage. ???
+
+  @dot digraph G { 
+
+      n [color = lightblue,style=filled];
+      dummy[shape=point width=0];
+      v -> dummy -> w;
+      n -> dummy;
+  }
+ 
+  @param[in] v start of segment
+  @param[in] w end of segment
+   @param[in] tolerance for distance test
+ 
+   @return position 0.0 to 1.0 along the segment of -1.0 if it is not within tolerance
 */
+
+double Node::positionAlongSegment(const Node &v, const Node &w, double tol) const {
+    STATS_INC("Node::positionAlongSegment");
+
+    double tolerance_Sqr = tol * tol;
+
+    // avoid a sqrt
+    double distance_Sqr = v.distanceToSquared(w);
+
+    // v == w case
+    if (distance_Sqr == 0.0) {
+        return (this->distanceToSquared(v) < tolerance_Sqr)? 0 : -1;
+    }
+
+    // consider the line extending the segment, parameterized as v + t (w - v)
+    // we find projection of point p onto the line
+    // it falls where t = [(p-v) . (w-v)] / |w-v|^2
+
+    double t = ((*this) - v).dotProduct(w - v) / distance_Sqr;
+
+    // -1 when lies beyond the v, w end of the segments
+    t = (t < 0.0 || t > 1.0)? -1 : t;
+
+    // projected point
+    Node projection = v + ((w - v) * t);
+
+    return (distanceToSquared(projection) > tolerance_Sqr)? -1 : t;
+}
+
+/*! \brief Compute the shortest distance
+ * Compute the shortest distance and x,y position on the segment of the
+ * closest point.
+ */
 double Node::distanceToSegment(double segmentX1, double segmentY1,
-                               double segmentX2, double segmentY2,
-                               double &qX, double &qY) const {
-  Node q;
+        double segmentX2, double segmentY2,
+        double &qX, double &qY) const {
+    Node q;
 
-  double distance = distanceToSegment(Node(segmentX1, segmentY1),
-                                      Node(segmentX2, segmentY2), q);
+    double distance = distanceToSegment(Node(segmentX1, segmentY1),
+            Node(segmentX2, segmentY2), q);
 
-  qX = q.x_;
-  qY = q.y_;
+    qX = q.x_;
+    qY = q.y_;
 
-  return distance;
+    return distance;
+}
+
+bool Node::isRightToSegment(const Node &lineBegin, const Node &lineEnd) const
+{
+    return ((lineEnd.x()-lineBegin.x())*(this->y()-lineBegin.y())-(lineEnd.y()-lineBegin.y())*(this->x()-lineBegin.x())) < 0;
 }
 
 
@@ -223,32 +284,32 @@ double Node::distanceToSegment(double segmentX1, double segmentY1,
 
 /*! \brief Construct a new Node that needs the user to set its attributes.  */
 Node::Node()
-  : nid_(0), id_(0), x_(0.0), y_(0.0), hint_(""), valid_(false) {
-}
+    : nid_(0), id_(0), x_(0.0), y_(0.0), hint_(""), valid_(false) {
+    }
 
 /*! \brief Construct a new Node and assign it \c x and \c y values.  */
 Node::Node(double x, double y)
-  : nid_(0), id_(0), x_(x), y_(y), hint_(""), valid_(false) {
-}
+    : nid_(0), id_(0), x_(x), y_(y), hint_(""), valid_(false) {
+    }
 
 /*! \brief Construct a new Node and assign it the associated values.  */
 Node::Node(UID nid, UID id , double x, double y)
-  : nid_(nid), id_(id), x_(x), y_(y), hint_(""), valid_(true) {
-}
+    : nid_(nid), id_(id), x_(x), y_(y), hint_(""), valid_(true) {
+    }
 
 /*! \brief Create a new Node by parsing a string.  */
 Node::Node(const std::string &line)
-     : nid_(0), id_(0), x_(0.0), y_(0.0), hint_(""), valid_(true) {
-  std::istringstream buffer(line);
-  long int ids;
-  buffer >> ids;
-  buffer >> x_;
-  buffer >> y_;
-  hint_ = "";
-  if (ids < 0) {
-    valid_ = false;
-  } else {
-    nid_ = UID(ids);
-    id_ = UID(ids);
-  }
-}
+    : nid_(0), id_(0), x_(0.0), y_(0.0), hint_(""), valid_(true) {
+        std::istringstream buffer(line);
+        long int ids;
+        buffer >> ids;
+        buffer >> x_;
+        buffer >> y_;
+        hint_ = "";
+        if (ids < 0) {
+            valid_ = false;
+        } else {
+            nid_ = UID(ids);
+            id_ = UID(ids);
+        }
+    }

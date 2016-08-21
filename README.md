@@ -1,5 +1,19 @@
-vehicle-routing-problems
-========================
+Garbage collection in montevideo
+============================================
+
+# A little Code Cleanup
+
+The project started to be a bit of everything.
+But there is a lot o unsued code.
+
+First clean up Garbage collection code, And post the clean up in the public repository.
+(Specially for the FOSS4G)
+
+Then a cmake.
+
+
+
+# Original comments:
 
 ## C++ Classes for solving various vehicle routing problems
 

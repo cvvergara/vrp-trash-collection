@@ -1,3 +1,16 @@
+/*VRP*********************************************************************
+ *
+ * vehicle routing problems
+ *      A collection of C++ classes for developing VRP solutions
+ *      and specific solutions developed using these classes.
+ *
+ * Copyright 2014 Stephen Woodbridge <woodbri@imaptools.com>
+ * Copyright 2014 Vicky Vergara <vicky_vergara@hotmail.com>
+ *
+ * This is free software; you can redistribute and/or modify it under
+ * the terms of the MIT License. Please file LICENSE for details.
+ *
+ ********************************************************************VRP*/
 #ifndef SIGNALHANDLER_H
 #define SIGNALHANDLER_H
 
@@ -49,6 +62,9 @@ public:
   // by setting the slot in the <signalHandlers_>
   // table to NULL.
   void removeHandler( int signum );
+
+  // Fetch the current pointer to signal handler or NULL pointer
+  EventHandler *getHandler( int signum ) { return signalHandlers_[signum]; };
 
 private:
   // Ensure we're a Singleton.
@@ -116,7 +132,8 @@ private:
     SignalHandler::instance()->registerHandler (SIGQUIT, &sigquit_handler);
 
 #define THROW_ON_SIGINT do { \
-    if ( sigint_handler.gracefulQuit() == 1 ) \
+    SIGINT_Handler *sigint_handler = (SIGINT_Handler *)SignalHandler::instance()->getHandler(SIGINT); \
+    if ( sigint_handler and sigint_handler->gracefulQuit() == 1 ) \
         throw( UserQuitException( "Abort on User Request!" ) ); \
     } while (0);
 

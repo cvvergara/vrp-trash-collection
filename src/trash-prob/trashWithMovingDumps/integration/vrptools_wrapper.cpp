@@ -31,8 +31,8 @@
 #endif
 
 #include "trashprob.h"
-#include "feasableSolLoop.h"
-#include "tabuopt.h"
+#include "truckManyVisitsDump.h"
+#include "fleetOpt.h"
 
 //#define PGR_LOGGER_ON
 #include "./minilog.h"
@@ -52,7 +52,6 @@ int vrp_trash_collection( container_t *containers, unsigned int container_count,
     REG_SIGINT
 
 #ifdef DOVRPLOG
-
     if ( not google::IsGoogleLoggingInitialized() ) {
       FLAGS_log_dir = "/tmp/";
       google::InitGoogleLogging( "vrp_trash_collection" );
@@ -60,16 +59,42 @@ int vrp_trash_collection( container_t *containers, unsigned int container_count,
       FLAGS_stderrthreshold = google::FATAL;
       FLAGS_minloglevel = google::INFO;
     }
+    PGR_LOGF("google::IsGoogleLoggingInitialized: %d\n", google::IsGoogleLoggingInitialized());
+#endif
 
+    osrmi->useOsrm( true );
+
+    std::string err = osrmi->getErrorMsg();
+
+    if (not osrmi->getConnection()) {
+#ifdef DOVRPLOG
+        DLOG(INFO) << "in wrapper, OSRM connection is not available!";
+#endif
+        *err_msg = strdup( "OSRM connection is not available!" );
+        return -1;
+    }
+
+#ifdef DOVRPLOG
+    DLOG(INFO) << "Starting vrp_trash_collection(): num. container: "
+               << container_count << ", num. other_loc: "
+               << otherloc_count  << ", num. vehicle: "
+               << vehicle_count   << ", num. ttime: "
+               << ttime_count     << ", num. iteration: "
+               << iteration;
 #endif
 
 
-    TrashProb prob(containers, container_count, otherlocs, otherloc_count, ttimes,
-                   ttime_count, vehicles, vehicle_count) ;
 
+    TrashProb prob(containers, container_count, otherlocs, otherloc_count,
+                   ttimes, ttime_count, vehicles, vehicle_count, check);
+
+#if 0
+    DLOG(INFO) << "Problem definition -----------------------";
+    prob.dumpdataNodes();
+#endif
 
     if (check == 1) {
-      if ( prob.isValid() )
+      if ( prob.isValid() or prob.getErrorsString().size() == 0 )
         *data_err_msg = strdup( "OK" );
       else
         *data_err_msg = strdup( prob.getErrorsString().c_str() );
@@ -87,16 +112,77 @@ int vrp_trash_collection( container_t *containers, unsigned int container_count,
 
     THROW_ON_SIGINT
 
-    FeasableSolLoop tp( prob );
-    tp.computeCosts();
+    TruckManyVisitsDump tp( prob );
+    tp.process(0);
+#ifdef DOVRPLOG
+    DLOG(INFO) << "Initial solution: 0 is best";
+#endif
+
+    double best_cost = 9999999;
+    Solution best_sol( tp );
+    best_cost = best_sol.getCostOsrm();
 
     THROW_ON_SIGINT
 
-    TabuOpt ts( tp , iteration);
+#if 0
+    best_sol.dumpSolutionForPg();
+#endif
+
+#if 0
+    TabuOpt tsi( tp , iteration);
+    Solution opt_sol = tsi.getBestSolution();
+
+    if (best_cost > opt_sol.getCostOsrm()) {
+#ifdef DOVRPLOG
+      DLOG(INFO) << "Optimization: 0 is best";
+#endif
+      best_cost = opt_sol.getCostOsrm();
+      best_sol = opt_sol;
+    }
+#endif
+
+    for (int icase = 1; icase < 7; ++icase) {
+#ifdef DOVRPLOG
+      DLOG(INFO) << "initial solution: " << icase;
+#endif
+      tp.process(icase);
+      if (best_cost > tp.getCostOsrm()) {
+#ifdef DOVRPLOG
+        DLOG(INFO) << "initial solution: " << icase << " is best";
+#endif
+        best_cost = tp.getCostOsrm();
+        best_sol = tp;
+      }
+
+      THROW_ON_SIGINT
+
+    }
+
+#if 0
+    DLOG(INFO) << "Best initial solution selected";
+    best_sol.dumpSolutionForPg();
+#endif
+
+    Optimizer optSol(best_sol, iteration);
+    if (best_cost > optSol.getCostOsrm()) {
+        best_cost = optSol.getCostOsrm();
+        best_sol = optSol;
+    }
+
+#ifdef DOVRPLOG
+    DLOG(INFO) << "=-=-=-=-=-=- OPTIMIZED SOLUTION -=-=-=-=-=-=-=";
+    DLOG(INFO) << "Number of containers: " << best_sol.countPickups();
+    best_sol.dumpCostValues();
+    DLOG(INFO) << "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=";
+    best_sol.tau();
+    DLOG(INFO) << "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=";
+#endif
 
     unsigned long int count = 0;
-    *vehicle_paths = ts.getSolutionForPg( count );
+    *vehicle_paths = best_sol.getSolutionForPg( count );
     *vehicle_path_count = count;
+
+    twc->cleanUp();
 
     if ( count == -1 ) {
       *err_msg = strdup ( "Failed to allocate memory for results!");
@@ -104,7 +190,6 @@ int vrp_trash_collection( container_t *containers, unsigned int container_count,
       return -1;
     }
 
-    twc->cleanUp();
   } catch ( std::exception &e ) {
 #ifdef DOVRPLOG
     DLOG(INFO) << "in wrapper, caught exception: " << e.what();
@@ -126,8 +211,8 @@ int vrp_trash_collection( container_t *containers, unsigned int container_count,
 }
 
 
-int get_osrm_route_geom( float8 *lat, float8 *lon, int num, double *time, char **gtext,
-          char **err_msg ) {
+int get_osrm_route_geom( float8 *lat, float8 *lon, int num, double *time,
+          char **gtext, char **err_msg ) {
 
 #ifdef OSRMCLIENT
   bool ret;
@@ -140,7 +225,6 @@ int get_osrm_route_geom( float8 *lat, float8 *lon, int num, double *time, char *
     PGR_LOG("Called get_osrm_route_geom");
 
 #ifdef DOVRPLOG
-
     if ( not google::IsGoogleLoggingInitialized() ) {
       FLAGS_log_dir = "/tmp/";
       google::InitGoogleLogging( "vrp_trash_collection" );
@@ -149,7 +233,6 @@ int get_osrm_route_geom( float8 *lat, float8 *lon, int num, double *time, char *
       FLAGS_minloglevel = google::INFO;
       PGR_LOG("Initializing InitGoogleLogging");
     }
-
 #endif
 
     osrmi->useOsrm( true );

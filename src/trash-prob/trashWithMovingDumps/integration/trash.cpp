@@ -23,7 +23,6 @@
 
 #ifdef DOVRPLOG
 #include "logger.h"
-//#include "glog/utilities.h"
 #endif
 
 #ifdef DOSTATS
@@ -31,16 +30,15 @@
 #include "stats.h"
 #endif
 
-
-
 #include "trashconfig.h"
-#include "feasableSolLoop.h"
-#include "tabuopt.h"
+#include "truckManyVisitsDump.h"
+#include "fleetOpt.h"
 
 
 void Usage()
 {
   std::cout << "Usage: trash file (no extension)\n";
+  std::cout << "trash file data_path\n";
 }
 
 
@@ -64,89 +62,14 @@ int main(int argc, char **argv)
 {
 
 #ifdef DOVRPLOG
-
   if ( not google::IsGoogleLoggingInitialized() ) {
     FLAGS_log_dir = "./logs/";
     google::InitGoogleLogging( "vrp_trash_collection" );
     FLAGS_logtostderr = 0;
     FLAGS_stderrthreshold = google::FATAL;
     FLAGS_minloglevel = google::INFO;
+    FLAGS_logbufsecs = 0;
   }
-
-#endif
-
-//#define MAKETEST
-#ifdef MAKETEST
-
-//  expected output when ran as:
-//  sudo -u postgres bin/maketest
-//
-//  i: 0, time: 0
-//  i: 1, time: 1.18333
-//  i: 2, time: 1.81667
-
-    osrmi->clear();
-    osrmi->useOsrm( true );
-    //loc=-34.905422,-56.161236
-    //loc=-34.905815,-56.161892
-    //loc=-34.849224,-56.095463
-    //loc=-34.905109,-56.161789
-    osrmi->addViaPoint( -34.905422,-56.161236 );
-    osrmi->addViaPoint( -34.905815,-56.161892 );
-    osrmi->addViaPoint( -34.849224,-56.095463 );
-    osrmi->addViaPoint( -34.905109,-56.161789 );
-    if ( osrmi->getOsrmViaroute() ) {
-
-        std::deque<double> times;
-        if ( osrmi->getOsrmTimes( times ) ) {
-            std::cout << "Times:" << std::endl;
-            for (int i=0; i<times.size(); i++)
-                std::cout << "i: " << i << ", time: " << times[i] << std::endl;
-        }
-        else {
-            std::cout << "getOsrmTimes Failed!" << std::endl;
-            return 1;
-        }
-
-        std::deque<std::string> hints;
-        if ( osrmi->getOsrmHints( hints ) ) {
-            std::cout << "Hints:" << std::endl;
-            for (int i=0; i<hints.size(); i++)
-                std::cout << "i: " << i << ", hint: " << hints[i] << std::endl;
-        }
-        else {
-            std::cout << "getOsrmHints Failed!" << std::endl;
-            return 1;
-        }
-
-        std::deque<std::string> names;
-        if ( osrmi->getOsrmStreetNames( names ) ) {
-            std::cout << "StreetNames:" << std::endl;
-            for (int i=0; i<names.size(); i++)
-                std::cout << "i: " << i << ", name: " << names[i] << std::endl;
-        }
-        else {
-            std::cout << "getOsrmStreetNames Failed!" << std::endl;
-            return 1;
-        }
-
-        names.clear();
-        if ( osrmi->getOsrmNamesOnRoute( names ) ) {
-            std::cout << "NamesOnRoute:" << std::endl;
-            for (int i=0; i<names.size(); i++)
-                std::cout << "i: " << i << ", name: " << names[i] << std::endl;
-        }
-        else {
-            std::cout << "getOsrmNamesOnRoute Failed!" << std::endl;
-            return 1;
-        }
-    }
-    else {
-        std::cout << "getOsrmViaroute Failed!" << std::endl;
-        return 1;
-    }
-
-    return 0;
 #endif
 
   if (argc < 2) {
@@ -165,61 +88,77 @@ int main(int argc, char **argv)
     //CONFIG->dump("CONFIG");
 #endif
 
-    FeasableSolLoop tp(infile);
+#ifdef VRPMINTRACE
+   DLOG(INFO) << "log file started for: " << infile;
+#endif
+
+
+   /* testing the server before using */
+   { 
+       osrmi->useOsrm(true);
+       bool testResult = osrmi->testOsrmClient(
+               -34.87198931958, -56.190261840820305,
+               -34.88156563691107, -56.17189407348633,
+               -34.90634621832085, -56.16365432739258
+               );
+       assert(testResult == true);
+   }
+#if 0
+   /* set to 1 when testing OSRM only */
+   assert(true==false);        
+#endif
+
+
+
+
+   int iteration = 50;
+   double best_cost = 9999999;
+
+   /* 
+    * Initializing the problem
+    */
+   TruckManyVisitsDump tp(infile);
+
+
+   tp.process(2);
+
+   STATS_PRINT("stats");
+   assert(true==false);        
+
+   DLOG(INFO) << "Initial solution: 0 is best";
+   Solution best_sol(tp);
+   best_cost = best_sol.getCostOsrm();
+
+   for (int icase = 1; icase < 7; ++icase) {
+       DLOG(INFO) << "initial solution: " << icase;
+       tp.process(icase);
+       if (best_cost > tp.getCostOsrm()) {
+           DLOG(INFO) << "initial solution: " << icase << " is best";
+           best_cost = tp.getCostOsrm();
+           best_sol = tp;
+       }
+   }
+
+
+   Optimizer optSol(best_sol, iteration);
+   if (best_cost > optSol.getCostOsrm()) {
+       best_cost = optSol.getCostOsrm();
+       best_sol = optSol;
+   }
+
 
 
 #ifdef VRPMINTRACE
-    tp.dumpCostValues();
-#ifdef DOSTATS
-    DLOG(INFO) << "FeasableSol time: " << starttime.duration();
-#endif
+   best_sol.dumpCostValues();
+   best_sol.tau();
 #endif
 
-#ifdef DOSTATS
-    STATS->set("FeasableSol time", starttime.duration());
-#endif
-
-    tp.setInitialValues();
-    tp.computeCosts();
-#ifdef DOSTATS
-    STATS->set("Initial cost", tp.getCost());
-    STATS->set("Node count", tp.getNodeCount());
-    STATS->set("Vehicle count", tp.getFleetSize());
-    Timer searchtime;
-#endif
-
-    int iteration = 3;
-    TabuOpt ts(tp, iteration);
-
-#ifdef DOSTATS
-    STATS->set("Search time", searchtime.duration());
-#endif
-
-    Solution best = ts.getBestSolution();
-    best.computeCosts();
-
-#ifdef DOSTATS
-    STATS->set("Total time", starttime.duration());
-#endif
-
-#ifdef VRPMINTRACE
-    best.dumpCostValues();
-    best.tau();
-#endif
-
-#ifdef DOSTATS
-    STATS->set("best cost", best.getCost());
-    STATS->set("Best distance", best.getDistance());
-
-    STATS->dump("Final");
-#endif
-
-    best.dumpSolutionForPg();
-    twc->cleanUp();
+   best_sol.dumpSolutionForPg();
+   twc->cleanUp();
 
   } catch (const std::exception &e) {
-    std::cerr << e.what() << std::endl;
-    return 1;
+      std::cerr << e.what() << std::endl;
+      return 1;
   }
 
   return 0;

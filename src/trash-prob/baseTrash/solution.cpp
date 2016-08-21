@@ -40,6 +40,15 @@ void Solution::evaluate()
 }
 
 
+int Solution::countPickups() {
+    assert( fleet.size() );
+
+    int count = 0;
+    for ( UINT i = 0; i < fleet.size(); i++ )
+      count += fleet[i].countPickups();
+
+    return count;
+}
 
 
 int Solution::v_computeCosts()
@@ -68,6 +77,15 @@ int Solution::v_computeCosts()
 }
 
 
+double Solution::getCostOsrm() {
+  totalCost = 0.0;
+
+  for ( UINT i = 0; i < fleet.size(); i++ ) {
+    totalCost += fleet[i].getCostOsrm();
+  }
+
+  return totalCost;
+}
 
 int Solution::computeCosts()
 {
@@ -83,7 +101,7 @@ double Solution::getDistance() const
 {
   return totalDistance;
 }
-
+/*
 void Solution::dumpSolutionForPg () const
 {
   vehicle_path_t *results;
@@ -126,8 +144,136 @@ void Solution::dumpSolutionForPg () const
   }
 
   free(results);
-}
+}*/
 
+//Duplicated dumpSolutionForPg in order to change the output
+void Solution::dumpSolutionForPg () const
+{
+  vehicle_path_t *results;
+  UINT count;
+  results = getSolutionForPg( count ) ;
+/*
+  std::cout <<"\tseq:" <<
+            "\tVID:" <<
+            "\tnid" <<
+            "\tntype" <<
+            "\tdeltaTime" <<
+            "\tcargo" << std::endl;
+  for (UINT i = 0; i < count; i++)
+    std::cout << i <<
+              "\t" << results[i].seq <<
+              "\t" << results[i].vid <<
+              "\t" << results[i].nid <<
+              "\t" << results[i].ntype <<
+              "\t" << results[i].deltatime <<
+              "\t" << results[i].cargo << std::endl;
+              */
+  auto mapPhantomNodes = twc->getPhantomNodes();
+
+  for ( UINT i = 0; i < fleet.size(); ++i ) {
+    if ( fleet[i].size() <= 1 ) continue;
+    int seq = 0;
+    std::cout <<
+              "seq" <<
+              "\tVID" <<
+              "\tx" <<
+              "\ty" <<
+              "\tid" <<
+              "\tntype" <<
+              "\tDepart" <<
+              "\tdTime" <<
+              "\tdCargo" << std::endl;
+    for ( UINT j = 0; j < fleet[i].size(); ++j ) {
+        seq++;
+        auto it = mapPhantomNodes.find(fleet[i][j].id());
+        if ( it!=mapPhantomNodes.end() ) {
+#ifdef REWRITE
+            /*
+             * This section use phantomnodes
+             *
+             * TODO n is not defined
+             *
+             */
+
+          Twnode before = Twnode(twc->IPNId(),it->second.reveNodeId(),it->second.beforePNode().x(),it->second.beforePNode().y());
+          n.set_type( Twnode::kPhantomNode );
+          Twnode after = Twnode(twc->IPNId(),it->second.forwNodeId(),it->second.afterPNode().x(),it->second.afterPNode().y());
+          n.set_type( Twnode::kPhantomNode );
+
+          //Print beforeNode
+          std::cout <<
+                     seq <<
+                    "\t" << fleet[i].getVid() <<
+                    "\t" << it->second.beforePNode().x() <<
+                    "\t" << it->second.beforePNode().y() <<
+                    "\t" << it->second.reveNodeId() <<
+                    "\t" << TWC::mIPNId <<
+                    "\t" << "" <<
+                    "\t" << "" <<
+                    "\t" << "" << std::endl;
+          //Print Node
+            std::cout <<
+                       seq <<
+                      "\t" << fleet[i].getVid() <<
+                      "\t" << fleet[i][j].x() <<
+                      "\t" << fleet[i][j].y() <<
+                      "\t" << fleet[i][j].id() <<
+                      "\t" << fleet[i][j].type() <<
+                      "\t" << fleet[i][j].departureTime() <<
+                      "\t" << fleet[i][j].deltaTime() <<
+                      "\t" << fleet[i][j].demand() << std::endl;
+            //Print afterNode
+            std::cout <<
+                       seq <<
+                      "\t" << fleet[i].getVid() <<
+                      "\t" << it->second.afterPNode().x() <<
+                      "\t" << it->second.afterPNode().y() <<
+                      "\t" << it->second.forwNodeId() <<
+                      "\t" << TWC::mIPNId <<
+                      "\t" << "" <<
+                      "\t" << "" <<
+                      "\t" << "" << std::endl;
+#endif
+        }
+        else
+        {
+            //Print Node
+              std::cout <<
+                         seq <<
+                        "\t" << fleet[i].getVid() <<
+                        "\t" << fleet[i][j].x() <<
+                        "\t" << fleet[i][j].y() <<
+                        "\t" << fleet[i][j].id() <<
+                        "\t" << fleet[i][j].type() <<
+                        "\t" << fleet[i][j].departureTime() <<
+                        "\t" << fleet[i][j].deltaTime() <<
+                        "\t" << fleet[i][j].demand() << std::endl;
+        }
+    }
+
+    seq++;
+    std::cout <<
+              seq  <<
+              "\t" << fleet[i].getVid() <<
+              "\t" << fleet[i].getDumpSite().id() <<
+              "\t" << fleet[i].getDumpSite().type() <<
+              "\t" << fleet[i].getDumpSite().departureTime() <<
+              "\t" <<  fleet[i].getDumpSite().deltaTime() <<
+              "\t" << fleet[i].getDumpSite().demand() << std::endl;
+    seq++;
+    std::cout <<
+              seq  <<
+              "\t" << fleet[i].getVid() <<
+              "\t" << fleet[i].getEndingSite().id() <<
+              "\t" << fleet[i].getEndingSite().type() <<
+              "\t" << fleet[i].getEndingSite().departureTime() <<
+              "\t" <<  fleet[i].getEndingSite().deltaTime() <<
+              "\t" << fleet[i].getEndingSite().demand() << std::endl;
+
+
+  }
+  free(results);
+}
 
 
 vehicle_path_t *Solution::getSolutionForPg( UINT &count ) const
@@ -193,6 +339,14 @@ vehicle_path_t *Solution::getSolutionForPg( UINT &count ) const
 #ifdef DOVRPLOG
   DLOG( INFO ) << "Solution::getSolutionForPg: seq: " << seq << ", count: " <<
                count;
+  for (UINT i = 0; i < count; i++)
+    DLOG( INFO ) << "i" << i <<
+              "\tseq:" << results[i].seq <<
+              "\tVID:" << results[i].vid <<
+              "\tnid" << results[i].nid <<
+              "\tntype" << results[i].ntype <<
+              "\tdeltaTime" << results[i].deltatime <<
+              "\tcargo" << results[i].cargo;
 #endif
   return results;
 }
@@ -601,11 +755,10 @@ void Solution::dumpFleet() const
 }
 
 
-void Solution::dump() const
-{
-  dumpDepots();
-  dumpDumps();
-  dumpPickups();
+void Solution::dump() const {
+  depots.dump("----------- depots -----------");
+  dumps.dump("----------- dumps -----------");
+  pickups.dump("----------- pickups -----------");
   dumpFleet();
   dumpSummary();
 }

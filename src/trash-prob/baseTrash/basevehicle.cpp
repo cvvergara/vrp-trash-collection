@@ -28,12 +28,123 @@
 
 #include "twpath.h"
 #include "basevehicle.h"
-#ifdef WITHOSRM
-#include "vrposrm.h"
-#endif
 #include "move.h"
 
 
+void BaseVehicle::set_endingSite(const Trashnode &other) {
+  endingSite.set_id(other.id());
+  endingSite.set_nid(other.nid());
+  endingSite.set_x(other.x());
+  endingSite.set_y(other.y());
+  endingSite.set_serviceTime(0);
+  endingSite.set_demand(0);
+  endingSite.set_type(Twnode::kEnd);
+}
+
+void BaseVehicle::set_startingSite(const Trashnode &other) {
+DLOG(INFO) << other.id();
+DLOG(INFO) << other.nid();
+  depot.set_id(other.id());
+  depot.set_nid(other.nid());
+  depot.set_x(other.x());
+  depot.set_y(other.y());
+  depot.set_serviceTime(0);
+  depot.set_demand(0);
+  depot.set_type(Twnode::kStart);
+  path.push_front(depot);
+}
+
+void BaseVehicle::e_add_trip(const BaseVehicle &trip) {
+  if (this->size() > 1) path.push_back(dumpSite);
+  for (UINT j = 1; j < trip.size(); ++j) {
+    path.push_back(trip[j]);
+  }
+  evaluate();
+}
+
+
+
+void BaseVehicle::print_short_eval() const {
+  print_short_eval("short eval");
+}
+
+void BaseVehicle::print_short_eval(const std::string& title) const {
+  DLOG(INFO) << title;
+  DLOG(INFO) << "starting site";
+  path[0].dumpeval(maxcapacity);
+  DLOG(INFO) << "dump site";
+  dumpSite.dumpeval(maxcapacity);
+  DLOG(INFO) << "endig site";
+  endingSite.dumpeval(maxcapacity);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bool  BaseVehicle::findPairNodesHasMoreNodesOnPath(
+  const TwBucket<Trashnode> &assigned, const TwBucket<Trashnode> &unassigned,
+  UINT &bestFrom, UINT &bestTo, TwBucket<Trashnode> &subPath) {
+  assert(unassigned.size());
+    bool found = twc->findPairNodesHasMoreNodesOnPath(assigned, unassigned,
+                       bestFrom, bestTo, subPath);
+  assert(found);
+  return found;
+}
+
+bool  BaseVehicle::findNodeHasMoreNodesOnPath(
+  const TwBucket<Trashnode> &assigned, const TwBucket<Trashnode> &unassigned,
+  UINT &bestNode, UINT &bestPos, TwBucket<Trashnode> &subPath) {
+  assert(unassigned.size());
+    bool found = twc->findNodeHasMoreNodesOnPath(path, assigned, unassigned,
+                       dumpSite, bestNode, bestPos, subPath);
+  assert(found);
+  return found;
+}
+
+
+void  BaseVehicle::setTravelingTimesOfRoute() const {
+    twc->setTravelingTimesOfRoute(path,dumpSite);
+}
 
 
 #ifdef WITHOSRM
@@ -53,8 +164,7 @@ double BaseVehicle::getCostOsrm() const
 }
 
 
-double BaseVehicle::getTotTravelTimeOsrm() const
-{
+double BaseVehicle::getTotTravelTimeOsrm() const {
   return endingSite.getTotTravelTimeOsrm();
 };
 #endif
@@ -101,8 +211,8 @@ bool BaseVehicle::findNearestNodeTo(Bucket &unassigned, POS &pos,
   double bestDist = -1;
   double d;
 
-  flag = twc->findNearestNodeUseExistingData( path, unassigned,  pos , bestNode,
-         bestDist );
+  flag = twc->findNearestNodeUseExistingData(path, unassigned,  pos , bestNode,
+         bestDist);
 
   for ( POS i = 0; i < unassigned.size(); i++ ) {
     if ( twc->isCompatibleIAJ( path[size() - 1]  , unassigned[i], dumpSite ) ) {
@@ -120,23 +230,51 @@ bool BaseVehicle::findNearestNodeTo(Bucket &unassigned, POS &pos,
   return flag;
 }
 
+bool BaseVehicle::findFastestNodeTo(bool first, Bucket &unassigned, POS &pos,
+                                    Trashnode &bestNode, double &bestTime) {
+
+#ifdef VRPMAXTRACE
+  DLOG( INFO ) << "Entering BaseVehicle::findFastestNodeTo";
+#endif
+  assert ( unassigned.size() );
+
+  if ( not unassigned.size() ) return false;
+
+  bool flag = false;
+  bestTime = VRP_MAX();
+  bool oldStateOsrm = osrmi->getUse();
+  osrmi->useOsrm(true);
+  flag = twc->findFastestNodeTo(first, path, unassigned, dumpSite,
+         pos, bestNode, bestTime);
+
+#ifdef VRPMAXTRACE 
+DLOG(INFO) << "bestTime: " << bestTime 
+           << "\t after position: "  << (pos-1)
+           << "\t node:" << bestNode.id() 
+           << "\t truck.size():" << path.size();
+#endif 
+  osrmi->useOsrm(oldStateOsrm);
+  return flag;
+}
+
+
+int BaseVehicle::countPickups() const {
+  int count = 0;
+  for ( POS i = 1; i < path.size(); i++ )
+    if ( path[i].isPickup() ) count++;
+
+  return count;
+}
+
+
 
 #ifdef DOVRPLOG
-void BaseVehicle::dump() const
-{
+void BaseVehicle::dump() const {
   DLOG( INFO ) << "---------- BaseVehicle ---------------";
   DLOG( INFO ) << "maxcapacity: " << getmaxcapacity();
   DLOG( INFO ) << "cargo: " << getCargo();
-  DLOG( INFO ) << "duration: " << getDuration();
-  DLOG( INFO ) << "cost: " << getcost();
-#ifdef WITHOSRM
-  DLOG( INFO ) << "OSRM time: " << getTotTravelTimeOsrm();
-#endif
   DLOG( INFO ) << "twvTot: " << twvTot();
   DLOG( INFO ) << "cvTot: " << cvTot();
-  DLOG( INFO ) << "w1: " << getw1();
-  DLOG( INFO ) << "w2: " << getw2();
-  DLOG( INFO ) << "w3: " << getw3();
   DLOG( INFO ) << "path nodes: -----------------";
   path.dump();
 }
@@ -153,8 +291,9 @@ void BaseVehicle::dump( const std::string &title ) const
 }
 
 
-void BaseVehicle::dumpeval() const
+void BaseVehicle::dumpeval(const std::string &title) const
 {
+  DLOG( INFO ) << "\n************* " << title << " ********************\n";
   DLOG( INFO ) << "\nStarting site:";
   path[0].dumpeval(maxcapacity);
 
@@ -170,6 +309,9 @@ void BaseVehicle::dumpeval() const
   DLOG( INFO )  << "TOTAL COST=" << cost;
 }
 
+void BaseVehicle::dumpeval() const {
+  dumpeval("NO TITLE");
+}
 
 void BaseVehicle::smalldump() const
 {
@@ -180,17 +322,22 @@ void BaseVehicle::smalldump() const
   DLOG( INFO )  << "TOTAL COST=" << cost;
 }
 
-void BaseVehicle::tau() const
-{
+void BaseVehicle::tau(const std::string &title) const {
   std::stringstream ss;
-  ss << " ";
+  ss << title << ": ";
 
-  for ( POS i = 0; i < path.size(); i++ )
-    ss << id( i ) << " ";
+  for (POS i = 0; i < path.size(); i++) {
+    ss << id(i) << " ";
+    if (path[i].isDump()) ss << "\n" << id(i) << " ";
+  }
 
   ss << dumpSite.id() << " ";
   ss << endingSite.id();
   DLOG( INFO ) << ss.str();
+}
+
+void BaseVehicle::tau() const {
+  tau("");
 }
 #endif
 
@@ -202,6 +349,10 @@ std::deque<int> BaseVehicle::getpath() const
   p.push_back( getDumpSite().nid() );
   p.push_back( getDepot().nid() );
   return p;
+}
+
+bool BaseVehicle::e_adjustDumpsToNoCV(int currentPos) {
+  path.e_adjustDumpsToNoCV(currentPos, dumpSite, maxcapacity);
 }
 
 
@@ -223,7 +374,7 @@ bool BaseVehicle::push_front( Trashnode node )
 
 #endif
 
-bool BaseVehicle::insert( Trashnode node, int at )
+bool BaseVehicle::e_insert( Trashnode node, int at )
 {
   if (not path.e_insert( node, at, getmaxcapacity()))
     return false;
@@ -232,18 +383,22 @@ bool BaseVehicle::insert( Trashnode node, int at )
   return true;
 }
 
-#if 0
-bool BaseVehicle::remove( int at )
+ void BaseVehicle::e_swap(int i,int j){  
+        if (i==j) return; //nothing to swap
+        path.e_swap(i,j,maxcapacity);
+        evalLast();
+ }
+
+
+bool BaseVehicle::e_remove( int at )
 {
-  E_Ret ret = path.e_remove( at, getmaxcapacity() );
-
-  if ( ret == OK ) evalLast();
-  else if ( ret == INVALID ) return false;
-
-  return true;
+  bool ret = path.e_remove(at, getmaxcapacity());
+  evalLast();
+  return ret;
 }
 
 
+#if 0
 bool BaseVehicle::moverange( int rangefrom, int rangeto, int destbefore )
 {
   E_Ret ret = path.e_move( rangefrom, rangeto, destbefore, getmaxcapacity() );
@@ -339,8 +494,7 @@ void BaseVehicle::evalLast()
            w3 * endingSite.twvTot();
 }
 
-void BaseVehicle::evaluate()
-{
+void BaseVehicle::evaluate() {
   path.evaluate(0, getmaxcapacity());
   evalLast();
 }
@@ -348,20 +502,9 @@ void BaseVehicle::evaluate()
 
 #ifdef OSRMCLIENT
 void BaseVehicle::evaluateOsrm() {
-  if (!osrmi->getConnection()) {
-    DLOG(INFO)<<"OSRM connection not found: using normal evaluation";
-    evaluate();
-    return;
-  };
-  bool oldUse=osrmi->getUse();
-  osrmi->useOsrm(true);
-  path.evaluateOsrm(getmaxcapacity());
-
-  Trashnode last = path[path.size() - 1];
-  dumpSite.evaluateOsrm(last, getmaxcapacity());
-  endingSite.evaluate(dumpSite, getmaxcapacity());
-  osrmi->clear();
-  osrmi->useOsrm(oldUse);
+  setTravelingTimesOfRoute();  // uses osrm
+  path.evaluate(0, getmaxcapacity());
+  evalLast();
 };
 #endif
 
