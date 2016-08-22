@@ -1,35 +1,86 @@
-Garbage collection in montevideo
+VRP Garbage Collection
 ============================================
 
-# A little Code Cleanup
+The Capacitated, Multitrip with Time Windows Vehicle Routing Problem of Garbage Collection
 
-The project started to be a bit of everything.
-But there is a lot o unsued code.
+Deposit: Starting and Ending sites from where a vehicle departs.
+Containers: Object used to hold garbage.
+Dump: Sites where the garbage is delivered.
+Vehicle: Garbage collector.
 
-First clean up Garbage collection code, And post the clean up in the public repository.
-(Specially for the FOSS4G)
+A vehicle's route:
 
-Then a cmake.
+Deposit -> Containers -> Dump -> [Containers -> Dump] -> Deposit
+
+Restrictions:
+* Vehicle:
+  * Time window:
+    * Driver shift start.
+    * Driver's shift end.
+  * One dimensional ``Capacity``.
+  * Capacity can be vary between vehicles.
+  * Goes to the ``Dump`` when reached the maximum capacity except the last trip.
+    * Even when a better route can be found with `not full` vehicle.
+  * Vehicles are empty at the ``Deposit`` and after departure of the ``Dump``
+  * Has to return to the original ``Deposit``
+  * Can not make `U turns`
+  * If a Driver has time
+
+
+Deposit:
+  * Has a (lat , lon) location.
+  * opens at 0
+  * closes at infinity
+  * As a Starting Site
+    * can have a service time  (currently is fixed to 0)
+  * As an Ending Site
+    * can have a service time  (currently is fixed to 0)
+    
+Dump:
+  * Has a (lat , lon) location.
+  * opens at 0
+  * closes at infinity
+  * Has a service time.
+
+Container:
+  * Has a (lat , lon) location.
+  * Has an opening time
+  * Has an closing time
+  * Has a Capacity
+    * The units must match the vehicles Capacity units.
+
+Others:
+  * Visit Dump inmediately after Deposit is forbidden
+  * Visit Deposit inmediately after a Container is forbidden
+
+Implied restrictions:
+  * City topoogy
+
+
+From the point of view of the driver:
+Deposit and dump:
+  - Opens at Driver's shift time start.
+  - Closes at Driver's shift time end.
+
+Data from Montevideo City is used for this development.
 
 
 
-# Original comments:
-
-## C++ Classes for solving various vehicle routing problems
-
- * baseClasses - Classes shared betwen the various problems
- * trash-collection - solve a trash collection problem. This has multiple depots with a single vehicle at each, they go to various containers and collect the trash and unloads at a dump before returning to its home depot. There is support for multiple dump sites, vehicle capacity and time windows.
- * vrpdptw - A single depot multiple vehicle pick and delivery problem with time windows.
- * more to come ...
-
-# THIS IS A WORK IN PROGRESS
 
 # Dependencies
 
-We current this have dependencies in our development environment for
+Currently:
 
- * libgd2 - used for generating plots of the routes
- * libcurl - used via curlpp to access OSRM engine
- * curlpp - a C++ wrapper around libcurl to talk to OSRM engine https://code.google.com/p/curlpp/
- * OSRM - we have a local server installed for our coverage area. This is used for comput drive times and routes https://github.com/Project-OSRM/osrm-backend
+ * glog - For logging
+ * OSRM - Local shared server installed for coverage area.
+
+
+# TODO
+
+- Update To be used with OSRM v5
+  - When the project started OSRM 0.3.3 was used.
+- Clean Code
+  - Many trial & error were kept in the code.
+- Update code to C++14
+- Documentation
 
