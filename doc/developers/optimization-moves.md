@@ -40,11 +40,11 @@ at most k 2-opt moves. For a proof, see [28].
 
 [8] Christofides, N., Eilon, S.: Algorithms for large-scale traveling
 salesman problems. Oper. Res. Quart. 23, 511.518 (1972)
-[26] Mak, K.T., Morton, A.J.: Distances between traveling salesman tours.
-Discret. Appl. Math. 58, 281.291 (1995)
-[28] Mendivil, D., Shonkwiler, R., Spruill, M.C.: An analysis of random
+[26] (http://www.sciencedirect.com/science/article/pii/0166218X93E0115F "Mak, K.T., Morton, A.J.: Distances between traveling salesman tours.
+Discret. Appl. Math. 58, 281.291 (1995)"
+[28] (http://people.math.gatech.edu/~shenk/Research/Optimization/RR+II.pdf "Mendivil, D., Shonkwiler, R., Spruill, M.C.: An analysis of random
 restart and iterated improvement for global optimization with an application
-to the traveling salesman problem. J. Optim. Theory Appl. 124(4), 407.433 (2005)
+to the traveling salesman problem. J. Optim. Theory Appl. 124(4), 407.433 (2005)")
 
 ## Various Move Operations
 
