@@ -117,35 +117,5 @@ The sql output would looke like:
 
 * TBD
 
-## Trashnode Class
-
-This is an extension of the Tweval base class and adds members for tracking the
-the nearest two depots and the nearest dump site. It also has an explicit
-``ntype`` member to identify if it is a pickup noe, and dump node or a depot
-node.
-
-* class members
-* class methods
-
-
-## Vehicle Class
-
-* overview of class
-* class members
-* class methods
-
-## TrashProblem Class
-
-* overview of class
-* class members
-* class methods
-
-## Solver Class
-
-* overview of class
-* class members
-* class methods
-
----
 
 [Up](./README.md)
