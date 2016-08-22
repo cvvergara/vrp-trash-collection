@@ -1,9 +1,9 @@
-<<<<<<< HEAD
 # Compiled Object files
 *.slo
 *.lo
 *.o
 *.obj
+*.d
 
 # Compiled Dynamic libraries
 *.so
@@ -21,10 +21,40 @@
 *.out
 *.app
 
-*.png
-out/*.png
-*.o
-*.d
+# vim swp files
+.*.swp
+
+# png images
+trash-collection/*.png
+pick-deliver/*.png
+pick-deliver/initialSolsPickDeliver/*.png
+pick-deliver/initialSolsPickDeliver/bin
+pick-deliver/initialSolsPickDeliver/old
+pick-deliver/basePickDeliver/old/
+pick-deliver/old
+baseTrash/old
+vdev-trash/initialSolsTrash/montevideo
+vdev-trash/initialSolsTrash/oldest
+montevideo
+vmontevideo
+logs
+build
+
 
 tester
+testosrm
 collection
+trash
+trashpg
+
+#other types papers, excel, geogebra
+*.pdf
+*.ods
+*.ggb
+*.orig
+
+callgrind-*
+
+montevideo/
+
+!init.d

@@ -1,0 +1,17 @@
+log.prepare
+*.md5
+*.osm.pbf
+*.osrm
+*.osrm.edges
+*.osrm.fileIndex
+*.osrm.hsgr
+*.osrm.names
+*.osrm.nodes
+*.osrm.ramIndex
+*.osrm.restrictions
+*.osrm.geometry
+*.osrm.timestamp
+
+stxxl.errlog
+stxxl.log
+
