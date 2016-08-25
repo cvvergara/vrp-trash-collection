@@ -344,10 +344,21 @@ class Twpath : public TwBucket<knode> {
     knode dumpSite = dumpS;
     int i = currentPos;
 
+    path.erase(
+            std::remove_if(
+                path.begin() + i,
+                path.end(),
+                [](const auto &item) {
+                return item.isDump();
+                }),
+            path.end()
+            );
+#if 0
     while ( i < path.size() ) {
       if ( path[i].isDump() ) erase(i);
       else i++;
     }
+#endif
 
     evaluate(currentPos, maxcapacity); //make sure everything is evaluated
 
@@ -381,15 +392,14 @@ class Twpath : public TwBucket<knode> {
     return  feasable() ;
   }
 
-  bool e_adjustDumpsToNoCV( int currentPos, 
+  bool e_adjustDumpsToNoCV( size_t currentPos, 
                             const knode &dumpS,
                             double maxcapacity ) {
 #ifdef TESTED
     DLOG( INFO ) << "Entering twpath::e_adjustDumpsToNoCV";
 #endif
     knode dumpSite = dumpS;
-    int startFrom = currentPos;
-    int i;
+    auto startFrom = currentPos;
 
     //make sure everything is evaluated
     evaluate(currentPos, maxcapacity); 
@@ -399,16 +409,28 @@ class Twpath : public TwBucket<knode> {
 
     // start checking from point i to the end of path
     // stop when // there is a capacity violation
-    i = currentPos;
+    auto i = currentPos;
     while (i < path.size() && !path[i].has_cv(maxcapacity)) {i++;}
 
     // remove dumps from i to end of path 
     startFrom = i - 1;
     i = startFrom;
+
+    path.erase(
+            std::remove_if(
+                path.begin() + i,
+                path.end(),
+                [](const auto &item) {
+                return item.isDump();
+                }),
+            path.end()
+            );
+#if 0
     while (i < path.size()) {
-      if (path[i].isDump()) erase(i);
-      else i++;
+        if (path[i].isDump()) erase(i);
+        else i++;
     }
+#endif
 
     //make sure everything is evaluated
     evaluate(startFrom, maxcapacity); 
@@ -418,11 +440,11 @@ class Twpath : public TwBucket<knode> {
 
     // while we still have a CV
     while (cvTot() != 0) {  // while we still have a CV
-      //cycle until we find the first non CV
-      for (i = path.size() - 1; i >= startFrom - 1 && path[i].cvTot(); --i) {}
-      // // the dump should be after pos i
-      insert(dumpSite, i + 1); 
-      evaluate(i, maxcapacity); //reevaluate the rest of the route
+        //cycle until we find the first non CV
+        for (i = path.size() - 1; i >= startFrom - 1 && path[i].cvTot(); --i) {}
+        // // the dump should be after pos i
+        insert(dumpSite, i + 1); 
+        evaluate(i, maxcapacity); //reevaluate the rest of the route
     }
 
     return  cvTot() ;
@@ -437,8 +459,8 @@ class Twpath : public TwBucket<knode> {
 
 #if 0
   /*! @name  operations within two  paths
-      \todo TODO fix return to be true when operation is performed
-  */
+    \todo TODO fix return to be true when operation is performed
+    */
   ///@{
   /*!
    * \brief Swap a node in path A with some node in path B
@@ -456,15 +478,15 @@ class Twpath : public TwBucket<knode> {
    * \return true when the swap was performed
    */
   bool e_swap(POS i, double maxcap, Twpath<knode> &rhs, POS j,
-                double rhs_maxcap) {
-    assert(i < size() and j < rhs.size());
+          double rhs_maxcap) {
+      assert(i < size() and j < rhs.size());
 
-    if ( i < 0 or j<0 or i>size() - 1 or j > rhs.size() - 1 ) return false;
+      if ( i < 0 or j<0 or i>size() - 1 or j > rhs.size() - 1 ) return false;
 
-    std::iter_swap(path.begin() + i, rhs.path.begin() + j);
-    evaluate( i, maxcap );
-    rhs.evaluate( j, rhs_maxcap );
-    return true;
+      std::iter_swap(path.begin() + i, rhs.path.begin() + j);
+      evaluate( i, maxcap );
+      rhs.evaluate( j, rhs_maxcap );
+      return true;
   }
 
 
@@ -482,29 +504,29 @@ class Twpath : public TwBucket<knode> {
    * \return Status of whether or not the move was made.
    */
   bool e_move( POS fromi, POS toDest, double maxcapacity ) {
-    assert(fromi < size() and toDest < size());
-    if ( fromi < 0 or toDest<0 or fromi>size() - 1 or toDest > size() - 1 )
-      return false;
+      assert(fromi < size() and toDest < size());
+      if ( fromi < 0 or toDest<0 or fromi>size() - 1 or toDest > size() - 1 )
+          return false;
 
-    assert(fromi != toDest);
-    if ( fromi == toDest ) return false;
+      assert(fromi != toDest);
+      if ( fromi == toDest ) return false;
 
-    if ( fromi < toDest ) {
-      if ( toDest + 1 > path.size() )
-        //I think this will never be executed
-        path.push_back( path[fromi] );
-      else
-        insert(path[fromi], toDest + 1);
+      if ( fromi < toDest ) {
+          if ( toDest + 1 > path.size() )
+              //I think this will never be executed
+              path.push_back( path[fromi] );
+          else
+              insert(path[fromi], toDest + 1);
 
-      erase(fromi);
-    } else {
-      insert(path[fromi], toDest);
-      erase(fromi + 1 );
-    }
+          erase(fromi);
+      } else {
+          insert(path[fromi], toDest);
+          erase(fromi + 1 );
+      }
 
-    fromi < toDest ? evaluate(fromi, maxcapacity) 
-                    : evaluate(toDest, maxcapacity);
-    return true;
+      fromi < toDest ? evaluate(fromi, maxcapacity) 
+          : evaluate(toDest, maxcapacity);
+      return true;
   }
 
 
@@ -518,13 +540,13 @@ class Twpath : public TwBucket<knode> {
    * \return Status of whether or not the move was made.
    */
   bool e_resize(UINT newSize, double maxcapacity) {
-    assert ( newSize <= size() );
-    if ( newSize<0 or newSize>size() ) return false;
+      assert ( newSize <= size() );
+      if ( newSize<0 or newSize>size() ) return false;
 
-    path.resize(newSize);
-    // its reduced so the last node's value its not affected so no need of
-    evalLast(maxcapacity); // TODO <--- can this one be avoided????
-    return true;
+      path.resize(newSize);
+      // its reduced so the last node's value its not affected so no need of
+      evalLast(maxcapacity); // TODO <--- can this one be avoided????
+      return true;
   }
 
 
@@ -541,44 +563,44 @@ class Twpath : public TwBucket<knode> {
    * \return Status of whether or not the move was made.
    */
   bool e_move(UID i, UID j, UID k, double maxcapacity) {
-    if ( !(i <= j and (k > j or k < i ))) return false;
+      if ( !(i <= j and (k > j or k < i ))) return false;
 
-    if ( j > size() - 1 or k > size() ) return false;
+      if ( j > size() - 1 or k > size() ) return false;
 
-    // moving range to right of the range
-    if ( k > j ) {
-      // if the length of the range is larger than the distance
-      // being moved it is faster to move the intervening nodes in
-      // the opposite direction
-      if ( j - i + 1 > k - j - 1 ) {
-        return e_move( j + 1, k - 1, i, maxcapacity );
+      // moving range to right of the range
+      if ( k > j ) {
+          // if the length of the range is larger than the distance
+          // being moved it is faster to move the intervening nodes in
+          // the opposite direction
+          if ( j - i + 1 > k - j - 1 ) {
+              return e_move( j + 1, k - 1, i, maxcapacity );
+          }
+
+          for ( int n = i, m = 0; n <= j; n++, m++ ) {
+              knode temp = path[i];
+              path.erase( path.begin() + i );
+              path.insert( path.begin() + k - 1, temp );
+          }
+      }
+      // moving range to left of the range
+      else {
+          // if the length of the range is larger than the distance
+          // being moved it is faster to move the intervening nodes in
+          // the opposite direction
+          if ( j - i + 1 > i - k ) {
+              return e_move( k, i - 1, j + 1, maxcapacity );
+          }
+
+          for ( int n = i, m = 0; n <= j; n++, m++ ) {
+              knode temp = path[i + m];
+              path.erase( path.begin() + i + m );
+              path.insert( path.begin() + k + m, temp );
+          }
       }
 
-      for ( int n = i, m = 0; n <= j; n++, m++ ) {
-        knode temp = path[i];
-        path.erase( path.begin() + i );
-        path.insert( path.begin() + k - 1, temp );
-      }
-    }
-    // moving range to left of the range
-    else {
-      // if the length of the range is larger than the distance
-      // being moved it is faster to move the intervening nodes in
-      // the opposite direction
-      if ( j - i + 1 > i - k ) {
-        return e_move( k, i - 1, j + 1, maxcapacity );
-      }
-
-      for ( int n = i, m = 0; n <= j; n++, m++ ) {
-        knode temp = path[i + m];
-        path.erase( path.begin() + i + m );
-        path.insert( path.begin() + k + m, temp );
-      }
-    }
-
-    // TODO i < k ? path[i].evaluate(maxcapacity) : path[k].evaluate(maxcapacity);
-    evaluate(maxcapacity);
-    return true;
+      // TODO i < k ? path[i].evaluate(maxcapacity) : path[k].evaluate(maxcapacity);
+      evaluate(maxcapacity);
+      return true;
   }
 
 
@@ -595,37 +617,37 @@ class Twpath : public TwBucket<knode> {
    * \return Status of whether or not the move was made.
    */
   bool e_movereverse( UID i, UID j, int k, double maxcapacity ) {
-    // path: 0 1 2 [3 4 5] 6 7 8 9
-    // invalid moves are:
-    //      rangeFrom > size-1 or rangeTo > size-1 or dest > size
-    //      dest < 0 or to < 0 or from < 0 or to < from
-    //      dest >= from and dest <= to+1
-    if ( i > path.size() - 1 or j > path.size() - 1  or
-         k > path.size() ) return false;
+      // path: 0 1 2 [3 4 5] 6 7 8 9
+      // invalid moves are:
+      //      rangeFrom > size-1 or rangeTo > size-1 or dest > size
+      //      dest < 0 or to < 0 or from < 0 or to < from
+      //      dest >= from and dest <= to+1
+      if ( i > path.size() - 1 or j > path.size() - 1  or
+              k > path.size() ) return false;
 
-    if ( i < 0 or j < 0 or k < 0 or j < i ) return false;
+      if ( i < 0 or j < 0 or k < 0 or j < i ) return false;
 
-    if ( k >= i and k <= j + 1 ) return false;
+      if ( k >= i and k <= j + 1 ) return false;
 
-    // moving range to right of the range
-    if ( k > j ) {
-      for ( int n = i, m = 1; n <= j; n++, m++ ) {
-        knode temp = path[i];
-        path.erase( path.begin() + i );
-        path.insert( path.begin() + k - m, temp );
+      // moving range to right of the range
+      if ( k > j ) {
+          for ( int n = i, m = 1; n <= j; n++, m++ ) {
+              knode temp = path[i];
+              path.erase( path.begin() + i );
+              path.insert( path.begin() + k - m, temp );
+          }
       }
-    }
-    // moving range to left of the range
-    else {
-      for ( int n = i; n <= j; n++ ) {
-        knode temp = path[n];
-        path.erase( path.begin() + n );
-        path.insert( path.begin() + k, temp );
+      // moving range to left of the range
+      else {
+          for ( int n = i; n <= j; n++ ) {
+              knode temp = path[n];
+              path.erase( path.begin() + n );
+              path.insert( path.begin() + k, temp );
+          }
       }
-    }
 
-    evaluate( maxcapacity );
-    return true;
+      evaluate( maxcapacity );
+      return true;
   }
 
 
@@ -641,70 +663,70 @@ class Twpath : public TwBucket<knode> {
    * \return Status of whether or not the move was made.
    */
   bool  e_reverse( UID i, UID j, double maxcapacity ) {
-    assert (i < size() and j < size());
+      assert (i < size() and j < size());
 
-    if ( i<0 or j<0 or i >= path.size() or j >= path.size() )
-      return false;
+      if ( i<0 or j<0 or i >= path.size() or j >= path.size() )
+          return false;
 
-    int m = i;
-    int n = j;
+      int m = i;
+      int n = j;
 
-    if ( i == j ) return false;
+      if ( i == j ) return false;
 
-    if ( i > j ) {
-      m = j;
-      n = i;
-    }
+      if ( i > j ) {
+          m = j;
+          n = i;
+      }
 
-    iterator itM = path.begin() + m;
-    iterator itN = path.begin() + n;
+      iterator itM = path.begin() + m;
+      iterator itN = path.begin() + n;
 
-    while ( itM < itN ) {  // TODO I dont think this comparison of iterators its correct
-      std::iter_swap( itM, itN );
-      itM++;
-      itN--;
-    }
+      while ( itM < itN ) {  // TODO I dont think this comparison of iterators its correct
+          std::iter_swap( itM, itN );
+          itM++;
+          itN--;
+      }
 
-    i < j ? evaluate(i, maxcapacity) : evaluate(j, maxcapacity);
-    return true;
+      i < j ? evaluate(i, maxcapacity) : evaluate(j, maxcapacity);
+      return true;
   }
 
 
   /*! \brief Evaluated: Remove a node from a path is e_erase.  */
   bool e_remove(UID i, double maxcapacity) {
-    return e_erase(i,maxcapacity);
+      return e_erase(i,maxcapacity);
   }
 
 
 
   void evaluateOsrm( const std::string &osrmBaseUrl ) {
-    assert( size() > 0 );
-    evaluateOsrm( 0, osrmBaseUrl );
+      assert( size() > 0 );
+      evaluateOsrm( 0, osrmBaseUrl );
   }
 
 
   void evaluateOsrm( UID from, const std::string &osrmBaseUrl ) {
-    // the equal just in case the last operation was erase
-    assert ( from <= size() );
+      // the equal just in case the last operation was erase
+      assert ( from <= size() );
 
-    if ( from >= path.size() ) from = size() - 1;
+      if ( from >= path.size() ) from = size() - 1;
 
-    iterator it = path.begin() + from;
+      iterator it = path.begin() + from;
 
-    while ( it != path.end() ) {
-      if ( it == path.begin() ) it->evaluateOsrm();
-      else it->evaluateOsrm( *( it - 1 ) , osrmBaseUrl );
+      while ( it != path.end() ) {
+          if ( it == path.begin() ) it->evaluateOsrm();
+          else it->evaluateOsrm( *( it - 1 ) , osrmBaseUrl );
 
-      ++it;
-    }
+          ++it;
+      }
   }
 
   bool isOsrmTtimeValid() const {
-    return path[path.size() - 1].isOsrmTtimeValid();
+      return path[path.size() - 1].isOsrmTtimeValid();
   }
 
   double getTotTravelTimeOsrm() const {
-    return path[path.size() - 1].getTotTravelTimeOsrm();
+      return path[path.size() - 1].getTotTravelTimeOsrm();
   }
 #endif  // 0
 

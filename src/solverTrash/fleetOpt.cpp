@@ -46,7 +46,7 @@ void Fleetopt::optimize(int iter) {
   auto count = 0;
   auto tot_count = 0;
 
-  for (UINT i = 0; i < iter; ++i) {
+  for (int i = 0; i < iter; ++i) {
     count = exchangesWorse(10);
     for (auto &trip : trips) {
       count = 0;

@@ -30,8 +30,8 @@
 const char *AssertFailedException::what() const throw()
 {
   return str;
-};
+}
 
 AssertFailedException::AssertFailedException( const char *_str ) : str(
-    _str ) {};
+    _str ) {}
 #endif

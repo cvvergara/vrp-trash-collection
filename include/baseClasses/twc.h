@@ -320,7 +320,7 @@ template <class knode> class TWC {
         mutable std::vector< std::vector<double> > twcij;
         mutable std::vector< std::vector<double> > travel_Time;   ///< Travel time matrix
         mutable std::vector< std::vector<double> > travel_time_onTrip;
-        mutable std::vector< std::vector< std::deque< int64_t> > > nodes_onTrip;  ///< The nodes on trip
+        mutable std::vector< std::vector< std::deque< size_t > > > nodes_onTrip;  ///< The nodes on trip
 
         typedef std::pair< std::pair <UINT, UINT>,  double> id_time;
         // typedef pair<UINT, double>::iterator i_id_time;
@@ -341,9 +341,9 @@ template <class knode> class TWC {
         }
 
 
-        bool emptiedTruck;
-        int z1Tot;
-        int z2Tot;
+        bool emptiedTruck = false;
+        int z1Tot = 0;
+        int z2Tot = 0;
 
         void initializeTravelTime() {
 #ifdef VRPMINTRACE
@@ -424,6 +424,7 @@ template <class knode> class TWC {
                 POS &pos,
                 knode &bestNode,
                 double &bestDist) const {
+            STATS_INC("findNearestNodeTo");
             assert(unassigned.size());
             int flag = false;
             bestDist = VRP_MAX();   // dist to minimize
@@ -431,8 +432,8 @@ template <class knode> class TWC {
             double d;
 
 
-            for ( int i = 0; i < unassigned.size(); i++ ) {
-                for ( int j = 0; j < truck.size() - 1; j++ ) {
+            for ( size_t i = 0; i < unassigned.size(); i++ ) {
+                for ( size_t j = 0; j < truck.size() - 1; j++ ) {
                     if ( isCompatibleIAJ(truck[j], unassigned[i], truck[j + 1]) ) {
                         d = truck.segmentDistanceToPoint(j , unassigned[i]);
 
@@ -454,6 +455,7 @@ template <class knode> class TWC {
                 POS &pos,
                 knode &bestNode,
                 double &bestDist) const {
+            STATS_INC("findNearestNodeUseExistingData");
             assert(unassigned.size());
             int flag = false;
             bestDist = VRP_MAX();   // dist to minimize
@@ -461,8 +463,8 @@ template <class knode> class TWC {
             double d;
 
 
-            for ( int i = 0; i < unassigned.size(); i++ ) {
-                for ( int j = 0; j < truck.size() - 1; j++ ) {
+            for ( size_t i = 0; i < unassigned.size(); i++ ) {
+                for ( size_t j = 0; j < truck.size() - 1; j++ ) {
                     if (!(j == 0)
                             && ((travel_Time[truck[j].nid()][unassigned[i].nid()] == -1)
                                 || (travel_Time[unassigned[i].nid()][truck[j + 1].nid()] == -1)))
@@ -491,23 +493,23 @@ template <class knode> class TWC {
 
         // TODO
     public:
-        bool  findBestToNodeHasMoreNodesOnPath(
-                const TwBucket<knode> &assigned, const TwBucket<knode> &unassigned,
+        void  findBestToNodeHasMoreNodesOnPath(
+                const TwBucket<knode> &assigned,
+                const TwBucket<knode> &unassigned,
                 UINT From, UINT &bestTo, TwBucket<knode> &subPath) const {
             assert(unassigned.size() != 0);
             assert(From < original.size());
             subPath.clear();
             bestTo = unassigned[0].nid();
-            UINT actual = 0;
-            int max = -1;
+            size_t max = 0;
 
             for (UINT i =0; i< unassigned.size() - 1; ++i) {
-                UINT to = unassigned[i].nid();
+                auto to = unassigned[i].nid();
                 if (From == to) continue;
                 assert(to < original.size());
-                actual = actualCantNodesOnTrip(From, to, assigned);
+                auto actual = actualCantNodesOnTrip(From, to, assigned);
 
-                if ((actual > max) || (max < 0)) {
+                if ((actual > max)) {
                     max = actual;
                     bestTo = to;
                     assert(bestTo < original.size());
@@ -553,21 +555,21 @@ template <class knode> class TWC {
         }
 
     public:
-        bool  findBestFromNodeHasMoreNodesOnPath(
-                const TwBucket<knode> &assigned, const TwBucket<knode> &unassigned,
+        void  findBestFromNodeHasMoreNodesOnPath(
+                const TwBucket<knode> &assigned,
+                const TwBucket<knode> &unassigned,
                 UINT &bestFrom, UINT To, TwBucket<knode> &subPath) const {
             assert(unassigned.size() != 0);
             assert(To < original.size());
             subPath.clear();
             bestFrom = unassigned[0].nid();
-            UINT actual = 0;
-            int max = -1;
+            size_t max = 0;
 
             for (UINT i =0; i< unassigned.size() - 1; ++i) {
                 UINT from = unassigned[i].nid();
                 if (from == To) continue;
                 assert(from < original.size());
-                actual = actualCantNodesOnTrip(from, To, assigned);
+                auto actual = actualCantNodesOnTrip(from, To, assigned);
 
                 if ((actual > max) || (max < 0)) {
                     max = actual;
@@ -592,18 +594,19 @@ template <class knode> class TWC {
         bool  findPairNodesHasMoreNodesOnPath(
                 const TwBucket<knode> &assigned, const TwBucket<knode> &unassigned,
                 UINT &bestFrom, UINT &bestTo, TwBucket<knode> &subPath) const {
+            STATS_INC("findPairNodesHasMoreNodesOnPath");
             assert(unassigned.size() > 1);
             subPath.clear();
             bestFrom = unassigned[0].nid();
             bestTo = unassigned[1].nid();
             UINT actual = 0;
-            int max = 0;
+            UINT max = 0;
 
             for (UINT i =0; i< unassigned.size() - 1; ++i) {
                 for (UINT j = 0; j < unassigned.size(); ++j) {
                     if (i == j) continue;
-                    UINT from = unassigned[i].nid();
-                    UINT to = unassigned[j].nid();
+                    auto from = unassigned[i].nid();
+                    auto to = unassigned[j].nid();
                     assert(from < original.size());
                     assert(to < original.size());
                     actual = actualCantNodesOnTrip(from, to, assigned);
@@ -627,12 +630,13 @@ template <class knode> class TWC {
 
             subPath.push_back(original[bestFrom]);
             for (unsigned int i = 0; i < nodes_onTrip[bestFrom][bestTo].size(); ++i) {
-                int nid = nodes_onTrip[bestFrom][bestTo][i];
+                auto nid = nodes_onTrip[bestFrom][bestTo][i];
                 assert(nid < original.size());
                 if (assigned.hasNid(nid)) continue;
                 subPath.push_back(original[nid]);
             }
             subPath.push_back(original[bestTo]);
+            return true;
         }
 
 
@@ -645,30 +649,30 @@ template <class knode> class TWC {
         bool  findNodeHasMoreNodesOnPath(const TwBucket<knode> &trip,
                 const TwBucket<knode> &assigned, const TwBucket<knode> &unassigned,
                 const knode &dumpSite, UINT &bestNode, UINT &bestPos, TwBucket<knode> &subPath) const {
+            STATS_INC("findNodeHasMoreNodesOnPath");
             assert(unassigned.size() != 0);
             subPath.clear();
             TwBucket<knode> l_trip = trip;
             l_trip.push_back(dumpSite);
             bestNode = unassigned[0].nid();
             bestPos = 1;
-            UINT bestPrevNode = l_trip[0].nid();
-            UINT bestNextNode = l_trip[1].nid();
-            UINT actual = 0;
-            int max = -1;
+            auto bestPrevNode = l_trip[0].nid();
+            auto bestNextNode = l_trip[1].nid();
+            size_t max = 0;
 
 
 
             for (UINT i =0; i< l_trip.size() - 1; ++i) {
                 for (unsigned int j = 0; j < unassigned.size(); ++j) {
-                    UINT from = l_trip[i].nid();
-                    UINT middle = unassigned[j].nid();
-                    UINT to = l_trip[i+1].nid();
+                    auto from = l_trip[i].nid();
+                    auto middle = unassigned[j].nid();
+                    auto to = l_trip[i+1].nid();
                     assert(from < original.size());
                     assert(middle < original.size());
                     assert(to < original.size());
-                    actual = actualCantNodesOnTrip(from, middle, assigned)
+                    auto actual = actualCantNodesOnTrip(from, middle, assigned)
                         + actualCantNodesOnTrip(middle, to, assigned) + 1;
-                    if ((actual > max) || (max < 0)) {
+                    if (actual > max) {
                         max = actual;
                         bestPrevNode = from;
                         bestNode = middle;
@@ -689,14 +693,14 @@ template <class knode> class TWC {
 #endif
 
             for (unsigned int i = 0; i < nodes_onTrip[bestPrevNode][bestNode].size(); ++i) {
-                int nid = nodes_onTrip[bestPrevNode][bestNode][i];
+                auto nid = nodes_onTrip[bestPrevNode][bestNode][i];
                 assert(nid < original.size());
                 if (assigned.hasNid(nid)) continue;
                 subPath.push_back(original[nid]);
             }
             subPath.push_back(original[bestNode]);
             for (unsigned int i = 0; i < nodes_onTrip[bestNode][bestNextNode].size(); ++i) {
-                int nid = nodes_onTrip[bestNode][bestNextNode][i];
+                auto nid = nodes_onTrip[bestNode][bestNextNode][i];
                 if (assigned.hasNid(nid)) continue;
                 assert(nid < original.size());
                 subPath.push_back(original[nid]);
@@ -719,12 +723,12 @@ template <class knode> class TWC {
             return true;
         }
 
-        int actualCantNodesOnTrip(UINT from, UINT to, const TwBucket<knode> &assigned) const {
+        auto actualCantNodesOnTrip(UINT from, UINT to, const TwBucket<knode> &assigned) const {
+            STATS_INC("actualCantNodesOnTrip");
             assert(from < original.size());
             assert(to < original.size());
             TwBucket<knode> subPath;
             TwBucket<knode> m_assigned = assigned;
-            int count = 0;
             for (unsigned int i = 0; i < nodes_onTrip[from][to].size(); ++i) {
                 UINT nid = nodes_onTrip[from][to][i];
                 if (assigned.hasNid(nid)) continue;
@@ -740,7 +744,6 @@ template <class knode> class TWC {
             assert(to < original.size());
             TwBucket<knode> subPath;
             TwBucket<knode> m_assigned = assigned;
-            int count = 0;
             for (unsigned int i = 0; i < nodes_onTrip[from][to].size(); ++i) {
                 UINT nid = nodes_onTrip[from][to][i];
                 if (assigned.hasNid(nid)) continue;
@@ -791,7 +794,6 @@ template <class knode> class TWC {
 #ifdef VRPMINTRACE
             DLOG(INFO) << "started fill_travel_time_onTrip_work";
 #endif
-            int i,j;
             TwBucket <knode> trip;
             TwBucket <knode> nodesOnPath;
 #ifdef VRPMINTRACE
@@ -801,7 +803,6 @@ template <class knode> class TWC {
             while (process_order.size() > 0) {
                 UINT i = process_order.begin()->first.first;
                 UINT j = process_order.begin()->first.second;
-                double p_tim = process_order.begin()->second;
 #ifdef VRPMINTRACE
                 if ((process_order.size() % 200) == 0)
                     DLOG(INFO) << "fill_travel_time_onTrip " << i << " size " << process_order.size() << " working with " << original[i].id() << "," << original[j].id()
@@ -886,7 +887,7 @@ template <class knode> class TWC {
 
     private:
         // the values for non containers to/from containers should be filled
-        bool compulsory_fill() {
+        void compulsory_fill() {
             STATS_INC("compulsory_fill");
             DLOG(INFO) << "started compulsory_fill";
 
@@ -1160,8 +1161,8 @@ template <class knode> class TWC {
 
 
             // fills the 2D table
-            for (int i = 0; i < nodesOnPath.size() - 1; ++i) {
-                for (int j = i + 1; j < nodesOnPath.size(); ++j) {
+            for (size_t i = 0; i < nodesOnPath.size() - 1; ++i) {
+                for (size_t  j = i + 1; j < nodesOnPath.size(); ++j) {
 
                     THROW_ON_SIGINT;
 
@@ -1195,7 +1196,7 @@ template <class knode> class TWC {
                          */
                         nodes_onTrip[from][to].clear();
 
-                        for (int k = i + 1; k < j; ++k) {
+                        for (size_t k = i + 1; k < j; ++k) {
                             /*
                              * Onnly inserting containers
                              */
@@ -1406,7 +1407,7 @@ template <class knode> class TWC {
             /*
              * position, nid
              */
-            typedef std::tuple<double, int> Storage;
+            typedef std::tuple<double, size_t> Storage;
 
 
             auto prev_node = geometry.front();
@@ -1723,6 +1724,7 @@ template <class knode> class TWC {
             }
 
             osrmi->useOsrm(oldStateOsrm);  
+            return true;
         }
 
 
@@ -1973,6 +1975,7 @@ triplets:
             }
 
             osrmi->useOsrm(oldStateOsrm);  
+            return true;
         }
 
 
@@ -2016,8 +2019,8 @@ triplets:
             double deltaTime;
             int bestIndex;
 
-            for ( int j = 0; j < truck.size(); j++ ) {
-                for ( int i = 0; i < unassigned.size(); i++ ) {
+            for ( size_t j = 0; j < truck.size(); j++ ) {
+                for ( size_t i = 0; i < unassigned.size(); i++ ) {
                     if (j == 0) {
                         setTravelingTimesInsertingOneNode(truck, dumpSite, unassigned[i]);
                     }
@@ -2902,13 +2905,10 @@ triplets:
 
 #ifdef DOVRPLOG
 
-            void print_nodes_onTrip(int from, int to) {
+            void print_nodes_onTrip(size_t from, size_t to) const {
                 std::stringstream ss;
-                std::deque<int64_t>::iterator i;
-                for (i = nodes_onTrip[from][to].begin();
-                        i != nodes_onTrip[from][to].end();
-                        ++i) {
-                    ss << original[*i].id() << " ";
+                for (const auto node : nodes_onTrip[from][to]) {
+                    ss << original[node].id() << " ";
                 }
                 DLOG(INFO) << ss.str();
             }
@@ -3205,10 +3205,10 @@ triplets:
                 DLOG(INFO) << "getAverageTime to" << to.nid();
                 assert(to.nid() < original.size());
                 double time = 0;
-                int j = to.nid();
-                int count = from.size();
+                auto j = to.nid();
+                auto count = from.size();
 
-                for ( int i = 0; i < from.size(); i++ ) {
+                for ( size_t i = 0; i < from.size(); i++ ) {
                     if (TravelTime(from[i].nid(), j) < 0) {
                         DLOG(INFO) << "found a negative";
                         travel_Time[from[i].nid()][j] = 0.00001;
@@ -3235,10 +3235,10 @@ triplets:
                 DLOG(INFO) << "getAverageTime from" << from.nid();
                 assert(from.nid() < original.size());
                 double time = 0;
-                int j = from.nid();
-                int count = to.size();
+                auto j = from.nid();
+                auto count = to.size();
 
-                for (int i = 0; i < to.size(); i++) {
+                for (size_t i = 0; i < to.size(); i++) {
                     if (TravelTime(j, to[i].nid()) < 0) {
                         DLOG(INFO) << "found a negative";
                         travel_Time[j][to[i].nid()] = 1;
@@ -3315,7 +3315,7 @@ triplets:
                 Timer timer;
 #endif
 
-                for ( int i = 0; i < nodes.size(); i++ ) {
+                for (size_t i = 0; i < nodes.size(); i++ ) {
                     nodes[i].set_hint(original[nodes[i].nid()].hint());
                     nodes[i].set_streetId(original[nodes[i].nid()].streetId());
                 }
@@ -3529,7 +3529,6 @@ triplets:
                 prepareTravelTime();
                 DLOG(INFO) << "TWC::loadAndProcess_travelTimes";
 
-                POS siz = original.size();
 
                 std::ifstream in(infile.c_str());
                 std::string line;
@@ -3602,7 +3601,7 @@ triplets:
     private:
             // constructors
             static TWC<knode>* p_twc;
-            TWC() :z1Tot(0), z2Tot(0), emptiedTruck(false) {
+            TWC()  {
                 cleanUp();
             }
             TWC(const TWC &) {}
@@ -3725,13 +3724,12 @@ triplets:
                 assert(original.size() == travel_Time.size());
                 twcij.resize(original.size());
 
-                for (int i = 0; i < original.size(); i++)
-                    twcij[i].resize(original.size());
+                for (auto &row : twcij) row.resize(original.size());
 
-                for ( int i = 0; i < original.size(); i++ ) {
-                    for ( int j = i; j < original.size(); j++ ) {
-                        twcij[i][j] = twc_for_ij(original[i], original[j]);
-                        twcij[j][i] = twc_for_ij(original[j], original[i]);
+                for (auto &from : original ) {
+                    for (auto &to : original ) {
+                        if (from.nid() == to.nid()) continue;
+                        twcij[from.nid()][to.nid()] = twc_for_ij(from, to);
                     }
                 }
             }
@@ -3742,9 +3740,8 @@ triplets:
             bool check_integrity() const {
                 assert(original.size() == twcij.size());
 
-                for ( int i = 0; i < original.size(); i++ ) {
-                    assert(twcij[i].size() == original.size());
-                }
+                for (const auto row : twcij) assert(row.size() == original.size());
+
                 return true;
             }
 

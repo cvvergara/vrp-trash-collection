@@ -521,28 +521,26 @@ double Solution::getAverageRouteDurationLength()
 }
 
 
+#if 0
 Solution::Solution( const std::string &infile,
                     const std::string &solFile )
- : Prob_trash( infile )
-{
+ : Prob_trash(infile) {
   std::vector< Twnode::NodeType > soltype;
-  std::vector<int> solid;
-  std::ifstream in( solFile.c_str() );
+  std::vector<int64_t> solid;
+  std::ifstream in(solFile.c_str());
   std::string line;
   int type, id;
 
   if (!in)  {
-#ifdef DOVRPLOG
-    DLOG( INFO ) << "\nFailed to open file " << solFile << "\n";
-#endif
+    DLOG(WARNING) << "\nFailed to open file " << solFile << "\n";
     return;
   }
 
   while ( in >> type >> id )  {
          solid.push_back(id);
-         soltype.push_back( (Twnode::NodeType)type);
+         soltype.push_back((Twnode::NodeType) type);
   }
-  int nid, vid;
+  size_t nid, vid;
   Vehicle truck;
   Bucket unassigned = pickups;
   Bucket assigned;
@@ -556,15 +554,15 @@ Solution::Solution( const std::string &infile,
   Bucket solPath;
   Bucket stops;
 
-  UINT i = 0;
-  while ( i < solid.size()) {
+  size_t i = 0;
+  while (i < solid.size()) {
     // with both negatives we are done
-    if ( (solid[i] < 0) && soltype[i] < 0 ) break; 
+    if ((solid[i] < 0) && soltype[i] < 0 ) break; 
 
     // with type negative its the truck id
     if ( soltype[i] < 0 ) { 
         //get the truck from the truks:
-        for ( UINT tr = 0; tr < trucks.size(); tr++ ) {
+        for ( size_t tr = 0; tr < trucks.size(); tr++ ) {
             if ( trucks[tr].getVid() == vid ) {
                 truck = trucks[tr];
                 break;
@@ -604,6 +602,13 @@ Solution::Solution( const std::string &infile,
                 unassigned = unassigned - stops;
             };
             break;
+      case  Twnode::kInvalid:
+      case  Twnode::kDelivery:
+      case  Twnode::kUnknown:
+      case  Twnode::kLoad:
+      case  Twnode::kPhantomNode:
+            break;
+
       }  // switch
       ++i;
     }  // while     
@@ -621,14 +626,13 @@ Solution::Solution( const std::string &infile,
     pickups.dumpid("Pickups");
 #endif
   }
-
 }
+#endif
 
 
 
 Solution::Solution( const std::string &infile,
-                    const std::vector<int> &sol ): Prob_trash( infile )
-{
+                    const std::vector<int> &sol ): Prob_trash( infile ) {
 
   int nid, vid;
   Vehicle truck;
@@ -686,7 +690,7 @@ Solution::Solution( const std::string &infile,
     DLOG( INFO ) << "Something went wrong creating the solution";
 
 #endif
-};
+}
 
 
 

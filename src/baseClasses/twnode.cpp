@@ -63,6 +63,10 @@ bool Twnode::isValid() const {
       if (demand_ >= 0) return true;
       break;
 
+    case kPhantomNode:
+      if (demand_ == 0) return true;
+      break;
+
     case kUnknown:
       return true;
       break;

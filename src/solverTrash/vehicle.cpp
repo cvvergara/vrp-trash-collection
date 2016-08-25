@@ -323,12 +323,12 @@ long int Vehicle1::eval_interSwapMoveDumps( Moves &moves,
   int fromNodeId, toNodeId;
   Move move;
 
-  int iLowLimit = std::max( POS(1), fromPos - 5 );
-  int iHighLimit = std::min( truck.size(), fromPos + 5 );
-  int jLowLimit = std::max( POS(1), toPos - 5 );
-  int jHighLimit = std::min( other.size(), toPos + 5 );
+  auto iLowLimit = std::max( POS(1), fromPos - 5 );
+  auto iHighLimit = std::min( truck.size(), fromPos + 5 );
+  auto jLowLimit = std::max( POS(1), toPos - 5 );
+  auto jHighLimit = std::min( other.size(), toPos + 5 );
 
-  for ( int i = iLowLimit; i < iHighLimit; i++ ) {
+  for ( auto i = iLowLimit; i < iHighLimit; i++ ) {
     if (i == 0) continue;
     if (!(i < truck.size())) continue;;
 
@@ -336,7 +336,7 @@ long int Vehicle1::eval_interSwapMoveDumps( Moves &moves,
 
     fromNodeId = truck.path[i].nid();
 
-    for ( int j = jLowLimit; j < jHighLimit - 1; j++ ) {
+    for ( auto j = jLowLimit; j < jHighLimit - 1; j++ ) {
       if (j == 0) continue;
       if (!(j < other.size())) continue;
       if ( other.path[j].isDump() ) continue;
@@ -561,7 +561,7 @@ bool Vehicle1::eval_erase( POS at, double &savings ) const
                << "\tsavings: " << oldcost - truck.getCost();
 #endif
   return truck.feasable();
-};
+}
 
 long int Vehicle1::eval_insertMoveDumps( const Trashnode &node, Moves &moves,
                                         POS fromTruck, POS fromPos, POS toTruck,

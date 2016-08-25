@@ -1,0 +1,249 @@
+Log file created at: 2016/08/19 10:07:24
+Running on machine: vicky-desktop
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0819 10:07:24.279857  9210 osrmclient.cpp:61] Entering Constructor
+I0819 10:07:24.280356  9210 osrmclient.cpp:83] connectionAvailable == true
+I0819 10:07:24.280366  9210 osrmclient.cpp:391] testing OsrmClient class:
+I0819 10:07:24.280370  9210 osrmclient.cpp:395] #1 OsrmClient set to Use
+I0819 10:07:24.280374  9210 osrmclient.cpp:398] #2 OsrmClient Connection available
+I0819 10:07:24.280376  9210 osrmclient.cpp:401] #3 Status != -1
+I0819 10:07:24.280380  9210 osrmclient.cpp:410] GET "http://localhost:5000/route/v1/driving/-56.19026184,-34.87198932;-56.17189407,-34.88156564?overview=false&alternatives=true&steps=true"
+I0819 10:07:24.281858  9210 osrmclient.cpp:420] #4 test time:206.4
+I0819 10:07:24.281886  9210 osrmclient.cpp:430] #5 get stored hints
+I0819 10:07:24.281890  9210 osrmclient.cpp:431] #5 hint11vYAgP___39uBAAAGQAAAGsAAAACAAAAAAAAAFI7AAC9OgAAEgAAAOOapvz65Ov9y5qm_Evl6_0BAAEBwvX4oQ==
+I0819 10:07:24.281895  9210 osrmclient.cpp:432] #5 hint2Mb0AgP___3-bBwAAKgAAAGAAAAAAAAAAAAAAAPf1AAAQ0gAAEgAAAIvjpvz3v-v9iuKm_OO_6_0AAAEBwvX4oQ==
+I0819 10:07:24.282500  9210 osrmclient.cpp:441] #6 get time:206.4
+I0819 10:07:24.282511  9210 osrmclient.cpp:442] #6 time:206.4
+I0819 10:07:24.282516  9210 osrmclient.cpp:443] #6 hint1
+I0819 10:07:24.282519  9210 osrmclient.cpp:444] #6 hint2
+I0819 10:07:24.282536  9210 osrmclient.cpp:449] GET "http://localhost:5000/route/v1/driving/-56.19026184,-34.87198932;-56.17189407,-34.88156564;-56.16365433,-34.90634622;-56.19026184,-34.87198932?overview=false&alternatives=true&steps=true"
+I0819 10:07:24.285094  9210 osrmclient.cpp:470] #7 getOsrmViaroute OK
+I0819 10:07:24.285159  9210 osrmclient.cpp:480] #8 Times:
+I0819 10:07:24.285164  9210 osrmclient.cpp:484] time: 206.4
+I0819 10:07:24.285171  9210 osrmclient.cpp:484] time: 253.3
+I0819 10:07:24.285174  9210 osrmclient.cpp:484] time: 460.3
+I0819 10:07:24.285181  9210 osrmclient.cpp:488] Total time: 920
+I0819 10:07:24.285202  9210 osrmclient.cpp:498] #9 Hints:
+I0819 10:07:24.285207  9210 osrmclient.cpp:500] hint: 1vYAgP___39uBAAAGQAAAGsAAAACAAAAAAAAAFI7AAC9OgAAEgAAAOOapvz65Ov9y5qm_Evl6_0BAAEBwvX4oQ==
+I0819 10:07:24.285210  9210 osrmclient.cpp:500] hint: Mb0AgP___3-bBwAAKgAAAGAAAAAAAAAAAAAAAPf1AAAQ0gAAEgAAAIvjpvz3v-v9iuKm_OO_6_0AAAEBwvX4oQ==
+I0819 10:07:24.285212  9210 osrmclient.cpp:500] hint: 4HIAgP___38AAAAABgAAACIAAAALAAAAAAAAACoYAAChCgAAEgAAAIYCp_wRX-v9ugKn_BZf6_0BAAEBwvX4oQ==
+I0819 10:07:24.285215  9210 osrmclient.cpp:500] hint: 1vYAgP___39uBAAAGQAAAGsAAAACAAAAAAAAAFI7AAC9OgAAEgAAAOOapvz65Ov9y5qm_Evl6_0BAAEBwvX4oQ==
+I0819 10:07:24.285236  9210 osrmclient.cpp:511] #10 StreetNames:
+I0819 10:07:24.285239  9210 osrmclient.cpp:513] name: Grito de Asencio
+I0819 10:07:24.285243  9210 osrmclient.cpp:513] name: Juan Paullier
+I0819 10:07:24.285245  9210 osrmclient.cpp:513] name: 
+I0819 10:07:24.285248  9210 osrmclient.cpp:513] name: Grito de Asencio
+I0819 10:07:24.285259  9210 osrmclient.cpp:525] #10 getOsrmGeometry:
+I0819 10:07:24.285261  9210 osrmclient.cpp:527] geometry: -56.1902, -34.8721
+I0819 10:07:24.285267  9210 osrmclient.cpp:527] geometry: -56.1914, -34.8723
+I0819 10:07:24.285271  9210 osrmclient.cpp:527] geometry: -56.1913, -34.8734
+I0819 10:07:24.285275  9210 osrmclient.cpp:527] geometry: -56.1891, -34.8733
+I0819 10:07:24.285279  9210 osrmclient.cpp:527] geometry: -56.1881, -34.8751
+I0819 10:07:24.285284  9210 osrmclient.cpp:527] geometry: -56.1868, -34.875
+I0819 10:07:24.285289  9210 osrmclient.cpp:527] geometry: -56.1863, -34.8763
+I0819 10:07:24.285292  9210 osrmclient.cpp:527] geometry: -56.1856, -34.8764
+I0819 10:07:24.285296  9210 osrmclient.cpp:527] geometry: -56.1763, -34.8796
+I0819 10:07:24.285300  9210 osrmclient.cpp:527] geometry: -56.1729, -34.8794
+I0819 10:07:24.285305  9210 osrmclient.cpp:527] geometry: -56.1718, -34.8801
+I0819 10:07:24.285308  9210 osrmclient.cpp:527] geometry: -56.1716, -34.8815
+I0819 10:07:24.285312  9210 osrmclient.cpp:527] geometry: -56.1698, -34.8968
+I0819 10:07:24.285317  9210 osrmclient.cpp:527] geometry: -56.1681, -34.9001
+I0819 10:07:24.285441  9210 osrmclient.cpp:527] geometry: -56.1677, -34.9049
+I0819 10:07:24.285466  9210 osrmclient.cpp:527] geometry: -56.164, -34.9046
+I0819 10:07:24.285473  9210 osrmclient.cpp:527] geometry: -56.1637, -34.9064
+I0819 10:07:24.285478  9210 osrmclient.cpp:527] geometry: -56.1635, -34.9067
+I0819 10:07:24.285483  9210 osrmclient.cpp:527] geometry: -56.1661, -34.8848
+I0819 10:07:24.285488  9210 osrmclient.cpp:527] geometry: -56.1695, -34.8815
+I0819 10:07:24.285493  9210 osrmclient.cpp:527] geometry: -56.1749, -34.8782
+I0819 10:07:24.285500  9210 osrmclient.cpp:527] geometry: -56.1842, -34.8743
+I0819 10:07:24.285506  9210 osrmclient.cpp:527] geometry: -56.1847, -34.8721
+I0819 10:07:24.285511  9210 osrmclient.cpp:527] geometry: -56.1896, -34.8724
+I0819 10:07:24.285516  9210 osrmclient.cpp:527] geometry: -56.1898, -34.872
+I0819 10:07:24.285528  9210 osrmclient.cpp:544] f0(0,0): -1
+I0819 10:07:24.285536  9210 osrmclient.cpp:545] p1(0.9,0.9): -1
+I0819 10:07:24.285540  9210 osrmclient.cpp:546] p2(2.0,1.5): 0.5
+I0819 10:07:24.285547  9210 osrmclient.cpp:547] p3(1.1,1.1): 0.06
+I0819 10:07:24.285552  9210 osrmclient.cpp:548] p4(3.1,2.1): -1
+I0819 10:07:24.285557  9210 osrmclient.cpp:549] f5(4.0,4.0): -1
+I0819 10:07:24.285563  9210 osrmclient.cpp:550] f6(2.5,0.0): -1
+I0819 10:07:24.285574  9210 prob_trash.cpp:36] Prob_trash---- string Constructor --------------
+I0819 10:07:24.285580  9210 prob_trash.cpp:46] Prob_trash LoadProblem -------------- ../tests/g_du_rm_cl_01
+I0819 10:07:24.286584  9210 prob_trash.cpp:172] Prob_trash:Load_otherlocs../tests/g_du_rm_cl_01.otherlocs.txt
+I0819 10:07:24.347729  9210 twc.h:2664] Coronel Olavarria
+I0819 10:07:24.485740  9210 twc.h:2752] TRAVEL TIME STATSs
+I0819 10:07:24.485774  9210 twc.h:2753] total zero values358
+I0819 10:07:24.485782  9210 twc.h:2754] total -1 values127806
+I0819 10:07:24.485787  9210 twc.h:2755] total positive values0
+I0819 10:07:24.487248  9210 twc.h:2752] TRAVEL TIME STATSs
+I0819 10:07:24.487257  9210 twc.h:2753] total zero values358
+I0819 10:07:24.487260  9210 twc.h:2754] total -1 values127806
+I0819 10:07:24.487263  9210 twc.h:2755] total positive values0
+I0819 10:07:25.330467  9210 prob_trash.cpp:145] Prob_trash:LoadTrucks../tests/g_du_rm_cl_01.vehicles.txt
+I0819 10:07:25.374619  9210 twc.h:656] started compulsory fill
+I0819 10:07:38.537824  9210 twc.h:670] Ended compulsory fill
+I0819 10:09:36.546131  9210 twc.h:2540] time = 3.55281e+269
+I0819 10:09:36.546946  9210 twc.h:2540] time = -nan
+I0819 10:09:36.547729  9210 twc.h:2540] time = 90.6667
+I0819 10:09:36.548518  9210 twc.h:2511] time = 1.05873e+08
+I0819 10:09:36.549154  9210 twc.h:2540] time = 1
+I0819 10:09:36.549777  9210 twc.h:2540] time = 2.01318
+I0819 10:09:36.550411  9210 twc.h:2511] time = 7.776e+06
+I0819 10:09:36.551041  9210 twc.h:2540] time = 1
+I0819 10:09:36.551661  9210 twc.h:2540] time = 2.01318
+I0819 10:09:36.552283  9210 twc.h:2511] time = 7.776e+06
+I0819 10:09:36.552294  9210 prob_trash.cpp:136] -------- Leaving Prob_trash::LoadProblem --------------
+I0819 10:09:36.554147  9210 truckManyVisitsDump.cpp:681] Starting initial Solution Proccess
+I0819 10:09:36.555698  9210 truckManyVisitsDump.cpp:603] -+-+-+-+-+-+-+-+-+-+-+-+-+-+- TRUCK 0 +-+-+-+-+-+-+-+-+-+-+-+-+-+-
+I0819 10:09:36.565305  9210 costvehicle.h:68] CostVehicle constructor
+I0819 10:09:36.565335  9210 vehicle.h:49] Vehicle1 constructor
+I0819 10:09:36.565963  9210 twc.h:2540] time = 1
+I0819 10:09:36.566649  9210 twc.h:2540] time = 2.01318
+I0819 10:09:36.567296  9210 twc.h:2511] time = 7.776e+06
+I0819 10:09:38.205503  9210 basevehicle.cpp:336] trip: 1000001 1000002 1000001
+I0819 10:09:38.205541  9210 twbucket.h:598] subpath 6403 4078 4079 4125 5577 5578 4077 4396 2714 4691 4682 4682 5561 6145 6134 3729 4722 3728 3623 4955 4954 4940 4941 4953 4952 4943 4951 4944 4945 4950 4948 4947
+I0819 10:09:38.205557  9210 twbucket.h:598] assigned
+I0819 10:09:38.205593  9210 twbucket.h:598] unassigned 346 2434 2441 4943 4944 4945 4946 4949 4950 4953 4954 4955 4976 4977 4991 4992 4993 4994 4995 4996 4997 3457 3513 3514 3515 3516 3517 3518 3521 3522 3523 3524 3525 3526 3527 3528 3529 3530 3531 3532 3533 3534 3535 3536 3537 3538 3539 3540 3541 3542 3543 3544 3545 3546 3547 3548 3549 3550 3551 3552 3553 3554 3555 3556 3557 3612 3623 3624 3625 3626 3627 3628 3629 3630 3631 3632 3633 3634 3635 3636 3637 3638 3639 3640 3641 3642 3643 3644 3645 3646 3647 3648 3649 3650 3651 3652 3653 3655 3656 3657 3727 3728 3730 3731 3732 3733 4064 4066 4068 4070 4680 4690 4693 4694 4695 4698 4700 4701 4702 4722 4938 4940 4942 4998 4999 5000 5001 5002 5003 5004 5005 5006 5007 5008 5009 5010 5011 5012 5013 5502 5503 5704 6135 6599 6600 6601 6604 6730 6732 7021 7034 7821 8039 8364 9071 9364 9615 2448 2714 4077 4079 4396 4683 4688 5577 6148 6155 6156 7820 4078 1869 2424 2425 2426 2427 2430 2432 2436 2437 2438 2443 2444 2445 2446 2447 3520 3729 3807 4063 4065 4067 4071 4072 4074 4076 4080 4081 4109 4111 4112 4113 4115 4116 4118 4119 4120 4121 4122 4125 4126 4127 4128 4681 4682 4684 4685 4687 4692 4696 4697 4699 4711 4716 4727 5561 5576 5578 5722 6134 6137 6138 6139 6140 6141 6145 6147 6149 6151 6152 6153 6154 6157 6403 6404 6602 7864 7865 9318 9319 9351 9585 9616 4712 4714 4715 4936 4937 4947 4948 4956 4957 4958 4960 4962 4964 4965 4967 4968 4970 4971 4972 4973 4974 4975 4978 4979 4980 4982 4983 4984 4985 4986 4987 4989 4990 5501 5603 5605 5666 6143 6159 6160 6161 6336 6603 7035 7036 7421 8558 9320 9335 9384 9385 9403 2428 2440 2442 4073 4124 6401 6402 2439 3456 4951 4952 3519 3654 4686 4939 4941 6133 6399 6731 8037 8883 4117 236 2418 2429 2435 4069 4075 4108 4110 4114 4689 4691 5563 6136 6142 6144 6150 6162 6400 6598 7782 4713 4959 4961 4963 4966 4969 4981 4988
+I0819 10:09:38.240849  9210 tweval.cpp:109] twv=1, cv=0, twvTot=1, cvTot=0, cargo=5880, travel Time=864.4, arrival Time=1307.4, wait Time=0, service Time=1.5, departure Time=1308.9
+I0819 10:09:38.240931  9210 twnode.cpp:94] 201 = 4947,		type 1,	x -56.198738,	y -34.825626,	open 360,	close 840,	demand 180,	serviceT 1.5,	 street:60,	 hint:pn8AgLnDAIA2FQAAUAAAABgAAAAAAAAAAAAAAEbIAAC_-gAAEgAAAMN5pvxbmuz9r3mm_Gaa7P0AAAEBwvX4oQ==
+I0819 10:09:38.240945  9210 costvehicle.cpp:318]  +++++++++++++++++++++  	 TRUCK #<<0      +++++++++++++++++++++
+I0819 10:09:38.240950  9210 costvehicle.cpp:320]  Average Container:
+I0819 10:09:38.240959  9210 twnode.cpp:94] 357 = -1,		type -1,	x -56.205969,	y -34.840412,	open 360,	close 840,	demand 188.98305,	serviceT 1.5,	 street:-1,	 hint:
+I0819 10:09:38.240967  9210 costvehicle.cpp:322]  ------  current path -------
+I0819 10:09:38.240983  9210 basevehicle.cpp:336] : 1000001 6403 4078 4079 4125 5577 5578 4077 4396 2714 4691 4682 4682 5561 6145 6134 3729 4722 3728 3623 4955 4954 4940 4941 4953 4952 4943 4951 4944 4945 4950 4948 4947 1000002 1000001
+I0819 10:09:38.240988  9210 costvehicle.cpp:325]  ------  truck time limits -------
+I0819 10:09:38.240991  9210 costvehicle.cpp:326] Shift Starts	360
+I0819 10:09:38.240996  9210 costvehicle.cpp:327] Shift ends	840
+I0819 10:09:38.241000  9210 costvehicle.cpp:328] Shift length	480
+I0819 10:09:38.241010  9210 costvehicle.cpp:331] ------Real  Values of current truck in the solution -------
+                   realttSC=	-696.4
+                   realttCC=	28.1531
+                   realttCD=	-907.8
+                   realttDC=	2.01318
+                   realttDE=	-529.7
+                 service(E)=	0
+                maxcapacity=	10000
+                 C.demand()=	188.983
+            C.servicetime()=	1.5
+                 C.closes()=	840
+    path[size()-1].closes()=	840
+  dumpSite.getservicetime()=	20
+dumpSite.getDepartureTime()=	421.1
+ (number of trips)    realN=	1
+endingSite.getArrivalTime()=	-108.6
+      depot.departureTime()=	360
+                       size=	33
+Average # of containers per trip
+                         Z =	52	= floor( maxcapacity/C.demand())	= floor( 10000/188.983)	
+                        z =	32	=(realN()==1)? n  : n % Z		=(1== 1) 32: 32
+Number of containers that can still fit on last trip
+                 Zmissing =	20	= Z - z	= 52 - 32
+                     n =	32	=size() - 1 - (realN() - 1)  	32
+                realz1 =	0	== min ( floor ( realIdleTimeSCDE / (C.getservicetime() + realttCC) ) , Zmissing )	0
+                realz2 =	0	=idleTimeSDCDE / (C.getservicetime() + realttCC)	0
+realArrivalEclosesLast =	-576	=path[size()-1].closes() + realttCD + dumpSite.getservicetime() + realttDE 	
+    realForcedWaitTime =	1416	=shiftEnds -( realArrivalEclosesLast  +  serviceE() )	1416
+         realTotalTime =	-468.6	 =endingSite.arrivalTime()  - path[0].departureTime()	-108.6 - 360
+          realIdleTime =	0	 = shiftLength  -  realTotalTime	480 - -468.6
+      realIdleTimeSCDE =	0	=( Zmissing>0 )?  (C.getservicetime() + realttCC ) * Zmissing :
+		(Zmissing==0? C.closes() - ( depot.getDepartureTime() +  realttSC):0) ;	0
+     realIdleTimeSDCDE =	0	=C.closes() - ( dumpSite.getDepartureTime() + realttDC)	0
+                sumIdle=	0	=sumIdle=realIdleTimeSCDE+realIdleTimeSDCDE+realIdleTime	0
+        workNotDonePerc=	0	=(double (realz1 + realz2))  /(double (n + realz1+realz2))
+     1+ workNotDonePerc=	1	=(double (realz1 + realz2))  /(double (n + realz1+realz2))
+realTotalTime + sumIdle)=	-468.6
+I0819 10:09:38.275106  9210 tweval.cpp:109] twv=1, cv=0, twvTot=1, cvTot=0, cargo=5880, travel Time=864.4, arrival Time=1307.4, wait Time=0, service Time=1.5, departure Time=1308.9
+I0819 10:09:38.275183  9210 twnode.cpp:94] 201 = 4947,		type 1,	x -56.198738,	y -34.825626,	open 360,	close 840,	demand 180,	serviceT 1.5,	 street:60,	 hint:pn8AgLnDAIA2FQAAUAAAABgAAAAAAAAAAAAAAEbIAAC_-gAAEgAAAMN5pvxbmuz9r3mm_Gaa7P0AAAEBwvX4oQ==
+I0819 10:09:38.275199  9210 costvehicle.cpp:318]  +++++++++++++++++++++  	 TRUCK #<<0      +++++++++++++++++++++
+I0819 10:09:38.275205  9210 costvehicle.cpp:320]  Average Container:
+I0819 10:09:38.275216  9210 twnode.cpp:94] 357 = -1,		type -1,	x -56.205969,	y -34.840412,	open 360,	close 840,	demand 188.98305,	serviceT 1.5,	 street:-1,	 hint:
+I0819 10:09:38.275220  9210 costvehicle.cpp:322]  ------  current path -------
+I0819 10:09:38.275238  9210 basevehicle.cpp:336] : 1000001 6403 4078 4079 4125 5577 5578 4077 4396 2714 4691 4682 4682 5561 6145 6134 3729 4722 3728 3623 4955 4954 4940 4941 4953 4952 4943 4951 4944 4945 4950 4948 4947 1000002 1000001
+I0819 10:09:38.275244  9210 costvehicle.cpp:325]  ------  truck time limits -------
+I0819 10:09:38.275249  9210 costvehicle.cpp:326] Shift Starts	360
+I0819 10:09:38.275254  9210 costvehicle.cpp:327] Shift ends	840
+I0819 10:09:38.275259  9210 costvehicle.cpp:328] Shift length	480
+I0819 10:09:38.275269  9210 costvehicle.cpp:331] ------Real  Values of current truck in the solution -------
+                   realttSC=	-696.4
+                   realttCC=	28.1531
+                   realttCD=	-907.8
+                   realttDC=	2.01318
+                   realttDE=	-529.7
+                 service(E)=	0
+                maxcapacity=	10000
+                 C.demand()=	188.983
+            C.servicetime()=	1.5
+                 C.closes()=	840
+    path[size()-1].closes()=	840
+  dumpSite.getservicetime()=	20
+dumpSite.getDepartureTime()=	421.1
+ (number of trips)    realN=	1
+endingSite.getArrivalTime()=	-108.6
+      depot.departureTime()=	360
+                       size=	33
+Average # of containers per trip
+                         Z =	52	= floor( maxcapacity/C.demand())	= floor( 10000/188.983)	
+                        z =	32	=(realN()==1)? n  : n % Z		=(1== 1) 32: 32
+Number of containers that can still fit on last trip
+                 Zmissing =	20	= Z - z	= 52 - 32
+                     n =	32	=size() - 1 - (realN() - 1)  	32
+                realz1 =	20	== min ( floor ( realIdleTimeSCDE / (C.getservicetime() + realttCC) ) , Zmissing )	20
+                realz2 =	14	=idleTimeSDCDE / (C.getservicetime() + realttCC)	14
+realArrivalEclosesLast =	-576	=path[size()-1].closes() + realttCD + dumpSite.getservicetime() + realttDE 	
+    realForcedWaitTime =	1416	=shiftEnds -( realArrivalEclosesLast  +  serviceE() )	1416
+         realTotalTime =	-468.6	 =endingSite.arrivalTime()  - path[0].departureTime()	-108.6 - 360
+          realIdleTime =	948.6	 = shiftLength  -  realTotalTime	480 - -468.6
+      realIdleTimeSCDE =	593.062	=( Zmissing>0 )?  (C.getservicetime() + realttCC ) * Zmissing :
+		(Zmissing==0? C.closes() - ( depot.getDepartureTime() +  realttSC):0) ;	593.062
+     realIdleTimeSDCDE =	416.887	=C.closes() - ( dumpSite.getDepartureTime() + realttDC)	416.887
+                sumIdle=	1958.55	=sumIdle=realIdleTimeSCDE+realIdleTimeSDCDE+realIdleTime	1958.55
+        workNotDonePerc=	0	=(double (realz1 + realz2))  /(double (n + realz1+realz2))
+     1+ workNotDonePerc=	1	=(double (realz1 + realz2))  /(double (n + realz1+realz2))
+realTotalTime + sumIdle)=	1489.95
+I0819 10:09:38.309486  9210 tweval.cpp:109] twv=1, cv=0, twvTot=1, cvTot=0, cargo=5880, travel Time=864.4, arrival Time=1307.4, wait Time=0, service Time=1.5, departure Time=1308.9
+I0819 10:09:38.309537  9210 twnode.cpp:94] 201 = 4947,		type 1,	x -56.198738,	y -34.825626,	open 360,	close 840,	demand 180,	serviceT 1.5,	 street:60,	 hint:pn8AgLnDAIA2FQAAUAAAABgAAAAAAAAAAAAAAEbIAAC_-gAAEgAAAMN5pvxbmuz9r3mm_Gaa7P0AAAEBwvX4oQ==
+I0819 10:09:38.309545  9210 costvehicle.cpp:318]  +++++++++++++++++++++  	 TRUCK #<<0      +++++++++++++++++++++
+I0819 10:09:38.309551  9210 costvehicle.cpp:320]  Average Container:
+I0819 10:09:38.309561  9210 twnode.cpp:94] 357 = -1,		type -1,	x -56.205969,	y -34.840412,	open 360,	close 840,	demand 188.98305,	serviceT 1.5,	 street:-1,	 hint:
+I0819 10:09:38.309566  9210 costvehicle.cpp:322]  ------  current path -------
+I0819 10:09:38.309581  9210 basevehicle.cpp:336] : 1000001 6403 4078 4079 4125 5577 5578 4077 4396 2714 4691 4682 4682 5561 6145 6134 3729 4722 3728 3623 4955 4954 4940 4941 4953 4952 4943 4951 4944 4945 4950 4948 4947 1000002 1000001
+I0819 10:09:38.309587  9210 costvehicle.cpp:325]  ------  truck time limits -------
+I0819 10:09:38.309592  9210 costvehicle.cpp:326] Shift Starts	360
+I0819 10:09:38.309597  9210 costvehicle.cpp:327] Shift ends	840
+I0819 10:09:38.309602  9210 costvehicle.cpp:328] Shift length	480
+I0819 10:09:38.309609  9210 costvehicle.cpp:331] ------Real  Values of current truck in the solution -------
+                   realttSC=	-696.4
+                   realttCC=	28.1531
+                   realttCD=	-907.8
+                   realttDC=	2.01318
+                   realttDE=	-529.7
+                 service(E)=	0
+                maxcapacity=	10000
+                 C.demand()=	188.983
+            C.servicetime()=	1.5
+                 C.closes()=	840
+    path[size()-1].closes()=	840
+  dumpSite.getservicetime()=	20
+dumpSite.getDepartureTime()=	421.1
+ (number of trips)    realN=	1
+endingSite.getArrivalTime()=	-108.6
+      depot.departureTime()=	360
+                       size=	33
+Average # of containers per trip
+                         Z =	52	= floor( maxcapacity/C.demand())	= floor( 10000/188.983)	
+                        z =	32	=(realN()==1)? n  : n % Z		=(1== 1) 32: 32
+Number of containers that can still fit on last trip
+                 Zmissing =	20	= Z - z	= 52 - 32
+                     n =	32	=size() - 1 - (realN() - 1)  	32
+                realz1 =	20	== min ( floor ( realIdleTimeSCDE / (C.getservicetime() + realttCC) ) , Zmissing )	20
+                realz2 =	14	=idleTimeSDCDE / (C.getservicetime() + realttCC)	14
+realArrivalEclosesLast =	-576	=path[size()-1].closes() + realttCD + dumpSite.getservicetime() + realttDE 	
+    realForcedWaitTime =	1416	=shiftEnds -( realArrivalEclosesLast  +  serviceE() )	1416
+         realTotalTime =	-468.6	 =endingSite.arrivalTime()  - path[0].departureTime()	-108.6 - 360
+          realIdleTime =	948.6	 = shiftLength  -  realTotalTime	480 - -468.6
+      realIdleTimeSCDE =	593.062	=( Zmissing>0 )?  (C.getservicetime() + realttCC ) * Zmissing :
+		(Zmissing==0? C.closes() - ( depot.getDepartureTime() +  realttSC):0) ;	593.062
+     realIdleTimeSDCDE =	416.887	=C.closes() - ( dumpSite.getDepartureTime() + realttDC)	416.887
+                sumIdle=	1958.55	=sumIdle=realIdleTimeSCDE+realIdleTimeSDCDE+realIdleTime	1958.55
+        workNotDonePerc=	0	=(double (realz1 + realz2))  /(double (n + realz1+realz2))
+     1+ workNotDonePerc=	1	=(double (realz1 + realz2))  /(double (n + realz1+realz2))
+realTotalTime + sumIdle)=	1489.95

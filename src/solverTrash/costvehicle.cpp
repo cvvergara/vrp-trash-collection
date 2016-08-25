@@ -71,7 +71,6 @@ void CostVehicle::setInitialValues( const Trashnode &node,
   //double serviceE = endingSite.serviceTime();
   //shiftLength = endTime - startTime;
   //e_makeFeasable( 0 );
-  double Z = estimatedZ();
   totalTime = 0;
   double fixedTime = depot.serviceTime() // begining of trip
                    + ttDE + serviceE();  // ending of trip 
@@ -128,7 +127,7 @@ DLOG(INFO) << "arrivalEcloseslst(C) " << arrivalEclosesLast(C);
   idleTime = endingSite.totWaitTime() + totalWaitTime - forcedWaitTime;
   // nomatter the containers, the travel time from dump to endsite is constant
   realttDE = ttDE;
-};
+}
 
 void CostVehicle::setCost(const Trashnode &last) {
   realttSC = path.size() > 1 ? path[1].totTravelTime()  : ttSC;
@@ -286,7 +285,7 @@ void CostVehicle::setCost(const Trashnode &last) {
 
 
   v_cost = getDuration();
-};
+}
 
 
 double CostVehicle::getDeltaCost( double deltaTravelTime, int deltan ) {
@@ -308,7 +307,7 @@ double CostVehicle::getDeltaCost( double deltaTravelTime, int deltan ) {
                      newrealIdleTimeSCDE + newrealIdleTimeSDCDE;
   double deltacost = newv_cost - v_cost;
   return deltacost;
-};
+}
 
 
 
@@ -531,5 +530,5 @@ void CostVehicle::dumpCostValues() const
              shiftLength * 100 << "%\n"
              << "arrivalEcloseslast\t" << arrivalEcloseslast << "\n";
 #endif
-};
+}
 #endif

@@ -182,10 +182,10 @@ double Tweval::arrival_i_closes_j(const Tweval &other) const {
 /*! \todo \TODO
   The actual arrival time at \b This node,  given that:
       \b this node is visited directly after \b other node
-      and that the actual arrival time at \b other node was arrival(other)
+      and that the actual arrival time at \b other node is \b arrival
 */
 double Tweval::arrival_i_arrives_j(const Tweval &other, double arrival) const {
-  return  other.closes() + other.serviceTime() + twc->TravelTime(other.nid(), nid());
+  return  arrival + other.serviceTime() + twc->TravelTime(other.nid(), nid());
 }
 
 

@@ -172,7 +172,7 @@ bool OsrmClient::getOsrmTime(
 bool OsrmClient::getOsrmTime(double &time) {
     STATS_INC("OsrmClient::getOsrmTime(double &time)");
 
-    time == 0;
+    time = 0;
     if (!connectionAvailable || !use) {
         return false;
     }
@@ -192,15 +192,6 @@ bool OsrmClient::getOsrmTime(double &time) {
     return true;
 }
 
-#if 0
-<<<<<<< HEAD
-=======
-bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
-                              const Node &node3, double &time )
-{
-  if ( not connectionAvailable ) return false;
->>>>>>> origin/right-side-montevideo
-#endif
 
 bool OsrmClient::getOsrmTimes(std::deque<double> &times) {
     STATS_INC("OsrmClient::getOsrmTimes(td::deque<double> &times");
@@ -373,7 +364,7 @@ bool OsrmClient::getOsrmStreetNames(std::deque<std::string> &names) {
 }
 
 
-// TODO
+#if 0
 bool OsrmClient::getOsrmNamesOnRoute(std::deque<std::string> &names) {
 
     if (not connectionAvailable) return false;
@@ -411,6 +402,7 @@ bool OsrmClient::getOsrmNamesOnRoute(std::deque<std::string> &names) {
 #endif
     return true;
 }
+#endif
 
 //! testOsrmClient
 /*!
@@ -623,6 +615,7 @@ bool OsrmClient::getOsrmNearest(double ilon, double ilat, double &olon, double &
 
 
 
+#if 0
     //test 11 (names on route)
     {
         std::deque<std::string> names;
@@ -631,53 +624,14 @@ bool OsrmClient::getOsrmNearest(double ilon, double ilat, double &olon, double &
             DLOG(INFO) << "#11 NamesOnRoute:" << std::endl;
             for (int i=0; i<names.size(); i++)
                 DLOG(INFO) << "i: " << i << ", name: " << names[i] << std::endl;
-#if 0
-=======
-    //rContent = "";
-    tmpSS << jsonResult;
-    //rContent = tmpSS.str();
-    jsonDoc.Parse( tmpSS.str().c_str() );
-
-    // Everything ok. Set status.
-    status = 1;
-    // Get node coordinates from return json and set
-    // http://127.0.0.1:5000/nearest?loc=-34.9137291,-56.1743363
-    // nearest returns -> {"name":"Doctor Luis Piera","mapped_coordinate":[-34.913792,-56.174328],"status":0}
-    if ( jsonDoc.HasMember( "status" ) ) {
-        int rStatus = ( int ) jsonDoc["status"].GetInt();
-        if (rStatus == 0) {
-            // extract the latitude and longitude
-            if ( jsonDoc.HasMember( "mapped_coordinate" ) ) {
-                olat = ( double ) jsonDoc["mapped_coordinate"][0].GetDouble();
-                olon = ( double ) jsonDoc["mapped_coordinate"][1].GetDouble();
-            }
-            if ( jsonDoc.HasMember( "one_way" ) ) {
-                one_way = ( unsigned int ) jsonDoc["one_way"].GetInt();
-            }
-            if ( jsonDoc.HasMember( "forward_node_id" ) ) {
-                forward_id = ( unsigned int ) jsonDoc["forward_node_id"].GetInt();
-            }
-            if ( jsonDoc.HasMember( "reverse_node_id" ) ) {
-                reverse_id = ( unsigned int ) jsonDoc["reverse_node_id"].GetInt();
-            }
-            if ( jsonDoc.HasMember( "forward_weight" ) ) {
-                forward_wt = ( unsigned int ) jsonDoc["forward_weight"].GetInt();
-            }
-            if ( jsonDoc.HasMember( "reverse_weight" ) ) {
-                reverse_wt = ( unsigned int ) jsonDoc["reverse_weight"].GetInt();
-            }
-            if ( jsonDoc.HasMember( "name_id" ) ) {
-                street_id = ( unsigned int ) jsonDoc["name_id"].GetInt();
-            }
-            return true;
->>>>>>> origin/right-side-montevideo
-#endif
         } else {
             DLOG(INFO) << "#11 getOsrmNamesOnRoute Failed!" << std::endl;
             return false;
         }
     }
+#endif
 
+    use = oldUse;
     return true;
 
 }
@@ -732,6 +686,8 @@ bool OsrmClient::getOsrmNearest(
     auto lat = location.values.at(0).get<osrm::json::Number>().value;
     auto lon = location.values.at(1).get<osrm::json::Number>().value;
     oNode = Node(lon, lat);
+
+    return true;
 }
 
 

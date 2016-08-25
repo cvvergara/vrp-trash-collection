@@ -127,7 +127,9 @@ class OsrmClient {
 
      bool getOsrmStreetNames(std::deque<std::string> &names);
 
+#if 0
      bool getOsrmNamesOnRoute(std::deque<std::string> &names);
+#endif
 
      int getStatus() const { return status; }
      int getConnection() const {return connectionAvailable; }

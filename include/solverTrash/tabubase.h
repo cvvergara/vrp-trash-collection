@@ -433,18 +433,15 @@ public:
 #ifdef VRPMAXTRACE
     DLOG( INFO ) << "Entering TabuBase::removeTruckFromTabuList";
 #endif
-    int pos1, pos2;
-    Move move;
-    int expires;
-    std::map<const Move, int> oldTabuList = TabuList;
+    auto oldTabuList = TabuList;
     TabuList.clear();
 
-    for ( std::map<Move, int>::iterator it = oldTabuList.begin();
+    for ( auto it = oldTabuList.begin();
           it != oldTabuList.end(); ++it ) {
-      pos1 = it->first.getvid1();
-      pos2 = it->first.getvid2();
-      move = it->first;
-      expires = it->second;
+      auto pos1 = it->first.getvid1();
+      auto pos2 = it->first.getvid2();
+      auto move = it->first;
+      auto expires = it->second;
 
       if ( pos1 == truckPos or pos2 == truckPos ) continue;
 

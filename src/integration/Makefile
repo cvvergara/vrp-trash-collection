@@ -132,9 +132,8 @@ OSRMCLIENT_LIBS = -L/usr/local/lib -lboost_filesystem -lboost_iostreams -lboost_
 
 
 INCLUDES = -I$(BASECLASSES_DIR) -I$(BASETRASH_DIR) -I$(INITTRASH_DIR) -I$(SOLVERTRASH_DIR) -I. 
-CPPCOMPILEFLAGS = -Wreorder -Wall -Wextra -Wdouble-promotion -fmax-errors=10 
-CPPCOMPILEFLAGS = -fmax-errors=10
-CPPFLAGS = -g -O0 -MMD  -MP -fPIC $(CPPCOMPILEFLAGS) $(OSRMCLIENT_CFLAGS) $(DEFINES) $(STATS_CFLAGS) $(PLOT_CFLAGS) $(LOGGER_CFLAGS) $(DEBUG_CFLAGS) $(TRACE_CFLAGS) 
+CPPCOMPILEFLAGS = -Wreorder -Wall -Wextra -Wdouble-promotion -fmax-errors=10 -pedantic -Wuninitialized -Wunreachable-code -Werror
+CPPFLAGS = -g  -MMD  -MP -fPIC $(CPPCOMPILEFLAGS) $(OSRMCLIENT_CFLAGS) $(DEFINES) $(STATS_CFLAGS) $(PLOT_CFLAGS) $(LOGGER_CFLAGS) $(DEBUG_CFLAGS) $(TRACE_CFLAGS) 
 #LDFLAGS = -L/usr/lib/x86_64-linux-gnu -lgd $(INCLUDES) -L$(BASECLASSES) -L$(BASETRASH) -L$(INITTRASH)  $(JSON_LIBS) $(OSRMCLIENT_LIBS) $(LOGGER_LIBS)
 LDFLAGS = -L/usr/lib/x86_64-linux-gnu  $(INCLUDES) -L$(BASECLASSES) -L$(BASETRASH) -L$(INITTRASH)  $(JSON_LIBS) $(OSRMCLIENT_LIBS) $(LOGGER_LIBS)
 

@@ -71,7 +71,7 @@ class Vehicle: public Vehicle1 {
   void basicOptimization();
   ///{@
   int  exchangesWorse(int lim_iter);
-  int  exchangesWorse(Trip &trip, Trip &o_trip, int lim_iter);
+  int  exchangesWorse(Trip &trip, Trip &o_trip, UINT lim_iter);
   bool exchangesWorse(Trip &trip, Trip &o_trip);
   ///@}
 

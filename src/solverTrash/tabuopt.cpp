@@ -76,7 +76,7 @@ TabuOpt::TabuOpt( const OptSol &initialSolution, unsigned int iteration ) :
   if (maxIteration > 1) search();
 
   bestSolution.evaluate();
-};
+}
 
 
 vehicle_path_t *TabuOpt::getSolutionForPg( UINT &count ) const
@@ -633,7 +633,7 @@ bool TabuOpt::classifyMoves( Moves &neighborhood )
 
   neighborhood.clear();
   return false;         //we didnt make a move that deleted a truck
-};
+}
 
 bool TabuOpt::computeCosts( OptSol &s )
 {
@@ -655,9 +655,9 @@ void TabuOpt::cleanUpInterSwMoves( Moves &moves, const Move &guide ) const
   STATS->inc( "TabuOpt::cleanUpInterSwMoves" );
 #endif
 
-  if ( not moves.size() ) return;
+  if (not moves.size()) return;
 
-  if ( not guide.getmtype() == Move::InterSw ) return;
+  if (!(guide.getmtype() == Move::InterSw)) return;
 
   int fromPos = guide.getInterSwFromPos();
   int toPos = guide.getInterSwToPos();
@@ -1042,5 +1042,5 @@ void TabuOpt::dumpMoves( std::string str, Moves moves ) const
 
   for ( movePtr = moves.begin(); movePtr != moves.end(); ++movePtr )
     movePtr->Dump();
-};
+}
 

@@ -105,41 +105,30 @@ double serviceE() const;
                double _endtime, const Bucket &otherlocs )
     : BaseVehicle( _vid, _start_id, _dump_id, _end_id,
                    _capacity, _dumpservicetime, _starttime,
-                   _endtime, otherlocs ),
-    ttSC(0.0), ttDC(0.0), ttCD(0.0), ttDE(0.0), ttCC(0.0),
-    realttSC(0.0), realttDC(0.0), realttCD(0.0), realttDE(0.0), realttCC(0.0),
-    N(0), Nreal(0), minDumpVisits(0), maxDumpVisits(0), realDumpVisits(0),
-    Z(0), z1(0), z2(0), realz1(0), realz2(0), n(0), z(0), Zmissing(0), lastn(0),
-    totalTime(0.0), realTotalTime(0.0), lastRealTotalTime(0.0),
-    forcedWaitTime(0.0), totalWaitTime(0.0), idleTime(0.0),
-    realForcedWaitTime(0.0), realtotalWaitTime(0.0), realIdleTime(0.0),
-    idleTimeSCDE(0.0), idleTimeSDCDE(0.0),
-    realIdleTimeSCDE(0.0), realIdleTimeSDCDE(0.0),
-    sumIdle(0.0), penalty(0.0),
-    v_cost(0.0), workNotDonePerc(0.0) {
-  };
+                   _endtime, otherlocs ) {
+    };
 
 
   inline int  realN() const { return ( path.dumpVisits() + 1 ) ;}
   inline double  totalServiceTime() {
-    return ( path.totServiceTime() +  dumpSite.serviceTime() +
-             endingSite.serviceTime() ) ;
+      return ( path.totServiceTime() +  dumpSite.serviceTime() +
+              endingSite.serviceTime() ) ;
   }
 
   Trashnode& avgC() {return C;}
   double getCost() const { return v_cost;};
   double getCost() {
-    if (size() > 1) setCost(path.last());
-    else setCost(C);
+      if (size() > 1) setCost(path.last());
+      else setCost(C);
 
-    return v_cost;
+      return v_cost;
   };
   double getCostOsrm() {
-    evaluateOsrm();
-    if (size() > 1) setCost(path.last());
-    else setCost(C);
+      evaluateOsrm();
+      if (size() > 1) setCost(path.last());
+      else setCost(C);
 
-    return v_cost;
+      return v_cost;
   };
 
   int getz1() const  {return realz1;};
@@ -156,17 +145,47 @@ double serviceE() const;
   //for cost function
 private:
   Trashnode C;
-  double ttSC, ttDC, ttCD, ttDE, ttCC;
-  double realttSC, realttDC, realttCD, realttDE, realttCC;
-  int N, Nreal, minDumpVisits, maxDumpVisits, realDumpVisits;
-  int Z, z1, z2, realz1, realz2, n, z, Zmissing, lastn;
-  double totalTime, realTotalTime, lastRealTotalTime;
-  double forcedWaitTime, totalWaitTime, idleTime;
-  double realForcedWaitTime, realtotalWaitTime, realIdleTime;
-  double idleTimeSCDE, idleTimeSDCDE;
-  double realIdleTimeSCDE, realIdleTimeSDCDE;
-  double sumIdle, penalty;
-  double v_cost, workNotDonePerc;
+  double ttSC = 0;
+  double ttDC = 0;
+  double ttCD = 0;
+  double ttDE = 0;
+  double ttCC = 0;
+  double realttSC = 0;
+  double realttDC = 0;
+  double realttCD = 0;
+  double realttDE = 0;
+  double realttCC = 0;
+  int N = 0;
+  int Nreal = 0;
+  int minDumpVisits = 0;
+  int maxDumpVisits = 0;
+  int realDumpVisits;
+  int Z = 0;
+  int z1 = 0;
+  int z2 = 0;
+  int realz1 = 0;
+  int realz2 = 0;
+  int n = 0;
+  int z = 0;
+  int Zmissing = 0;
+  int lastn;
+  double totalTime = 0;
+  double realTotalTime = 0;
+  double lastRealTotalTime;
+  double forcedWaitTime = 0;
+  double totalWaitTime = 0;
+  double idleTime = 0;
+  double realForcedWaitTime = 0;
+  double realtotalWaitTime = 0;
+  double realIdleTime = 0;
+  double idleTimeSCDE = 0;
+  double idleTimeSDCDE = 0;
+  double realIdleTimeSCDE = 0;
+  double realIdleTimeSDCDE = 0;
+  double sumIdle = 0;
+  double penalty = 0;
+  double v_cost = 0;
+  double workNotDonePerc = 0;
 };
 
 

@@ -650,6 +650,7 @@ class TwBucket {
     }
 
 
+#if 0
     /*!
      * \brief Compute the change in time of inserting node before pos in the path and check for TW violations..
      *
@@ -680,8 +681,6 @@ class TwBucket {
         return delta;
     }
 
-<<<<<<< HEAD
-=======
     double delta  =  TravelTime[prev][node.nid()]
                      + node.getServiceTime()
                      + TravelTime[node.nid()][next]
@@ -689,6 +688,7 @@ class TwBucket {
                         - path[pos - 1].getDepartureTime());
     return delta;
   }
+#endif
 
   /*!
    * \brief Compute the change in time when swapping node into pos in the path and do additional time violation checks.
@@ -720,19 +720,6 @@ class TwBucket {
   }
 
 
-  /*!
-   * \brief Compute the change in time of inserting node before pos in the path.
-   *
-   * Simulate inserting node before pos in the path and compute the resulting
-   * change in time. No TW violations are checked.
-   *
-   * \param[in] node The node to be inserted in the simulation.
-   * \param[in] pos The position before which the node will be inserted.
-   * \return The change in travel time or infinity if the move is invalid.
-   */
-  double  getDeltaTime(const knode &node, POS pos) const {
-    assert(pos < path.size());
->>>>>>> origin/right-side-montevideo
 
     /*!
      * \brief Check all nodes from pos to upto if adding delta would cause a violation.
@@ -846,7 +833,15 @@ bool hasId(const knode &node) const {
     return hasid(node.id());
 }
 /*! \brief \param[in] id Uses the \b id */
-bool hasId(UID id) const {
+
+bool hasId(int64_t id) const {
+    return std::find_if(path.begin(), path.end(),
+            [&id](const auto &item) {
+        return item.id() == id;
+        }) != path.end();
+
+
+#if 0
     const_reverse_iterator rit = path.rbegin();
 
     for (const_iterator it = path.begin(); it != path.end() ; it++, ++rit) {
@@ -855,6 +850,7 @@ bool hasId(UID id) const {
     }
 
     return false;
+#endif
 }
 ///@}
 
@@ -1033,7 +1029,14 @@ bool has_cv(double cargoLimit) const {
  * \return The internal node id or -1 if user id was not found.
  * \todo TODO  put it in twc
  */
-UID getNidFromId(UID id) const {
+auto getNidFromId(int64_t id) const {
+
+    return std::find_if(path.begin(), path.end(),
+            [&id](const auto &item) {
+        return item.id() == id;
+        })->nid();
+
+#if 0
     const_reverse_iterator rit = path.rbegin();
 
     for (const_iterator it = path.begin(); it != path.end() ; it++, ++rit) {
@@ -1043,6 +1046,7 @@ UID getNidFromId(UID id) const {
     }
 
     return 0;
+#endif
 }
 
 
@@ -1051,12 +1055,20 @@ UID getNidFromId(UID id) const {
  * \param[in] id The user id for the node.
  * \return The position in the path or -1 if it is not found.
  */
-POS posFromId(UID id) const {
+auto posFromId(int64_t id) const {
+
+    return std::find_if(path.begin(), path.end(),
+            [&id](const auto &item) {
+        return item.id() == id;
+        }) - path.begin();
+
+#if 0
     for ( const_iterator it = path.begin(); it != path.end() ; it++ ) {
         if ( it->id() == id ) return POS(it - path.begin());
     }
 
     return 0;
+#endif
 }
 
 
@@ -1191,12 +1203,24 @@ bool erase(POS atPos) {
 /* \brief Erase node from within the path.
  * \param[in] node The node to be erased.
  */
-bool erase(const knode &node) {
-    if ( !hasNid(node) ) return false;
+void erase(const knode &node) {
+
+    path.erase(
+            std::remove_if(
+                path.begin(),
+                path.end(),
+                [&node](const auto &item) {
+                return item.id() == node.id();
+                }),
+            path.end()
+            );
+#if 0
+    if (!hasNid(node)) return false;
     int atPos = pos(node.nid());
     assert(atPos < path.size());
     path.erase(path.begin() + atPos);
     return true;
+#endif
 }
 
 
@@ -1205,15 +1229,15 @@ bool erase(const knode &node) {
   \param[in] fromPos Position of the start of the range to be erased.
   \param[in] toPos Position of the last in the range to be erased.
 
-<<<<<<< HEAD
+  <<<<<<< HEAD
   \warning Notice that the right side of the range is not included 
   when  ( fromPos < toPos )  range erased: [fromPos,toPos)
   when  ( fromPos > toPos )  range erased: [toPos,fromPos)
-=======
-    \warning Notice that the right side of the range is not included
-    when  ( fromPos < toPos )  range erased: [fromPos,toPos)
-    when  ( fromPos > toPos )  range erased: [toPos,fromPos)
->>>>>>> origin/right-side-montevideo
+  =======
+  \warning Notice that the right side of the range is not included
+  when  ( fromPos < toPos )  range erased: [fromPos,toPos)
+  when  ( fromPos > toPos )  range erased: [toPos,fromPos)
+  >>>>>>> origin/right-side-montevideo
 
   \warning If fromPos and toPos are reversed it will still erase the range.
   */
@@ -1240,8 +1264,8 @@ bool push_front(const knode &node) {
     path.push_front(node);
     return true;
 }
-iterator begin() {path.begin();}
-iterator end() {path.begin();}
+auto begin() {return path.begin();}
+auto end() {return path.begin();}
 void pop_back() {path.pop_back();}
 void pop_front() {path.pop_front();}
 /*! \brief disables resizing to a larger bucket */
