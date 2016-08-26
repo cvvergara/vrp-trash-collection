@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "config.h"
+#include "baseClasses/config.h"
 
 class TrashConfig : public Config
 {

@@ -17,71 +17,16 @@
 #include <sstream>
 #include <deque>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
+#include "baseClasses/logger.h"
+#include "baseClasses/stats.h"
+#include "baseClasses/timer.h"
+#include "baseClasses/move.h"
+#include "baseClasses/twpath.h"
 
-#ifdef DOSTATS
-#include "stats.h"
-#include "timer.h"
-#endif
-
-#include "twpath.h"
-#include "extendedvehicle.h"
-#ifdef WITHOSRM
-#include "vrposrm.h"
-#endif
-#include "move.h"
+#include "baseTrash/extendedvehicle.h"
 
 
 
-#ifdef WITHOSRM
-
-// *OSRM() REQUIRES the main() to call cURLpp::Cleanup myCleanup; ONCE!
-void ExtendedVehicle::evaluateOsrm()
-{
-  double otime = path.getTotTravelTimeOsrm();
-
-  if ( otime == -1 ) {
-    Timer osrmtime;
-
-    std::string osrmBaseUrl = CONFIG->getString( "osrmBaseUrl" );
-    path.evaluateOsrm( osrmBaseUrl );
-    dumpSite.evaluateOsrm( path[path.size() - 1] , osrmBaseUrl );
-    endingSite.evaluateOsrm( dumpSite, osrmBaseUrl );
-
-    // stats collection
-    if ( otime == -1 )
-      STATS->inc( "failed To Get Time OSRM" );
-
-    STATS->addto( "cum Time Get Time OSRM", osrmtime.duration() );
-    STATS->inc( "cnt Get Time OSRM" );
-  }
-
-};
-
-
-double ExtendedVehicle::getCostOsrm() const
-{
-  double otime = getTotTravelTimeOsrm();
-
-  // if OSRM failed, return -1.0 to indicate a failure
-  if ( otime == -1 ) return otime;
-
-  // WARNING: this is only an approximation because changes at a per
-  //          node level need to be evaluated for moving dumps and violations
-
-  return w1 * ( otime + path.getTotWaitTime() + path.getTotServiceTime() ) +
-         w2 * endingSite.getcvTot() +
-         w3 * endingSite.gettwvTot();
-}
-
-
-double ExtendedVehicle::getTotTravelTimeOsrm() const
-{
-  return endingSite.getTotTravelTimeOsrm();
-};
-#endif
 
 bool ExtendedVehicle::e_setPath( const Bucket &sol )
 {
@@ -125,7 +70,7 @@ bool  ExtendedVehicle::findNearestNodeTo( Bucket &unassigned, UID &pos,
   flag = twc->findNearestNodeUseExistingData( path, unassigned,  pos , bestNode,
          bestDist );
 
-  for ( int i = 0; i < unassigned.size(); i++ ) {
+  for ( size_t i = 0; i < unassigned.size(); i++ ) {
     if ( twc->isCompatibleIAJ( path[size() - 1]  , unassigned[i], dumpSite ) ) {
       d = unassigned[i].distanceToSegment( path[size() - 1], dumpSite );
 
@@ -156,11 +101,10 @@ std::deque<int> ExtendedVehicle::getpath() const
 
 bool ExtendedVehicle::push_back( Trashnode node )
 {
-  assert ( node.nid() >= 0 );
-  E_Ret ret = path.e_push_back( node, getmaxcapacity() );
+  auto ret = path.e_push_back( node, getmaxcapacity() );
 
-  if ( ret == OK ) evalLast();
-  else if ( ret == INVALID ) return false;
+  if ( ret == true ) evalLast();
+  else return false;
 
   return true;
 }
@@ -175,67 +119,79 @@ bool ExtendedVehicle::push_front( Trashnode node )
 
 bool ExtendedVehicle::insert( Trashnode node, int at )
 {
-  E_Ret ret = path.e_insert( node, at, getmaxcapacity() );
+  auto ret = path.e_insert( node, at, getmaxcapacity() );
 
-  if ( ret == OK ) {
+  if ( ret == true ) {
     path.evaluate( at, getmaxcapacity() );
     evalLast();
-  } else if ( ret == INVALID ) return false;
+  } else return false;
 
   return true;
 }
 
 bool ExtendedVehicle::remove( int at )
 {
-  E_Ret ret = path.e_remove( at, getmaxcapacity() );
+  auto ret = path.e_remove( at, getmaxcapacity() );
 
-  if ( ret == OK ) evalLast();
-  else if ( ret == INVALID ) return false;
+  if ( ret == true ) evalLast();
+  else return false;
 
   return true;
 }
 
 
+
 bool ExtendedVehicle::moverange( int rangefrom, int rangeto, int destbefore )
 {
-  E_Ret ret = path.e_move( rangefrom, rangeto, destbefore, getmaxcapacity() );
+    assert(true==false);
+    return false;
+#if 0
+  auto ret = path.e_move( rangefrom, rangeto, destbefore, getmaxcapacity() );
 
-  if ( ret == OK ) evalLast();
-  else if ( ret == INVALID ) return false;
+  if ( ret == true ) evalLast();
+  else return false;
 
   return true;
+#endif
 }
 
 
 bool ExtendedVehicle::movereverse( int rangefrom, int rangeto, int destbefore )
 {
-  E_Ret ret = path.e_movereverse( rangefrom, rangeto, destbefore,
+    assert(true==false);
+    return false;
+#if 0
+  auto ret = path.e_movereverse( rangefrom, rangeto, destbefore,
                                   getmaxcapacity() );
 
-  if ( ret == OK ) evalLast();
-  else if ( ret == INVALID ) return false;
+  if ( ret == true ) evalLast();
+  else return false;
 
   return true;
+#endif
 }
 
 
-bool ExtendedVehicle::reverse( int rangefrom, int rangeto )
-{
-  E_Ret ret = path.e_reverse( rangefrom, rangeto, getmaxcapacity() );
+bool ExtendedVehicle::reverse( int rangefrom, int rangeto ) {
+    assert(true==false);
+    return false;
+#if 0
+  auto ret = path.e_reverse( rangefrom, rangeto, getmaxcapacity() );
 
-  if ( ret == OK ) evalLast();
-  else if ( ret == INVALID ) return false;
+  if ( ret == true ) evalLast();
+  else return false;
 
   return true;
+#endif
 }
 
 
 bool ExtendedVehicle::move( int fromi, int toj )
 {
-  E_Ret ret = path.e_move( fromi, toj, getmaxcapacity() );
+  auto ret = path.e_move( fromi, toj, getmaxcapacity() );
 
-  if ( ret == OK ) evalLast();
-  else if ( ret == INVALID ) return false;
+  if ( ret == true ) evalLast();
+  else return false;
 
   return true;
 }
@@ -245,8 +201,8 @@ bool ExtendedVehicle::swap( const int &i, const int &j )
 {
   E_Ret ret = path.e_swap( i, j, getmaxcapacity() );
 
-  if ( ret == OK ) evalLast();
-  else if ( ret == INVALID ) return false;
+  if ( ret == true ) evalLast();
+  else return false;
 
   return true;
 }
@@ -275,6 +231,8 @@ void ExtendedVehicle::restorePath( Twpath<Trashnode> oldpath )
 
 void ExtendedVehicle::evalLast()
 {
+    assert(true==false);
+#if 0
   Trashnode last = path[path.size() - 1];
   dumpSite.setDemand( -last.getCargo() );
   dumpSite.evaluate( last, getmaxcapacity() );
@@ -289,6 +247,7 @@ void ExtendedVehicle::evalLast()
     cost = w1 * endingSite.getTotTime() +
            w2 * endingSite.getcvTot() +
            w3 * endingSite.gettwvTot();
+#endif
 }
 
 void ExtendedVehicle::evaluate()
@@ -306,6 +265,9 @@ void ExtendedVehicle::evaluate()
 bool ExtendedVehicle::doTwoOpt( const int &c1, const int &c2, const int &c3,
                                 const int &c4 )
 {
+    assert(true==false);
+    return false;
+#if 0
   // Feasible exchanges only
   if ( c3 == c1 || c3 == c2 || c4 == c1 || c4 == c2 || c2 < 1 || c3 < 2 )
     return false;
@@ -322,18 +284,22 @@ bool ExtendedVehicle::doTwoOpt( const int &c1, const int &c2, const int &c3,
 
   // if the change does NOT improve the cost or generates TW violations
   // undo the change
-  if ( getcost() > oldcost or hastwv() ) {
+  if ( getcost() > oldcost or this->hastwv() ) {
     reverse( c2, c3 );
     return false;
   }
 
   return true;
+#endif
 }
 
 
 bool ExtendedVehicle::doThreeOpt( const int &c1, const int &c2, const int &c3,
                                   const int &c4, const int &c5, const int &c6 )
 {
+    assert(true==false);
+    return false;
+#if 0
   // Feasible exchanges only
   if ( ! ( c2 > c1 && c3 > c2 && c4 > c3 && c5 > c4 && c6 > c5 ) ) return false;
 
@@ -350,11 +316,15 @@ bool ExtendedVehicle::doThreeOpt( const int &c1, const int &c2, const int &c3,
   }
 
   return true;
+#endif
 }
 
 
 bool ExtendedVehicle::doOrOpt( const int &c1, const int &c2, const int &c3 )
 {
+    assert(true==false);
+    return false;
+#if 0
   // Feasible exchanges only
   if ( ! ( c2 >= c1 and ( c3 < c1 - 1 or c3 > c2 + 2 ) ) ) return false;
 
@@ -371,11 +341,15 @@ bool ExtendedVehicle::doOrOpt( const int &c1, const int &c2, const int &c3 )
   }
 
   return true;
+#endif
 }
 
 
 bool ExtendedVehicle::doNodeMove( const int &i, const int &j )
 {
+    assert(true==false);
+    return false;
+#if 0
   if ( i == j or i < 1 or j < 1 or i > path.size() - 1 or j > path.size() - 1 )
     return false;
 
@@ -389,11 +363,15 @@ bool ExtendedVehicle::doNodeMove( const int &i, const int &j )
   }
 
   return true;
+#endif
 }
 
 
 bool ExtendedVehicle::doNodeSwap( const int &i, const int &j )
 {
+    assert(true==false);
+    return false;
+#if 0
   if ( i < 1 or j < 1 or i > path.size() - 1 or j > path.size() - 1 )
     return false;
 
@@ -407,11 +385,15 @@ bool ExtendedVehicle::doNodeSwap( const int &i, const int &j )
   }
 
   return true;
+#endif
 }
 
 
 bool ExtendedVehicle::doInvertSeq( const int &i, const int &j )
 {
+    assert(true==false);
+    return false;
+#if 0
   if ( i > path.size() or j > path.size() - 1 )
     return false;
 
@@ -425,6 +407,7 @@ bool ExtendedVehicle::doInvertSeq( const int &i, const int &j )
   }
 
   return true;
+#endif
 }
 
 
@@ -663,6 +646,9 @@ bool ExtendedVehicle::findBestFit( const Trashnode &tn, int *tpos,
 bool ExtendedVehicle::swap2( ExtendedVehicle &v2, const int &i1, const int &i2,
                              bool force )
 {
+    assert(true==false);
+    return false;
+#if 0
   if ( i1 < 0 or i1 > this->size() - 1 or i2 < 0 or i2 > v2.size() - 1 )
     return false;
 
@@ -684,9 +670,11 @@ bool ExtendedVehicle::swap2( ExtendedVehicle &v2, const int &i1, const int &i2,
   }
 
   return true;
+#endif
 }
 
 
+#if 0
 /*
     3-route node exchange - swap3
     path[i1] -> v2.path[i2] -> v3.path[i3] -> path[i1]
@@ -695,6 +683,8 @@ bool ExtendedVehicle::swap3( ExtendedVehicle &v2, ExtendedVehicle &v3,
                              const int &i1,
                              const int &i2, const int &i3, bool force )
 {
+    assert(true==false);
+    return false;
   if ( i1 < 0 or i1 > this->size() - 1 or
        i2 < 0 or i2 > v2.size() - 1 or
        i2 < 0 or i3 > v3.size() - 1 ) return false;
@@ -728,6 +718,7 @@ bool ExtendedVehicle::swap3( ExtendedVehicle &v2, ExtendedVehicle &v3,
 
   return true;
 }
+#endif
 
 
 
@@ -742,6 +733,9 @@ bool ExtendedVehicle::exchangeSeq( ExtendedVehicle &v2, const int &i1,
                                    const int &j1,
                                    const int &i2, const int &j2, bool force )
 {
+    assert(true==false);
+    return false;
+#if 0
   if ( j1 < i1 or j2 < i2 or i1 < 0 or i2 < 0 or
        j1 > this->size() - 1 or j2 > v2.size() - 1 ) return false;
 
@@ -802,6 +796,7 @@ bool ExtendedVehicle::exchangeSeq( ExtendedVehicle &v2, const int &i1,
   }
 
   return true;
+#endif
 }
 
 
@@ -837,6 +832,9 @@ bool ExtendedVehicle::exchange3( ExtendedVehicle &v2, ExtendedVehicle &v3,
                                  const int &cnt,
                                  const int &i1, const int &i2, const int &i3, bool force )
 {
+    assert(true==false);
+    return false;
+#if 0
   if ( i1 < 0 or i1 + cnt > this->size() - 1 or
        i2 < 0 or i2 + cnt > v2.size() - 1 or
        i3 < 0 or i3 + cnt > v3.size() - 1 or cnt < 1 ) return false;
@@ -892,6 +890,7 @@ bool ExtendedVehicle::exchange3( ExtendedVehicle &v2, ExtendedVehicle &v3,
   }
 
   return true;
+#endif
 }
 
 

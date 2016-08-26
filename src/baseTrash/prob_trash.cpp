@@ -16,12 +16,9 @@
 #include <algorithm>
 #include <math.h>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
-#include "stats.h"
-
-#include "prob_trash.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/stats.h"
+#include "baseTrash/prob_trash.h"
 
 
 

@@ -86,7 +86,7 @@ void OptSol::optimizeTruckNumber()
 
   for ( UINT i = 0; i < notFullz1.size(); i++ ) ss << notFullz1[i] << "\t";
 
-  DLOG( INFO ) << ss.str();
+  DLOG(INFO) << ss.str();
   DLOG( INFO ) << "FUll Trucks in current trip: ";
   ss.str( "" );
 

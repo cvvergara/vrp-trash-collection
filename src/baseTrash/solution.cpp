@@ -13,12 +13,9 @@
  ********************************************************************VRP*/
 
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
-
-#include "pg_types_vrp.h"
-#include "solution.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/pg_types_vrp.h"
+#include "baseTrash/solution.h"
 
 bool Solution::feasable() const
 {

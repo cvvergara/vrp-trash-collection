@@ -19,17 +19,13 @@
 #include <sstream>
 
 
-#ifdef DOPLOT
-#include "plot.h"
-#endif
 
-
-#include "twpath.h"
-#include "trashnode.h"
-#include "twc.h"
-#include "twpath.h"
-#include "move.h"
-#include "basevehicle.h"
+#include "baseClasses/twpath.h"
+#include "baseTrash/trashnode.h"
+#include "baseClasses/twc.h"
+#include "baseClasses/twpath.h"
+#include "baseClasses/move.h"
+#include "baseTrash/basevehicle.h"
 //#include "pg_types_vrp.h"
 
 
@@ -51,7 +47,7 @@ public:
   }
 
   ExtendedVehicle( std::string line, const Bucket &otherlocs)
-    : BaseVehicle( std::string line, const Bucket &otherlocs )  {
+    : BaseVehicle(line, otherlocs)  {
   }
 
   const Trashnode &getBackToDepot() const {return endingSite;}
@@ -93,8 +89,20 @@ public:
                     oldpath ); //tmp=v; v.dostuff; v=tmp restores as original
 
   //--------------------------------------------------------------------
+  // others
+  //--------------------------------------------------------------------
+  bool e_setPath(const Bucket &sol);
+  bool findNearestNodeTo(BaseVehicle::Bucket&, UID&, Tweval&);
+  bool push_back(Tweval);
+  std::deque<int> getpath() const;
+  bool insert( Trashnode node, int at );
+  void evalLast();
+
+
+  //--------------------------------------------------------------------
   // algorithm specific - intra-route manipulations
   //--------------------------------------------------------------------
+
 
   bool doTwoOpt( const int &c1, const int &c2, const int &c3, const int &c4 );
   bool doThreeOpt( const int &c1, const int &c2, const int &c3, const int &c4,
@@ -119,8 +127,10 @@ public:
   //--------------------------------------------------------------------
 
   bool swap2( ExtendedVehicle &v2, const int &i1, const int &i2, bool force );
+#if 0
   bool swap3( ExtendedVehicle &v2, BaseVehicle &v3, const int &i1, const int &i2,
               const int &i3, bool force );
+#endif
   bool exchangeSeq( ExtendedVehicle &v2, const int &i1, const int &j1,
                     const int &i2,
                     const int &j2, bool force );

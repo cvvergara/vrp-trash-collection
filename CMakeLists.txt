@@ -66,7 +66,7 @@ include_directories(
 #--------------------------
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS " -Wall ")
-set(CMAKE_CXX_FLAGS_DEBUG " -Wall -g -Wall -Wextra -pedantic -Wuninitialized -Wunreachable-code -Wstrict-overflow=1 -D_FORTIFY_SOURCE=2")
+set(CMAKE_CXX_FLAGS_DEBUG " -Wall -g -Wall -Wextra -pedantic -Wuninitialized -fmax-errors=10 -Wunreachable-code -Wstrict-overflow=1 -D_FORTIFY_SOURCE=2")
 set(CMAKE_CXX_FLAGS_RELEASE " ")
 
 ## ----------------------------------------
@@ -126,6 +126,7 @@ mark_as_advanced(OSRM_INCLUDE_DIRS OSRM_LIBRARIES OSRM_LIBRARY_DIR)
 
 find_package(Glog REQUIRED)
 
+
 ##
 
 ## ----------------------------------------
@@ -144,22 +145,24 @@ find_package(CURL REQUIRED)
 
 file(GLOB VRPTC_SOURCES
     src/baseClasses/*.cpp
-    src/basseTrash/*.cpp
+    src/baseTrash/*.cpp
     src/initTrash/*.cpp
-    src/solverTrash/*.cpp)
+    src/solverTrash/*.cpp
+    src/integration/trash.cpp)
 
 
-add_library (
-    ${VRPTC_LIBRARY_NAME}
-    SHARED
+add_executable (
+    ${PROJECT_NAME}
     ${VRPTC_SOURCES}
     )
+
+#target_link_libraries (vrp-trash-collection LINK_PUBLIC ${PROJECT_NAME})
 
 #set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CPP)
 #set_target_properties(${VRPTC_LIBRARY_NAME} PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
 
 #message(FATAL_ERROR "got here--------------------------")
-#target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${Threads_LIBRARIES} ${OSRM_LIBRARIES} ${GLOG_LIBRARIES} ${CURLPP_LIBRARIES} )
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${Threads_LIBRARIES} ${OSRM_LIBRARIES} ${GLOG_LIBRARIES} ${CURLPP_LIBRARIES} )
 
 
 #enable_testing()

@@ -17,18 +17,13 @@
 #include <sstream>
 #include <deque>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
+#include "baseClasses/logger.h"
+#include "baseClasses/stats.h"
+#include "baseClasses/timer.h"
 
-#ifdef DOSTATS
-#include "stats.h"
-#include "timer.h"
-#endif
-
-#include "twpath.h"
-#include "basevehicle.h"
-#include "move.h"
+#include "baseClasses/move.h"
+#include "baseClasses/twpath.h"
+#include "baseTrash/basevehicle.h"
 
 
 void BaseVehicle::set_endingSite(const Trashnode &other) {

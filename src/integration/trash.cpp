@@ -21,18 +21,13 @@
 #include <math.h>
 #include <stdio.h>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
+#include "baseClasses/logger.h"
+#include "baseClasses/timer.h"
+#include "baseClasses/stats.h"
 
-#ifdef DOSTATS
-#include "timer.h"
-#include "stats.h"
-#endif
-
-#include "trashconfig.h"
-#include "truckManyVisitsDump.h"
-#include "fleetOpt.h"
+#include "baseTrash/trashconfig.h"
+#include "initTrash/truckManyVisitsDump.h"
+#include "solverTrash/fleetOpt.h"
 
 
 void Usage()
