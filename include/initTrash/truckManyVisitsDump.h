@@ -17,7 +17,7 @@
 #include <string>
 #include <deque>
 
-#include "./basicOperations.h"
+#include "initTrash/basicOperations.h"
 
 
 class TruckManyVisitsDump : public Basicoperations {

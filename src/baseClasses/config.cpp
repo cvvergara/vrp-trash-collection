@@ -16,11 +16,8 @@
 #include <cstdio>
 #include <iostream>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
-
-#include "config.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/config.h"
 
 
 /*!

@@ -13,8 +13,9 @@
  ********************************************************************VRP*/
 #ifndef SRC_BASECLASSES_NODE_H_
 #define SRC_BASECLASSES_NODE_H_
+#pragma once
 
-#include <basictypes.h>
+#include "baseClasses/basictypes.h"
 #include <string>
 
 /*! \class Node

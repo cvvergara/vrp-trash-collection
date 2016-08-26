@@ -14,8 +14,8 @@
 
 #include <iostream>
 
-#include "logger.h"
-#include "stats.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/stats.h"
 
 
 /*!

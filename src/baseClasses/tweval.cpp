@@ -15,12 +15,8 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef DOVRPLOG
-#include "./logger.h"
-#endif
-
-
-#include "./tweval.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/tweval.h"
 
 
 /*!

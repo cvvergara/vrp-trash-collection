@@ -2,17 +2,22 @@ cmake_minimum_required (VERSION 3.2.2)
 
 #https://cmake.org/cmake/help/v3.0/command/project.html
 
-project(vrptc 0.0.0.1 LANGUAGES C CXX) 
+project(vrptc VERSION 0.0.0.1 LANGUAGES C CXX) 
+
 
 message ("Generating project ${PROJECT_NAME}")
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE)
-  MESSAGE(FATAL_ERROR "In-source builds are not allowed.
-Please create a directory and run cmake from there, passing the path
-to this source directory as the last argument.
-This process created the file `CMakeCache.txt' and the directory
-`CMakeFiles'. Please delete them.")
+    message(FATAL_ERROR "\
+In-source builds are not allowed. \
+Please create a directory and run cmake from there, passing the path \
+to this source directory as the last argument. \
+This process created the file 'CMakeCache.txt' and the directory \
+'CMakeFiles'. Please delete them.
+")
 endif()
+
+
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -20,16 +25,15 @@ include(FindPkgConfig)
 
 set(VRPTC_LIBRARY "vrp-trash-collection")
 
-set(DEPS_LIBRARY_NAME "deps")
+#set(DEPS_LIBRARY_NAME "deps")
 
 
+option(DOVRPLOG "general debugging" ON)
+option(DOSTATS "On for debugging" ON)
+option(VRPMINTRACE "Option Min Logging description not so much debugging" ON)
+option(VRPMAXTRACE "Option Max Logging use for detailed debugging" OFF)
 
-
-option(DOVRPLOG "Option description" ON)
-option(DOSTATS "Option description" ON)
-option(OSRMCLIENT "Option description" ON)
-option(VRPMINTRACE "Option description" ON)
-option(VRPMAXTRACE "Option description" OFF)
+add_definitions(-DOSRMCLIENT)
 
 if(DOVRPLOG)
     add_definitions(-DDOVRPLOG)
@@ -37,10 +41,6 @@ endif()
 
 if(DOSTATS)
     add_definitions(-DDOSTATS)
-endif()
-
-if(OSRMCLIENT)
-    add_definitions(-DOSRMCLIENT)
 endif()
 
 if(VRPMINTRACE)
@@ -57,114 +57,110 @@ endif()
 
 
 include_directories(
-    "src/initTrash"
-    "src/baseClasses"
-    "src/solverTrash"
-    "src/baseTrash"
+    "include"
     )
 
-# Activa c++14
-CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX0X)
-message(STATUS "COMPILER_SUPPORTS_CXX0X= ${COMPILER_SUPPORTS_CXX0X}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CPP_FLAGS " -Wall ")
-set(CMAKE_CPP_FLAGS_DEBUG " -Wall -g -Wall -Wextra -pedantic -Wuninitialized -Wunreachable-code -Wstrict-overflow=1 -D_FORTIFY_SOURCE=2")
-set(CMAKE_CPP_FLAGS_RELEASE "")
+#--------------------------
+# c++ flags
+#--------------------------
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS " -Wall ")
+set(CMAKE_CXX_FLAGS_DEBUG " -Wall -g -Wall -Wextra -pedantic -Wuninitialized -Wunreachable-code -Wstrict-overflow=1 -D_FORTIFY_SOURCE=2")
+set(CMAKE_CXX_FLAGS_RELEASE " ")
 
-### Find
-## Boost
+## ----------------------------------------
+## Boost 
+##    Needed for the osrmclient
+## ----------------------------------------
+
 set(BOOST_COMPONENTS date_time filesystem iostreams program_options regex system thread unit_test_framework)
-#Check Boost
 set(BOOST_MIN_VERSION "1.49.0")
+
+
 find_package(Boost ${BOOST_MIN_VERSION} COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
 if(NOT Boost_FOUND)
     MESSAGE(FATAL_ERROR "Fatal error: Boost (version >= 1.49.0) required.\n")
+else()
+    MESSAGE(STATUS "Boost_VERSION ${Boost_VERSION}")
+    include_directories(${Boost_INCLUDE_DIRS})
 endif()
+
+
+
 ##
 
+## ----------------------------------------
 ## Threads
+## ----------------------------------------
+
 find_package(Threads REQUIRED)
+
 ##
 
+
+## ----------------------------------------
 ## OSRM
-# Office
+## ----------------------------------------
 
-set(OSRM_SOURCE_PATH "/disco_local/fpacheco/idm/right-side/osrm-backend")
-# Home
 
-set(OSRM_LIBRARIES /user/local/lib/libosrm.a)
-##
+pkg_check_modules(OSRM REQUIRED libosrm)
+message(STATUS "OSRM_VERSION  ${OSRM_VERSION}")
 
+if(NOT (OSRM_VERSION VERSION_EQUAL "v5.3.0"))
+    message(FATAL_ERROR "Currently tested with OSRM v5.3.0")
+endif()
+
+#-----------------------------------------------------DELETE
+message(STATUS "OSRM_LIBRARIES ${OSRM_LIBRARIES}") 
+message(STATUS "OSRM_LIBRARY_DIRS ${OSRM_LIBRARY_DIRS}") 
+message(STATUS "OSRM_INCLUDE_DIRS ${OSRM_INCLUDE_DIRS}") 
+message(STATUS "OSRM_LDFLAGS ${OSRM_LDFLAGS}") 
+include_directories(${OSRM_INCLUDE_DIRS})
+
+mark_as_advanced(OSRM_INCLUDE_DIRS OSRM_LIBRARIES OSRM_LIBRARY_DIR)
+
+## ----------------------------------------
 ## Glog
+## ----------------------------------------
+
 find_package(Glog REQUIRED)
+
 ##
 
+## ----------------------------------------
 ## CURL
+## ----------------------------------------
+
 find_package(CURL REQUIRED)
+
 ##
 
-## CURLPP via PKG
-if (UNIX)
-    PKG_CHECK_MODULES(CURLPP curlpp)
-    if (CURLPP_FOUND EQUAL 1)
-        MESSAGE(STATUS "curlpp found" )
-    else()
-        MESSAGE(FATAL_ERROR "curlpp library NOT found (required)!")
-    endif()
-endif(UNIX)
-###
 
-## rapidjson
-#find_package(rapidjson REQUIRED)
-##
-
-### Includes
-#include_directories(${Boost_INCLUDE_DIRS})
+#pkg_check_modules(CURLPP REQUIERED curlpp)
 #include_directories(${CURLPP_INCLUDE_DIRS})
-#include_directories(${RAPIDJSON_INCLUDE_DIRS})
-###
 
-# base trash
-file(GLOB UtilGlob
+
+
+file(GLOB VRPTC_SOURCES
     src/baseClasses/*.cpp
     src/basseTrash/*.cpp
     src/initTrash/*.cpp
     src/solverTrash/*.cpp)
 
 
-
-# Append the source files here
-set (VRPTC_SOURCES
-    loadfromfiles.cpp
-    vrptools.cpp
-    )
-
-# Append the header files here. this will get copied to include directory
-set (VRPTC_INCLUDE_FILES
-    loadfromfiles.h
-    vrptools.h
-    )
-
-#add_library(baseclasses OBJECT ${BASECLASSES_SOURCES} ${BASECLASSES_INCLUDE_FILES} )
-#add_library(basetrash OBJECT ${BASETRASH_SOURCES} ${BASETRASH_INCLUDE_FILES} )
-#add_library(inittrash OBJECT ${INITTRASH_SOURCES} ${INITTRASH_INCLUDE_FILES} )
-#add_library(solvertrash OBJECT ${SOLVERTRASH_SOURCES} ${SOLVERTRASH_INCLUDE_FILES} )
-
 add_library (
     ${VRPTC_LIBRARY_NAME}
     SHARED
-    ${BASECLASSES_SOURCES} ${BASECLASSES_INCLUDE_FILES}
-    ${BASETRASH_SOURCES} ${BASETRASH_INCLUDE_FILES}
-    ${INITTRASH_SOURCES} ${INITTRASH_INCLUDE_FILES}
-    ${SOLVERTRASH_SOURCES} ${SOLVERTRASH_INCLUDE_FILES}
     ${VRPTC_SOURCES}
     )
+
 #set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CPP)
-set_target_properties(${VRPTC_LIBRARY_NAME} PROPERTIES VERSION ${VRPTC_VERSION})
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${Threads_LIBRARIES} ${OSRM_LIBRARIES} ${GLOG_LIBRARIES} ${CURLPP_LIBRARIES} )
+#set_target_properties(${VRPTC_LIBRARY_NAME} PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
+
+#message(FATAL_ERROR "got here--------------------------")
+#target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${Threads_LIBRARIES} ${OSRM_LIBRARIES} ${GLOG_LIBRARIES} ${CURLPP_LIBRARIES} )
 
 
-enable_testing()
-add_subdirectory (tests)
+#enable_testing()
+#add_subdirectory (tests)

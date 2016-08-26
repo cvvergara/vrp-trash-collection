@@ -20,16 +20,9 @@
 #include <sstream>
 #include <fstream>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
-
-#ifdef DOSTATS
-#include "timer.h"
-//#include "plot.h"
-#endif
-
-#include "givenInitialSol.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/timer.h"
+#include "initTrash/givenInitialSol.h"
 
 
 

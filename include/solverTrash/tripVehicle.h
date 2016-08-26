@@ -14,8 +14,8 @@
 #ifndef TRIPVEHICLE_H
 #define TRIPVEHICLE_H
 
-#include "twc.h"
-#include "vehicle.h"
+#include "baseClasses/twc.h"
+#include "solverTrash/vehicle.h"
 
 
 // TODO move the code to .cpp keep the headers

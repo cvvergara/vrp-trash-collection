@@ -18,21 +18,14 @@
 #include <vector>
 #include <sstream>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
-
-#ifdef DOPLOT
-#include "plot.h"
-#endif
-
-#include "basictypes.h"
-#include "twpath.h"
-#include "trashnode.h"
-#include "twc.h"
-#include "twpath.h"
-#include "move.h"
-#include "basevehicle.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/basictypes.h"
+#include "baseClasses/twpath.h"
+#include "baseClasses/twc.h"
+#include "baseClasses/twpath.h"
+#include "baseClasses/move.h"
+#include "baseTrash/trashnode.h"
+#include "baseTrash/basevehicle.h"
 
 
 class CostVehicle: public BaseVehicle {

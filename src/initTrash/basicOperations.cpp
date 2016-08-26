@@ -12,7 +12,7 @@
  *
  ********************************************************************VRP*/
 
-#include "./basicOperations.h"
+#include "initTrash/basicOperations.h"
 
 void Basicoperations::invariant() {
 #if 0

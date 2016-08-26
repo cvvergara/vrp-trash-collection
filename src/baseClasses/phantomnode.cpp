@@ -1,4 +1,5 @@
-#include "phantomnode.h"
+
+#include "baseClasses/phantomnode.h"
 
 PhantomNode::PhantomNode(UID phantomNodeId, double x, double y, UID fwNodeId, UID rvNodeId, UID fwWeight, UID rvWeight, UID nameId):
     mBeforePNode( Point(0,0) ), mAfterPNode( Point(0,0) )

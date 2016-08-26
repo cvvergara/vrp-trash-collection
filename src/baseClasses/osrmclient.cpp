@@ -12,7 +12,7 @@
  *
  ********************************************************************VRP*/
 
-#include "osrmclient.h"
+#include "baseClasses/osrmclient.h"
 
 #include "osrm/match_parameters.hpp"
 #include "osrm/nearest_parameters.hpp"
@@ -35,20 +35,10 @@
 #include <utility>
 
 
-#include "node.h"
-
-
-
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
-
-
-
-#ifdef DOSTATS
-#include "timer.h"
-#include "stats.h"
-#endif
+#include "baseClasses/node.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/timer.h"
+#include "baseClasses/stats.h"
 
 OsrmClient *OsrmClient::p_osrm = NULL;
 osrm::OSRM *OsrmClient::routing_machine = NULL;

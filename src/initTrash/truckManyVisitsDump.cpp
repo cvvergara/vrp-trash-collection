@@ -12,8 +12,8 @@
  *
  ********************************************************************VRP*/
 
-#include "truckManyVisitsDump.h"
-#include "fleetOpt.h"
+#include "initTrash/truckManyVisitsDump.h"
+#include "solverTrash/fleetOpt.h"
 
 
 void TruckManyVisitsDump::initializeTrip(Trip &trip, bool fromStart) {

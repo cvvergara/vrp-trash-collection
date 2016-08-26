@@ -17,7 +17,7 @@
 #include <limits>
 #include <iostream>
 
-
+#include "baseClasses/vrp_assert.h"
 
 /*!
  * \class Move

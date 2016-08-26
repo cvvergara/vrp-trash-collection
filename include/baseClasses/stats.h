@@ -13,12 +13,14 @@
  ********************************************************************VRP*/
 #ifndef STATS_H
 #define STATS_H
+#pragma once
 
 #include <string>
 #include <vector>
 #include <map>
 
-#include "singleton.h"
+#include "baseClasses/singleton.h"
+
 //#include "timer.h"
 
 /*! \class Stats
@@ -44,6 +46,7 @@
  *
  * where method is one of the various methods documented for the class.
  */
+
 class Stats {
 private:
   std::map<std::string, double> stats;

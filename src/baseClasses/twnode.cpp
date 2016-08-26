@@ -16,11 +16,8 @@
 #include <sstream>
 #include <string>
 
-#ifdef DOVRPLOG
-#include "./logger.h"
-#endif
-
-#include "./twnode.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/twnode.h"
 
 
 

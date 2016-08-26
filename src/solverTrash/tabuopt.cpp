@@ -17,18 +17,13 @@
 #include <algorithm>
 #include <cstdlib>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
-
-#ifdef DOSTATS
-#include "stats.h"
-#include "timer.h"
-#endif
+#include "baseClasses/logger.h"
+#include "baseClasses/stats.h"
+#include "baseClasses/timer.h"
 
 
-#include "optsol.h"
-#include "tabuopt.h"
+#include "solverTrash/optsol.h"
+#include "solverTrash/tabuopt.h"
 
 
 

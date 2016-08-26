@@ -18,10 +18,10 @@
 #include <iostream>
 #include <vector>
 
-#include "trashnode.h"
-#include "prob_trash.h"
-#include "solution.h"
-#include "vehicle.h"
+#include "baseTrash/trashnode.h"
+#include "baseTrash/prob_trash.h"
+#include "baseTrash/solution.h"
+#include "solverTrash/vehicle.h"
 
 
 

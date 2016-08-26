@@ -18,19 +18,13 @@
 #include <cstdlib>
 #include <sstream>
 
-#include "vrp_assert.h"
+#include "baseClasses/vrp_assert.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/stats.h"
+#include "baseClasses/timer.h"
+#include "baseClasses/move.h"
+#include "solverTrash/optsol.h"
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
-
-#ifdef DOSTATS
-#include "stats.h"
-#include "timer.h"
-#endif
-
-#include "move.h"
-#include "optsol.h"
 
 template <class Ksolution>
 class TabuBase

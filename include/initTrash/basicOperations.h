@@ -17,7 +17,7 @@
 #include <string>
 #include <deque>
 
-#include "./solution.h"
+#include "baseTrash/solution.h"
 
 
 class Basicoperations : public Solution {

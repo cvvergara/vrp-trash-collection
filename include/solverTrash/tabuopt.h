@@ -17,11 +17,11 @@
 #include <map>
 #include <cstdlib>
 
-#include "vrp_assert.h"
-#include "signalhandler.h"
+#include "baseClasses/vrp_assert.h"
+#include "baseClasses/signalhandler.h"
 
-#include "pg_types_vrp.h"
-#include "tabubase.h"
+#include "baseClasses/pg_types_vrp.h"
+#include "solverTrash/tabubase.h"
 
 class TabuOpt: public TabuBase<OptSol>
 {

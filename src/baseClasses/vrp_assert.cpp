@@ -13,7 +13,7 @@
  ********************************************************************VRP*/
 #if 0
 #else
-#include "vrp_assert.h"
+#include "baseClasses/vrp_assert.h"
 #include <exception>
 
 #ifdef assert

@@ -11,9 +11,10 @@
  * the terms of the MIT License. Please file LICENSE for details.
  *
  ********************************************************************VRP*/
-#include <basictypes.h>
 #include <limits>
+#include "baseClasses/basictypes.h"
 
+//TODO substitute on code
 double VRP_MAX() { return ( std::numeric_limits<double>::max());}
 double VRP_MIN() { return ( -std::numeric_limits<double>::max());}
 

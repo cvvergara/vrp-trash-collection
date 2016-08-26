@@ -19,17 +19,11 @@
 #include <sstream>
 
 
-#ifdef DOPLOT
-#include "plot.h"
-#endif
-
-
-#include "basictypes.h"
-#include "twpath.h"
-#include "trashnode.h"
-#include "twc.h"
-//#include "move.h"
-#include "pg_types_vrp.h"
+#include "baseClasses/basictypes.h"
+#include "baseClasses/twpath.h"
+#include "baseTrash/trashnode.h"
+#include "baseClasses/twc.h"
+#include "baseClasses/pg_types_vrp.h"
 
 
 class BaseVehicle

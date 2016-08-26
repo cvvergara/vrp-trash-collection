@@ -23,10 +23,10 @@
 #include <map>
 #include <math.h>
 
-#include "tripVehicle.h"
-#include "twpath.h"
-#include "twc.h"
-#include "phantomnode.h"
+#include "solverTrash/tripVehicle.h"
+#include "baseClasses/twpath.h"
+#include "baseClasses/twc.h"
+#include "baseClasses/phantomnode.h"
 
 class Prob_trash {
 

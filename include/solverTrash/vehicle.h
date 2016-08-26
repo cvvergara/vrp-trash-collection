@@ -18,21 +18,13 @@
 #include <vector>
 #include <sstream>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
-
-#ifdef DOPLOT
-#include "plot.h"
-#endif
-
-#include "basictypes.h"
-#include "twpath.h"
-#include "trashnode.h"
-#include "twc.h"
-#include "twpath.h"
-#include "move.h"
-#include "costvehicle.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/basictypes.h"
+#include "baseClasses/twpath.h"
+#include "baseTrash/trashnode.h"
+#include "baseClasses/twc.h"
+#include "baseClasses/move.h"
+#include "solverTrash/costvehicle.h"
 
 
 

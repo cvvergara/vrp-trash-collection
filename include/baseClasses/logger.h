@@ -53,9 +53,15 @@
  * Google glog can be downloaded from: https://code.google.com/p/google-glog/
  *
  */
+
 #ifndef LOGGER_H
 #define LOGGER_H
+#pragma once
+
+#ifdef DOVRPLOG
 
 #include <glog/logging.h>
 
-#endif
+#endif  // DOVRPLOG
+
+#endif // LOGGER_H

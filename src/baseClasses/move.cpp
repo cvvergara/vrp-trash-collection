@@ -14,15 +14,10 @@
 
 #include <iostream>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
 
-#ifdef DOSTATS
-#include "stats.h"
-#endif
-
-#include "move.h"
+#include "baseClasses/move.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/stats.h"
 
 /*!
  * \brief Construct a Move object where the move is not defined and mtype is Invalid
@@ -237,7 +232,7 @@ void Move::setInterSwMove( POS fromTruck, POS fromPos, UID fromId,
 
 bool Move::isTabu( const Move &move_e ) const
 {
-  if ( not mtype == move_e.mtype ) return false;
+  if ( ! (mtype == move_e.mtype) ) return false;
 
   assert ( mtype != Invalid);
   int rule;

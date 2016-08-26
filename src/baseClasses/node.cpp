@@ -17,13 +17,11 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef DOVRPLOG
-#include "./logger.h"
-#include "./stats.h"
-#endif
+#include "baseClasses/logger.h"
+#include "baseClasses/stats.h"
 
-#include "./vrp_assert.h"
-#include "./node.h"
+#include "baseClasses/vrp_assert.h"
+#include "baseClasses/node.h"
 
 
 /*!

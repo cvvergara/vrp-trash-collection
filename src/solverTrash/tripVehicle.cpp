@@ -11,8 +11,9 @@
  * the terms of the MIT License. Please file LICENSE for details.
  *
  ********************************************************************VRP*/
+
 #include <algorithm>
-#include "tripVehicle.h"
+#include "solverTrash/tripVehicle.h"
 
 
 

@@ -14,8 +14,8 @@
 #ifndef FLEET_H_
 #define FLEET_H_
 
-#include "solution.h"
-#include "tripVehicle.h"
+#include "baseTrash/solution.h"
+#include "solverTrash/tripVehicle.h"
 
 class Fleetopt: public Vehicle {
   std::deque< Vehicle > fleet;

@@ -15,8 +15,9 @@
 #define TRASHNODE_H
 
 
-#include "tweval.h"
+#include "baseClasses/tweval.h"
 
+// TODO not use define
 #define Trashnode Tweval
 
 #endif

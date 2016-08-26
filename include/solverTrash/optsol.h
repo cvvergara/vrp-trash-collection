@@ -14,8 +14,8 @@
 #ifndef OPTSOL_H
 #define OPTSOL_H
 
-#include "solution.h"
-#include "move.h"
+#include "baseClasses/move.h"
+#include "baseTrash/solution.h"
 
 class OptSol : public Solution
 {

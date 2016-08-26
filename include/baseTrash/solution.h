@@ -22,12 +22,12 @@
 #include "plot.h"
 #endif
 
-#include "prob_trash.h"
-#include "twbucket.h"
-#include "twpath.h"
-#include "pg_types_vrp.h"
-#include "tripVehicle.h"
-#include "move.h"
+#include "baseTrash/prob_trash.h"
+#include "baseClasses/twbucket.h"
+#include "baseClasses/twpath.h"
+#include "baseClasses/pg_types_vrp.h"
+#include "solverTrash/tripVehicle.h"
+#include "baseClasses/move.h"
 
 const double EPSILON = 0.001;
 

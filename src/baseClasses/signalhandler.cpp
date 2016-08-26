@@ -12,7 +12,7 @@
  *
  ********************************************************************VRP*/
 
-#include "signalhandler.h"
+#include "baseClasses/signalhandler.h"
 
 SignalHandler *
 SignalHandler::instance()

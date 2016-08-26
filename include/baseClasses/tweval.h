@@ -14,12 +14,10 @@
 #ifndef SRC_BASECLASSES_TWEVAL_H_
 #define SRC_BASECLASSES_TWEVAL_H_
 
-// #include <vector>
 #include <string>
 
-// #include "vrp_assert.h"
-#include "./twnode.h"
-#include "./twc.h"
+#include "baseClasses/twnode.h"
+#include "baseClasses/twc.h"
 
 
 /*! \class Tweval

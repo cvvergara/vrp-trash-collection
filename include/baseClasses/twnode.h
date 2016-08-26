@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "./node.h"
+#include "baseClasses/node.h"
 
 /*! \class Twnode
  * \brief Extends the \ref Node class to create a Node with time window attributes.

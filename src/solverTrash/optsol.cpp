@@ -14,16 +14,10 @@
 
 #include <sstream>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
-
-#ifdef DOSTATS
-#include "timer.h"
-#include "stats.h"
-#endif
-
-#include "optsol.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/timer.h"
+#include "baseClasses/stats.h"
+#include "solverTrash/optsol.h"
 
 
 /**

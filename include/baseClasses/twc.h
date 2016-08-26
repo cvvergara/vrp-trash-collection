@@ -825,8 +825,8 @@ template <class knode> class TWC {
             // assert(true==false);
 #ifdef VRPMINTRACE
             int count=0;
-            for (int ii = 0; ii < travel_time_onTrip.size(); ++ii) {
-                for (int jj = 0; jj < travel_time_onTrip.size(); ++jj) {
+            for (size_t ii = 0; ii < travel_time_onTrip.size(); ++ii) {
+                for (size_t jj = 0; jj < travel_time_onTrip.size(); ++jj) {
                     if (travel_time_onTrip[ii][jj] != 0) count++;
                     if (travel_time_onTrip[ii][jj] != travel_Time[ii][jj]) {
                         DLOG(INFO) << original[ii].id() << "," << original[jj].id() << " -> " << travel_time_onTrip[ii][jj]
@@ -3749,7 +3749,7 @@ triplets:
 
             void set_TravelTime(UID fromId, UID toId, double time) {
 #ifdef VRPMINTRACE
-                if (!travel_Time[fromId][toId] == time)
+                if (!(travel_Time[fromId][toId] == time))
                     DLOG(INFO) << "<travel_time[" << fromId << "][" << toId << "]="
                         << travel_Time[fromId][toId] << " ---> " << time;
 #endif

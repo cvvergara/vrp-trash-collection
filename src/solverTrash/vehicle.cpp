@@ -17,20 +17,15 @@
 #include <sstream>
 #include <deque>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
+#include "baseClasses/logger.h"
+#include "baseClasses/stats.h"
+#include "baseClasses/timer.h"
 
-#ifdef DOSTATS
-#include "stats.h"
-#include "timer.h"
-#endif
+#include "baseClasses/twpath.h"
+#include "baseClasses/move.h"
 
-#include "twpath.h"
-
-#include "move.h"
-#include "vehicle.h"
-#include "basevehicle.h"
+#include "solverTrash/vehicle.h"
+#include "baseTrash/basevehicle.h"
 
 
 /** \todo comments (see comments of twbucket is the same thing)
