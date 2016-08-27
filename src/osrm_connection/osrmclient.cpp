@@ -12,7 +12,7 @@
  *
  ********************************************************************VRP*/
 
-#include "baseClasses/osrmclient.h"
+#include "osrm_connection/osrmclient.h"
 
 #include "osrm/match_parameters.hpp"
 #include "osrm/nearest_parameters.hpp"
@@ -38,6 +38,9 @@
 #include "baseClasses/node.h"
 #include "baseClasses/logger.h"
 #include "baseClasses/stats.h"
+
+namespace vrptc {
+namespace connection {
 
 OsrmClient *OsrmClient::p_osrm = NULL;
 osrm::OSRM *OsrmClient::routing_machine = NULL;
@@ -680,3 +683,5 @@ double OsrmClient::getOsrmTime(
     return -1;
 }
 
+}  // namespace connection
+}  // vrptc

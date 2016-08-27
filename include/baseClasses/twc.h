@@ -28,7 +28,7 @@
 #include "logger.h"
 #include "stats.h"
 
-#include "baseClasses/osrmclient.h"
+#include "osrm_connection/osrmclient.h"
 #include "baseClasses/phantomnode.h"
 
 

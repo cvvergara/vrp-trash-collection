@@ -13,7 +13,7 @@
  ********************************************************************VRP*/
 
 
-#include "baseClasses/osrmclient.h"
+#include "osrm_connection/osrmclient.h"
 #include "baseTrash/trashconfig.h"
 
 /*!

@@ -23,7 +23,7 @@
 #include "baseClasses/node.h"
 #include "baseClasses/twbucket.h"
 
-#include "baseClasses/osrmclient.h"
+#include "osrm_connection/osrmclient.h"
 
 /*! \class Twpath
  * \brief Twpath class members are auto evaluating.

@@ -24,9 +24,7 @@
 #include <osrm/json_container.hpp>
 
 #include "baseClasses/logger.h"
-//#include "baseClasses/vrp_assert.h"
-
-#include "stats.h"
+#include "baseClasses/stats.h"
 
 class Node;
 
@@ -43,9 +41,9 @@ class Node;
  *       into the OSRM code to avoid this step.
  */
 
-#if 0
-class osrm::OSRM;
-#endif
+namespace vrptc {
+namespace connection {
+
 
 class OsrmClient {
 
@@ -132,28 +130,28 @@ class OsrmClient {
              double x2, double y2,
              double x3, double y3);
 
-    /*!  @brief Get coordinates of the nearest point (virtual node) in the nearest edge (OSRM) for a point and edege name
-      
+     /*!  @brief Get coordinates of the nearest point (virtual node) in the nearest edge (OSRM) for a point and edege name
+
        Get node coordinates from return json and set
        GET "http://localhost:5000/nearest/v1/driving/-56.1743363,-34.9137291"
 
        ~~~~{.c}
        {
-           "waypoints": [
-               {
-                   "hint": "VTIAgMe0AIDwJwAAFAAAADAAAAAAAAAAAAAAAGGPAACz7wAAEgAAAAjZpvwAQuv9ANmm_D9C6_0AAAEBwvX4oQ==",
-                   "distance": 7.045144,
-                   "name": "Doctor Luis Piera",
-                   "location": [
-                       -56.174328,
-                       -34.913792
-                   ]
-               }
-           ],
-           "code": "Ok"
+       "waypoints": [
+       {
+       "hint": "VTIAgMe0AIDwJwAAFAAAADAAAAAAAAAAAAAAAGGPAACz7wAAEgAAAAjZpvwAQuv9ANmm_D9C6_0AAAEBwvX4oQ==",
+       "distance": 7.045144,
+       "name": "Doctor Luis Piera",
+       "location": [
+       -56.174328,
+       -34.913792
+       ]
+       }
+       ],
+       "code": "Ok"
        }
        ~~~~
-       
+
 
        @param[in] iTwnode Point @ref Twnode.
        @param[out] oTwnode TODO verify what it returns  type: @ref Twnode.
@@ -180,23 +178,11 @@ class OsrmClient {
              double lat1, double lon1,
              double lat2, double lon2);
 
-
-public:
-
-
-#ifdef DOVRPLOG
-     void dump() {
-         DLOG(INFO) << "----- OsrmClient ----------"
-             << "\nstatus: " << status
-             << "\nerr_msg: " << err_msg
-             << "\ncoordinates.size(): " << route_parameters.coordinates.size();
-#if 0
-         << "\nhttpContent: " << httpContent;
-#endif
-     }
-#endif
 };
 
-#define osrmi OsrmClient::Instance()
+}  // namespace connection
+}  // namespace vrptc
+
+#define osrmi vrptc::connection::OsrmClient::Instance()
 
 #endif

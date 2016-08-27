@@ -144,6 +144,7 @@ find_package(CURL REQUIRED)
 
 
 file(GLOB VRPTC_SOURCES
+    src/osrm_connection/*.cpp
     src/baseClasses/*.cpp
     src/baseTrash/*.cpp
     src/initTrash/*.cpp
