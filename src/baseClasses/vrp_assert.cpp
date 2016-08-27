@@ -13,7 +13,7 @@
  ********************************************************************VRP*/
 #if 0
 #else
-#include "vrp_assert.h"
+#include "baseClasses/vrp_assert.h"
 #include <exception>
 
 #ifdef assert
@@ -30,8 +30,8 @@
 const char *AssertFailedException::what() const throw()
 {
   return str;
-};
+}
 
 AssertFailedException::AssertFailedException( const char *_str ) : str(
-    _str ) {};
+    _str ) {}
 #endif

@@ -12,7 +12,7 @@
  *
  ********************************************************************VRP*/
 
-#include "./basicOperations.h"
+#include "initTrash/basicOperations.h"
 
 void Basicoperations::invariant() {
 #if 0
@@ -94,16 +94,17 @@ bool Basicoperations::safeInsertSubpath(Trip &trip, Bucket &subPath, UINT pos){
     assert(unassigned.hasNid(node.nid()) == false);
   }
   invariant();
+  return true;
 }
 
 bool Basicoperations::safePushFrontSubpath(Trip &trip, Bucket &subPath){
   invariant();
-    safeInsertSubpath(trip, subPath, 1);
+  return  safeInsertSubpath(trip, subPath, 1);
 }
 
 bool Basicoperations::safePushBackSubpath(Trip &trip, Bucket &subPath){
   invariant();
-    safeInsertSubpath(trip, subPath, trip.size());
+  return  safeInsertSubpath(trip, subPath, trip.size());
 }
 
 bool Basicoperations::safePushBackNode(Trip &trip, Trashnode &node) {

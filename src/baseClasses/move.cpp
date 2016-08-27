@@ -14,15 +14,10 @@
 
 #include <iostream>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
 
-#ifdef DOSTATS
-#include "stats.h"
-#endif
-
-#include "move.h"
+#include "baseClasses/move.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/stats.h"
 
 /*!
  * \brief Construct a Move object where the move is not defined and mtype is Invalid
@@ -34,7 +29,7 @@ Move::Move()
 #endif
   mtype = Invalid; nid1 = nid2 = vid1 = vid2 = pos1 = pos2 = -1;
   savings = -std::numeric_limits<double>::max();
-};
+}
 
 /*!
  * \brief Construct a Move object and assign the appropriate values.
@@ -53,7 +48,7 @@ Move::Move( Mtype _mtype, UID _nid1, UID _nid2, POS _vid1, POS _vid2, POS _pos1,
   pos1 = _pos1;
   pos2 = _pos2;
   savings = _sav;
-};
+}
 
 Move::Move( const Move &move )
 {
@@ -68,7 +63,7 @@ Move::Move( const Move &move )
   pos1 = move.pos1;
   pos2 = move.pos2;
   savings = move.savings;
-};
+}
 
 
 
@@ -210,7 +205,7 @@ void Move::setInsMove( POS fromTruck, POS fromPos, UID fromId, POS toTruck,
   vid1 = fromTruck; pos1 = fromPos; nid1 = fromId;
   vid2 = toTruck;   pos2 = toPos;   nid2 = fromId;
   savings = save; mtype = Ins;
-};
+}
 
 void Move::setIntraSwMove( POS fromTruck, POS fromPos, UID fromId,
                            POS withPos, UID withId, double save )
@@ -221,7 +216,7 @@ void Move::setIntraSwMove( POS fromTruck, POS fromPos, UID fromId,
   vid1 = fromTruck; pos1 = fromPos; nid1 = fromId;
   vid2 = fromTruck; pos2 = withPos; nid2 = withId;
   savings = save; mtype = IntraSw;
-};
+}
 
 void Move::setInterSwMove( POS fromTruck, POS fromPos, UID fromId,
                            POS withTruck, POS withPos, UID withId, double save )
@@ -232,12 +227,12 @@ void Move::setInterSwMove( POS fromTruck, POS fromPos, UID fromId,
   vid1 = fromTruck; pos1 = fromPos; nid1 = fromId;
   vid2 = withTruck; pos2 = withPos; nid2 = withId;
   savings = save; mtype = InterSw;
-};
+}
 
 
 bool Move::isTabu( const Move &move_e ) const
 {
-  if ( not mtype == move_e.mtype ) return false;
+  if ( ! (mtype == move_e.mtype) ) return false;
 
   assert ( mtype != Invalid);
   int rule;
@@ -253,7 +248,7 @@ bool Move::isTabu( const Move &move_e ) const
   }
 
   return isTabu( move_e, rule );
-};
+}
 
 
 bool Move::isTabu( const Move &move_e, int rule ) const
@@ -271,7 +266,7 @@ bool Move::isTabu( const Move &move_e, int rule ) const
   }
 
   return false;
-};
+}
 
 
 

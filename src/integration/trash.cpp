@@ -21,18 +21,13 @@
 #include <math.h>
 #include <stdio.h>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
+#include "baseClasses/logger.h"
+#include "baseClasses/timer.h"
+#include "baseClasses/stats.h"
 
-#ifdef DOSTATS
-#include "timer.h"
-#include "stats.h"
-#endif
-
-#include "trashconfig.h"
-#include "truckManyVisitsDump.h"
-#include "fleetOpt.h"
+#include "baseTrash/trashconfig.h"
+#include "initTrash/truckManyVisitsDump.h"
+#include "solverTrash/fleetOpt.h"
 
 
 void Usage()
@@ -58,10 +53,8 @@ void Usage()
     GLOG_logtostderr=1 ./bin/trash ...  // to get output to terminal
 */
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
-#ifdef DOVRPLOG
   if ( not google::IsGoogleLoggingInitialized() ) {
     FLAGS_log_dir = "./logs/";
     google::InitGoogleLogging( "vrp_trash_collection" );
@@ -70,7 +63,6 @@ int main(int argc, char **argv)
     FLAGS_minloglevel = google::INFO;
     FLAGS_logbufsecs = 0;
   }
-#endif
 
   if (argc < 2) {
     Usage();

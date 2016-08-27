@@ -17,21 +17,16 @@
 #include <sstream>
 #include <deque>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
+#include "baseClasses/logger.h"
+#include "baseClasses/stats.h"
+#include "baseClasses/timer.h"
 
-#ifdef DOSTATS
-#include "stats.h"
-#include "timer.h"
-#endif
+#include "baseClasses/twpath.h"
+#include "nodes/trashnode.h"
 
-#include "trashnode.h"
-#include "twpath.h"
-
-#include "move.h"
-#include "vehicle.h"
-#include "basevehicle.h"
+#include "baseClasses/move.h"
+#include "solverTrash/vehicle.h"
+#include "baseTrash/basevehicle.h"
 
 
 
@@ -71,7 +66,6 @@ void CostVehicle::setInitialValues( const Trashnode &node,
   //double serviceE = endingSite.serviceTime();
   //shiftLength = endTime - startTime;
   //e_makeFeasable( 0 );
-  double Z = estimatedZ();
   totalTime = 0;
   double fixedTime = depot.serviceTime() // begining of trip
                    + ttDE + serviceE();  // ending of trip 
@@ -128,7 +122,7 @@ DLOG(INFO) << "arrivalEcloseslst(C) " << arrivalEclosesLast(C);
   idleTime = endingSite.totWaitTime() + totalWaitTime - forcedWaitTime;
   // nomatter the containers, the travel time from dump to endsite is constant
   realttDE = ttDE;
-};
+}
 
 void CostVehicle::setCost(const Trashnode &last) {
   realttSC = path.size() > 1 ? path[1].totTravelTime()  : ttSC;
@@ -286,7 +280,7 @@ void CostVehicle::setCost(const Trashnode &last) {
 
 
   v_cost = getDuration();
-};
+}
 
 
 double CostVehicle::getDeltaCost( double deltaTravelTime, int deltan ) {
@@ -308,7 +302,7 @@ double CostVehicle::getDeltaCost( double deltaTravelTime, int deltan ) {
                      newrealIdleTimeSCDE + newrealIdleTimeSDCDE;
   double deltacost = newv_cost - v_cost;
   return deltacost;
-};
+}
 
 
 
@@ -531,5 +525,5 @@ void CostVehicle::dumpCostValues() const
              shiftLength * 100 << "%\n"
              << "arrivalEcloseslast\t" << arrivalEcloseslast << "\n";
 #endif
-};
+}
 #endif

@@ -13,11 +13,8 @@
  ********************************************************************VRP*/
 
 
-#ifdef OSRMCLIENT
-#include "osrmclient.h"
-#endif
-
-#include "trashconfig.h"
+#include "osrm_connection/osrmclient.h"
+#include "baseTrash/trashconfig.h"
 
 /*!
  * \class TrashConfig
@@ -36,24 +33,15 @@
 
 TrashConfig::TrashConfig() : Config()
 {
-#ifdef DOPLOT
-  set( "Plotting", " set to be done" );
-  set( "plotDir",     "./" );
-  set( "plotFontFile", "/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf" );
-#endif
 
-#ifdef OSRMCLIENT
   osrmi->useOsrm( true );
-#ifdef DOVRPLOG
 
-  if ( osrmi->getConnection() ) set ("osrmClient", " is available");
-  else set( "OsrmClient", " is not available");
+  if (osrmi->getConnection()) set("osrmClient", " is available");
+  else {
+      set( "OsrmClient", " is not available");
+      exit(1);
+  }
 
-#endif
-  osrmi->useOsrm( false );
-#else
-  set( "osrmClient", " not set to be used" );
-#endif
 
 #ifdef DOSTATS
   set( "Statistics", " set to be calculated" );
@@ -63,6 +51,6 @@ TrashConfig::TrashConfig() : Config()
   set( "Logging", " set to be done" );
 #endif
 
-};
+}
 
 

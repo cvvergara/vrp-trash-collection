@@ -17,18 +17,13 @@
 #include <sstream>
 #include <deque>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
+#include "baseClasses/logger.h"
+#include "baseClasses/stats.h"
+#include "baseClasses/timer.h"
 
-#ifdef DOSTATS
-#include "stats.h"
-#include "timer.h"
-#endif
-
-#include "twpath.h"
-#include "basevehicle.h"
-#include "move.h"
+#include "baseClasses/move.h"
+#include "baseClasses/twpath.h"
+#include "baseTrash/basevehicle.h"
 
 
 void BaseVehicle::set_endingSite(const Trashnode &other) {
@@ -352,7 +347,7 @@ std::deque<int> BaseVehicle::getpath() const
 }
 
 bool BaseVehicle::e_adjustDumpsToNoCV(int currentPos) {
-  path.e_adjustDumpsToNoCV(currentPos, dumpSite, maxcapacity);
+  return path.e_adjustDumpsToNoCV(currentPos, dumpSite, maxcapacity);
 }
 
 
@@ -505,59 +500,11 @@ void BaseVehicle::evaluateOsrm() {
   setTravelingTimesOfRoute();  // uses osrm
   path.evaluate(0, getmaxcapacity());
   evalLast();
-};
-#endif
-
-
-
-
-#ifdef DOPLOT
-/**************************************PLOT************************************/
-void BaseVehicle::plot( std::string file, std::string title,
-                        int carnumber ) const
-{
-  //    DLOG(INFO) << "USING VEHICLE PLOT";
-  Twpath<Trashnode> trace = path;
-  trace.push_back( dumpSite );
-  trace.push_back( endingSite );
-  trace.dumpid( "Path" );
-  trace.pop_front();
-  trace.pop_back();
-  trace.pop_back();
-  /** cpp11  the following next 3 lines become std::string carnum=std::to_string(carnumber */
-  std::stringstream convert;
-  convert << carnumber;
-  std::string carnum = convert.str();
-  std::string extra = "vehicle" + carnum ;
-
-  Plot<Trashnode> graph( trace );
-  graph.setFile( CONFIG->getString( "plotDir" ) + file + extra + ".png" );
-  graph.setTitle( title + extra );
-  graph.drawInit();
-
-  for ( int i = 0; i < trace.size(); i++ ) {
-    if ( trace[i].isPickup() )  {
-      graph.drawPoint( trace[i], 0x0000ff, 9, true );
-    } else if ( trace[i].isDepot() ) {
-      graph.drawPoint( trace[i], 0x00ff00, 5, true );
-    } else  {
-      graph.drawPoint( trace[i], 0xff0000, 7, true );
-    }
-  }
-
-  plot( graph, carnumber );
-  graph.save();
-}
-
-void BaseVehicle::plot( Plot<Trashnode> graph, int carnumber )const
-{
-  //DLOG(INFO) << "USING VEHICLE PLOT  1";
-  Twpath<Trashnode> trace = path;
-  trace.push_back( dumpSite );
-  trace.push_back( endingSite );
-  graph.drawPath( trace, graph.makeColor( carnumber * 10 ), 1, true );
 }
 #endif
+
+
+
 
 
 
@@ -666,5 +613,5 @@ BaseVehicle::BaseVehicle()
     w1(1.0), w2(1.0), w3(1.0)
 {
   path.clear();
-};
+}
 

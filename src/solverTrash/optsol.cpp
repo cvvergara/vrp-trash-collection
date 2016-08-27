@@ -14,16 +14,10 @@
 
 #include <sstream>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
-
-#ifdef DOSTATS
-#include "timer.h"
-#include "stats.h"
-#endif
-
-#include "optsol.h"
+#include "baseClasses/logger.h"
+#include "baseClasses/timer.h"
+#include "baseClasses/stats.h"
+#include "solverTrash/optsol.h"
 
 
 /**
@@ -92,7 +86,7 @@ void OptSol::optimizeTruckNumber()
 
   for ( UINT i = 0; i < notFullz1.size(); i++ ) ss << notFullz1[i] << "\t";
 
-  DLOG( INFO ) << ss.str();
+  DLOG(INFO) << ss.str();
   DLOG( INFO ) << "FUll Trucks in current trip: ";
   ss.str( "" );
 

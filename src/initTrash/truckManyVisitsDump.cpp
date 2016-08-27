@@ -12,13 +12,14 @@
  *
  ********************************************************************VRP*/
 
-#include "truckManyVisitsDump.h"
-#include "fleetOpt.h"
+#include "initTrash/truckManyVisitsDump.h"
+#include "solverTrash/fleetOpt.h"
 
 
 void TruckManyVisitsDump::initializeTrip(Trip &trip, bool fromStart) {
   invariant();
   trip.evaluate();
+  if (fromStart) {};
 #ifdef VRPMINTRACE
   if (!trip.feasable()) {
     trip.dumpeval("NOT FEASABLE in initializeTrip");
@@ -171,8 +172,6 @@ bool TruckManyVisitsDump::insertBestPairSubPath(std::deque<Trip> &trips) {
   DLOG(INFO) << "TruckManyVisitsDump::insertBestPairSubPath";
 #endif
   invariant();
-  float8 bestAvgNodeTime = 999999;
-  float8 currAvgNodeTime = 999999;
   int lessFilledTrip = 0;
   float8 worseProportion = 1;
 
@@ -628,7 +627,7 @@ void TruckManyVisitsDump::insertNodesOnPath(Trip &trip) {
   invariant();
 
   streetNodes.clear();
-  twc->getNodesOnPath(trip.Path(), trip.getDumpSite(), unassigned, streetNodes);
+  streetNodes = twc->getNodesOnPath(trip.Path(), trip.getDumpSite(), unassigned);
   tmp = streetNodes;
   assert((tmp * assigned).size() == 0);
   Bucket aux;
@@ -636,7 +635,7 @@ void TruckManyVisitsDump::insertNodesOnPath(Trip &trip) {
   float8 bestTime;
   UINT bestPos;
     // insert the containers that are in the path
-  int lastBestPos = 0;
+  size_t lastBestPos = 0;
   while (streetNodes.size() > 0) {
         invariant();
         aux.clear();
@@ -679,7 +678,7 @@ void TruckManyVisitsDump::process(int pcase)
   icase = pcase;
 
   DLOG(INFO) << "Starting initial Solution Proccess\n";
-  bool oldState = osrmi->getUse();
+  auto oldState = osrmi->getUse();
   osrmi->useOsrm(true);
   fillFleet();
   DLOG(INFO) << "OPTIMIZING\n";
@@ -692,6 +691,8 @@ void TruckManyVisitsDump::process(int pcase)
   fleet = opt_fleet.get_opt_fleet();
   DLOG(INFO) << "OPTIMIZED\n";
   tau();
+  osrmi->useOsrm(oldState);
+
   //assert(true==false);
   invariant();
 }
