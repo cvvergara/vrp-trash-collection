@@ -16,10 +16,11 @@
 #include <sstream>
 #include <string>
 
+#include "nodes/twnode.h"
 #include "baseClasses/logger.h"
-#include "baseClasses/twnode.h"
 
-
+namespace vrptc {
+namespace nodes {
 
 /*!
  * \brief Check if a Twnode is valid or not.
@@ -183,4 +184,7 @@ Twnode::Twnode(std::string line)
   type_ = (opens_ < closes_ && opens_ >= 0 && serviceTime_ >= 0)
           ? kUnknown : kInvalid;
 }
+
+}  // namespace nodes
+}  // namespace vrptc
 

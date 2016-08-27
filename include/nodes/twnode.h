@@ -16,7 +16,11 @@
 
 #include <string>
 
-#include "baseClasses/node.h"
+#include "nodes/node.h"
+
+namespace vrptc {
+namespace nodes {
+
 
 /*! \class Twnode
  * \brief Extends the \ref Node class to create a Node with time window attributes.
@@ -193,5 +197,8 @@ class Twnode: public Node {
   double serviceTime_;  ///< time it takes to be served
   int streetId_;        ///< The street id of the node
 };
+
+}  // namespace nodes
+}  // namespace vrptc
 
 #endif  // SRC_BASECLASSES_TWNODE_H_

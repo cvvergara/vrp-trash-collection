@@ -1,5 +1,9 @@
 
-#include "baseClasses/phantomnode.h"
+#include "nodes/phantomnode.h"
+
+namespace vrptc {
+namespace nodes {
+
 
 PhantomNode::PhantomNode(UID phantomNodeId, double x, double y, UID fwNodeId, UID rvNodeId, UID fwWeight, UID rvWeight, UID nameId):
     mBeforePNode( Point(0,0) ), mAfterPNode( Point(0,0) )
@@ -47,3 +51,7 @@ PhantomNode& PhantomNode::operator= (const PhantomNode &other)
     mNameId = other.mNameId;
     return *this;
 }
+
+}  // namespace nodes
+}  // namespace vrptc
+

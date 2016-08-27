@@ -26,7 +26,13 @@
 #include "baseClasses/logger.h"
 #include "baseClasses/stats.h"
 
+namespace vrptc {
+
+namespace nodes { 
 class Node;
+}
+
+namespace connection {
 
 /*! \class OsrmClient
  * \brief This class provides a shared memory connection to OSRM.
@@ -41,8 +47,6 @@ class Node;
  *       into the OSRM code to avoid this step.
  */
 
-namespace vrptc {
-namespace connection {
 
 
 class OsrmClient {
@@ -88,8 +92,8 @@ class OsrmClient {
       * \brief Add a location in WGS84 to the OSRM request.
       * \param[in] node of type @ref Twnode
       */
-     void addViaPoint(const Node &node);
-     void addViaPoint(const std::deque<Node> &path);
+     void addViaPoint(const nodes::Node &node);
+     void addViaPoint(const std::deque<nodes::Node> &path);
 
 
      /*!
@@ -98,7 +102,7 @@ class OsrmClient {
       * \return True if an error was encountered and err_msg will be set. False if ok.
       */
      double getOsrmTime();
-     double getOsrmTime(const Node &node1, const Node &node2);
+     double getOsrmTime(const nodes::Node &node1, const nodes::Node &node2);
      bool getOsrmTimes(std::deque<double> &times);
 
      /*!
@@ -106,7 +110,7 @@ class OsrmClient {
       * \param[out] geom A std::deque<Twnode> with each point in the path set as a \ref Twnode.
       * \return True if an error was encountered and err_msg will be set. False if ok.
       */
-     bool getOsrmGeometry(std::deque<Node> &geom);
+     bool getOsrmGeometry(std::deque<nodes::Node> &geom);
 
      /*!
       * \brief Extract the geometry from the OSRM response.
@@ -160,8 +164,8 @@ class OsrmClient {
        */
 
      bool getOsrmNearest(
-             const Node &iTwnode,
-             Node &oTwnode,
+             const nodes::Node &iTwnode,
+             nodes::Node &oTwnode,
              double &distance,
              std::string street);
 

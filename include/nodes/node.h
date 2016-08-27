@@ -18,6 +18,9 @@
 #include <string>
 #include "baseClasses/basictypes.h"
 
+namespace vrptc {
+namespace nodes {
+
 /*! \class Node
  * \brief The Node class defines a point in 2D space with an id.
  *
@@ -27,6 +30,7 @@
  * are built upon.
  *
  */
+
 
 class Node {
  public:
@@ -131,5 +135,8 @@ class Node {
   std::string hint_;  ///< orsrm's hint
   bool valid_;  ///< true when id_ has being assigned
 };
+
+}  // namespace nodes
+}  // namespace vrptc
 
 #endif  // SRC_BASECLASSES_NODE_H_

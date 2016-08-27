@@ -26,7 +26,7 @@
 #include "solverTrash/tripVehicle.h"
 #include "baseClasses/twpath.h"
 #include "baseClasses/twc.h"
-#include "baseClasses/phantomnode.h"
+#include "nodes/phantomnode.h"
 
 class Prob_trash {
 

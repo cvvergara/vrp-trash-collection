@@ -21,7 +21,7 @@
 
 #include "baseClasses/basictypes.h"
 #include "baseClasses/twpath.h"
-#include "baseTrash/trashnode.h"
+#include "nodes/trashnode.h"
 #include "baseClasses/twc.h"
 #include "baseClasses/pg_types_vrp.h"
 

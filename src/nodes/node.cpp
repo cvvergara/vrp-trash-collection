@@ -17,11 +17,14 @@
 #include <iostream>
 #include <sstream>
 
+#include "nodes/node.h"
+
 #include "baseClasses/logger.h"
 #include "baseClasses/stats.h"
-
 #include "baseClasses/vrp_assert.h"
-#include "baseClasses/node.h"
+
+namespace vrptc {
+namespace nodes {
 
 
 /*!
@@ -314,3 +317,7 @@ Node::Node(const std::string &line)
             id_ = UID(ids);
         }
     }
+
+}  // namespace nodes
+}  // namespace vrptc
+

@@ -29,16 +29,18 @@
 #include "stats.h"
 
 #include "osrm_connection/osrmclient.h"
-#include "baseClasses/phantomnode.h"
+#include "nodes/phantomnode.h"
 
 
 #include "baseClasses/basictypes.h"
-#include "baseClasses/node.h"
-#include "baseClasses/twnode.h"
+#include "nodes/node.h"
+#include "nodes/twnode.h"
 #include "baseClasses/twpath.h"
 #include "baseClasses/singleton.h"
 #include "baseClasses/pg_types_vrp.h"
 #include "baseClasses/signalhandler.h"
+
+using namespace vrptc::nodes;
 
 typedef std::map<UID,PhantomNode> PhantomNodes;   ///< Type definiton for PahntomNodes.
 

@@ -35,7 +35,7 @@
 #include <utility>
 
 
-#include "baseClasses/node.h"
+#include "nodes/node.h"
 #include "baseClasses/logger.h"
 #include "baseClasses/stats.h"
 
@@ -90,7 +90,7 @@ void OsrmClient::clear() {
  * OsrmClient::getOsrmTimes (times of each leg of the path)
  *
  ******************************************************************/
-void OsrmClient::addViaPoint(const Node &node) {
+void OsrmClient::addViaPoint(const nodes::Node &node) {
     STATS_INC("OsrmClient::addViaPoint(const Node &node)");
 
     route_parameters.coordinates.push_back({
@@ -105,7 +105,7 @@ void OsrmClient::addViaPoint(const Node &node) {
  * \brief Add a path of \ref Node as locations to a the OSRM request.
  * \param[in] path A std::deque<Node> that you want to add.
  */
-void OsrmClient::addViaPoint(const std::deque<Node> &path) {
+void OsrmClient::addViaPoint(const std::deque<nodes::Node> &path) {
     STATS_INC("OsrmClient::addViaPoint(std::deque<Node> &)");
 
     for (auto const &p : path) addViaPoint(p);
@@ -119,8 +119,8 @@ void OsrmClient::addViaPoint(const std::deque<Node> &path) {
  ******************************************************************/
 
 double OsrmClient::getOsrmTime(
-        const Node &node1,
-        const Node &node2) {
+        const nodes::Node &node1,
+        const nodes::Node &node2) {
     STATS_INC("OsrmClient::getOsrmTime (2 nodes)");
 
     clear();
@@ -233,7 +233,7 @@ bool OsrmClient::getOsrmViaroute() {
 
 
 bool
-OsrmClient::getOsrmGeometry(std::deque<Node> &geom) {
+OsrmClient::getOsrmGeometry(std::deque<nodes::Node> &geom) {
     STATS_INC("OsrmClient::getOsrmGeometry (std::deque<Node> &geom)");
 
     geom.clear();
@@ -256,7 +256,7 @@ OsrmClient::getOsrmGeometry(std::deque<Node> &geom) {
         auto &coordinate = c.get<osrm::json::Array>();
         auto lat = coordinate.values.at(1).get<osrm::json::Number>().value;
         auto lon = coordinate.values.at(0).get<osrm::json::Number>().value;
-        Node n(lon, lat);
+        nodes::Node n(lon, lat);
         geom.push_back(n);
     }
     return true;
@@ -507,7 +507,7 @@ bool OsrmClient::testOsrmClient(
 
     //test 10 (geometries array)
     {
-        std::deque<Node> geom;
+        std::deque<nodes::Node> geom;
         if (getOsrmGeometry(geom) == false) {
             DLOG(INFO) << "#10 getOsrmGeometry Failed!" << std::endl;
             return false;
@@ -519,15 +519,15 @@ bool OsrmClient::testOsrmClient(
     }
 
     do {
-        Node v(1.0, 1.0);
-        Node w(3.0, 2.0);
-        Node f0(0, 0);
-        Node p1(0.9, 0.9);
-        Node p2(2.0, 1.5);
-        Node p3(1.1, 1.1);
-        Node p4(3.1, 2.1);
-        Node f5(4.0, 4.0);
-        Node f6(2.5, 0.0);
+        nodes::Node v(1.0, 1.0);
+        nodes::Node w(3.0, 2.0);
+        nodes::Node f0(0, 0);
+        nodes::Node p1(0.9, 0.9);
+        nodes::Node p2(2.0, 1.5);
+        nodes::Node p3(1.1, 1.1);
+        nodes::Node p4(3.1, 2.1);
+        nodes::Node f5(4.0, 4.0);
+        nodes::Node f6(2.5, 0.0);
 
         double tol = 0.2;
 
@@ -564,13 +564,13 @@ bool OsrmClient::testOsrmClient(
 }
 
 bool OsrmClient::getOsrmNearest(
-        const Node &node,
-        Node &oNode,
+        const nodes::Node &node,
+        nodes::Node &oNode,
         double &distance,
         std::string street) {
     STATS_INC("OsrmClient::getOsrmNearest");
 
-    oNode = Node(node.x(), node.y());
+    oNode = nodes::Node(node.x(), node.y());
     street ="";
     if (!connectionAvailable || !use) {
         return false;
@@ -612,7 +612,7 @@ bool OsrmClient::getOsrmNearest(
     street = way.values["name"].get<osrm::json::String>().value;
     auto lat = location.values.at(0).get<osrm::json::Number>().value;
     auto lon = location.values.at(1).get<osrm::json::Number>().value;
-    oNode = Node(lon, lat);
+    oNode = nodes::Node(lon, lat);
 
     return true;
 }

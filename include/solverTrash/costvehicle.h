@@ -24,7 +24,7 @@
 #include "baseClasses/twc.h"
 #include "baseClasses/twpath.h"
 #include "baseClasses/move.h"
-#include "baseTrash/trashnode.h"
+#include "nodes/trashnode.h"
 #include "baseTrash/basevehicle.h"
 
 

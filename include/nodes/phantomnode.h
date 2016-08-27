@@ -5,6 +5,10 @@
 
 #include "baseClasses/basictypes.h"
 
+namespace vrptc {
+namespace nodes {
+
+
 class Point
 {
 public:
@@ -117,6 +121,10 @@ inline std::ostream &operator<<(std::ostream &out, const PhantomNode &pn)
         << "After PN: " << pn.afterPNode();
     return out;
 }
+
+
+}  // namespace nodes
+}  // namespace vrptc
 
 
 #endif // PHANTOMNODE_H

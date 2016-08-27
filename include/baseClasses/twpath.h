@@ -20,7 +20,7 @@
 
 #include "baseClasses/logger.h"
 
-#include "baseClasses/node.h"
+#include "nodes/node.h"
 #include "baseClasses/twbucket.h"
 
 #include "osrm_connection/osrmclient.h"

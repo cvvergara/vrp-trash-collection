@@ -24,7 +24,7 @@
 
 #include "baseClasses/basictypes.h"
 #include "baseClasses/vrp_assert.h"
-#include "baseClasses/node.h"
+#include "nodes/node.h"
 
 class Prob_trash;
 

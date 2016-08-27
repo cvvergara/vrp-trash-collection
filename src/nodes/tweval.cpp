@@ -15,9 +15,11 @@
 #include <iostream>
 #include <sstream>
 
+#include "nodes/tweval.h"
 #include "baseClasses/logger.h"
-#include "baseClasses/tweval.h"
 
+namespace vrptc {
+namespace nodes {
 
 /*!
 
@@ -290,3 +292,7 @@ void Tweval::evaluateOsrm(const Tweval &pred,
 
 #endif
 #endif  // 0
+
+}  // namespace nodes
+}  // namespace vrptc
+

@@ -22,7 +22,7 @@
 #include "baseClasses/timer.h"
 
 #include "baseClasses/twpath.h"
-#include "baseTrash/trashnode.h"
+#include "nodes/trashnode.h"
 
 #include "baseClasses/move.h"
 #include "solverTrash/vehicle.h"

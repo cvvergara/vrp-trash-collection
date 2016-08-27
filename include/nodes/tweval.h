@@ -16,9 +16,11 @@
 
 #include <string>
 
-#include "baseClasses/twnode.h"
+#include "nodes/twnode.h"
 #include "baseClasses/twc.h"
 
+namespace vrptc {
+namespace nodes {
 
 /*! \class Tweval
  * \brief Extend Twnode to evaluate the vehicle at node level
@@ -152,5 +154,7 @@ class Tweval: public Twnode {
   ///@}
 };
 
+}  // namespace nodes
+}  // namespace vrptc
 
 #endif  // SRC_BASECLASSES_TWEVAL_H_
