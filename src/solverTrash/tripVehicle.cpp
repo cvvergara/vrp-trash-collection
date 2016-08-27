@@ -396,7 +396,7 @@ void Trip::getNodesOnPath(const Trip &o_trip, POS o_i_pos, Bucket &nodesOnPath) 
   if (o_i_pos - 1 < o_nodes.size()) o_nodes.erase(o_i_pos - 1); // this nodes the other cant give
   if (o_i_pos - 1 < o_nodes.size()) o_nodes.erase(o_i_pos - 1);
   o_nodes.pop_front();  // delete the starting site
-  twc->getNodesOnPath(path, dumpSite, o_nodes, nodesOnPath);
+  nodesOnPath = twc->getNodesOnPath(path, dumpSite, o_nodes);
 }
 
 
@@ -405,7 +405,7 @@ void Trip::getNodesInOrder() {
   Bucket nodesInOrder;
   nodes = path; 
   nodes.pop_front();  // delete the starting site
-  twc->getNodesOnPath(path, dumpSite, nodes, nodesInOrder);
+  nodesInOrder = twc->getNodesOnPath(path, dumpSite, nodes);
   // nodesInOrder.dumpid("nodesInOrder");
   Trip test = *this;
   test.path.clear();
@@ -437,16 +437,14 @@ void Trip::getNodesOnPath(const Trip &o_trip, Bucket &nodesOnPath) const {
   nodesOnPath.clear();
   o_nodes = o_trip.path; // choose from this
   o_nodes.pop_front();  // delete the starting site
-  twc->getNodesOnPath(path, dumpSite, o_nodes, nodesOnPath);
+  nodesOnPath = twc->getNodesOnPath(path, dumpSite, o_nodes);
 }
 
 void Trip::getNodesNotOnPath(const Trip &o_trip, Bucket &nodesNotOnPath) const {
   Bucket o_nodes;
-  Bucket nodesOnPath;
-  nodesNotOnPath.clear();
   o_nodes = o_trip.path; // choose from this
   o_nodes.pop_front();  // delete the starting site
-  twc->getNodesOnPath(path, dumpSite, o_nodes, nodesOnPath);
+  auto nodesOnPath = twc->getNodesOnPath(path, dumpSite, o_nodes);
   nodesNotOnPath = o_nodes - nodesOnPath;  
 }
 
@@ -454,12 +452,11 @@ void Trip::getNodesNotOnPath(const Trip &o_trip, Bucket &nodesNotOnPath) const {
 
 bool Trip::chooseMyBest(const Trip &other, POS o_ins_pos, POS del_pos, POS &ins_pos, POS &o_del_pos, double &o_delta_del, double &i_delta) const {
   Bucket o_nodes;
-  Bucket nodesOnPath;  // the nodes on my path
   o_nodes = other.path; // choose from this
   if (o_ins_pos-1 < o_nodes.size()) o_nodes.erase(o_ins_pos-1); // this nodes the other cant give
   if (o_ins_pos-1 < o_nodes.size()) o_nodes.erase(o_ins_pos-1);
   o_nodes.pop_front();  // delete the starting site
-  twc->getNodesOnPath(path, dumpSite, o_nodes, nodesOnPath);
+  auto nodesOnPath = twc->getNodesOnPath(path, dumpSite, o_nodes);
   o_nodes = o_nodes - nodesOnPath;
   // o_nodes.dumpid("nodes not in my path");
   // nodesOnPath.dumpid("nodes in my path");

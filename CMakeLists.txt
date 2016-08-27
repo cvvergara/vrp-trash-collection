@@ -29,7 +29,7 @@ set(VRPTC_LIBRARY "vrp-trash-collection")
 
 
 option(DOVRPLOG "general debugging" ON)
-option(DOSTATS "On for debugging" ON)
+option(DOSTATS "On for debugging" OFF)
 option(VRPMINTRACE "Option Min Logging description not so much debugging" ON)
 option(VRPMAXTRACE "Option Max Logging use for detailed debugging" OFF)
 

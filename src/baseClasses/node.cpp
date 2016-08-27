@@ -44,41 +44,44 @@ double Node::haversineDistance(const Node &other) const {
   return dist;
 }
 
-double Node::distance(const Node &other) const {
-  if (!(isLatLon() && other.isLatLon())) return distanceTo(other);
+/*
+ * Distance in meters
+ */
 
-  return haversineDistance(other);
+double Node::distance(const Node &other) const {
+    assert(isLatLon() && other.isLatLon());
+    return haversineDistance(other);
 }
 
 /*!  * \brief Set attributes for this node.  */
 void Node::set(UID id, double x, double y) {
-  id_ = nid_ = id;
-  x_ = x;
-  y_ = y;
-  valid_ = true;
+    id_ = nid_ = id;
+    x_ = x;
+    y_ = y;
+    valid_ = true;
 }
 
 void Node::clear() {
-  nid_ = 0; id_ = 0;
-  x_ = 0.0; y_ = 0.0;
-  hint_ = "";
-  valid_ = false;
+    nid_ = 0; id_ = 0;
+    x_ = 0.0; y_ = 0.0;
+    hint_ = "";
+    valid_ = false;
 }
 /*! \brief Set attributes by parsing a string.  */
 void Node::set(const std::string &line) {
-  clear();
-  std::istringstream buffer(line);
-  long int ids;
-  buffer >> ids;
-  buffer >> x_;
-  buffer >> y_;
-  hint_ = "";
-  if (ids < 0) {
-    valid_ = false;
-  } else {
-    nid_ = UID(ids);
-    id_ = UID(ids);
-  }
+    clear();
+    std::istringstream buffer(line);
+    long int ids;
+    buffer >> ids;
+    buffer >> x_;
+    buffer >> y_;
+    hint_ = "";
+    if (ids < 0) {
+        valid_ = false;
+    } else {
+        nid_ = UID(ids);
+        id_ = UID(ids);
+    }
 }
 
 
@@ -86,10 +89,10 @@ void Node::set(const std::string &line) {
 /*!  * \brief Print the contents of this node.  */
 #ifdef DOVRPLOG
 void Node::dump() const {
-  DLOG(INFO) << nid_
-             << ", " << x_
-             << ", " << y_
-             << ", " << hint_;
+    DLOG(INFO) << nid_
+        << ", " << x_
+        << ", " << y_
+        << ", " << hint_;
 }
 #endif
 
@@ -97,12 +100,12 @@ void Node::dump() const {
 
 /*! \brief Create a new Node by performing vector addition.  */
 Node  Node::operator+(const Node &v) const {
-  return Node( x_ + v.x_, y_ + v.y_ );
+    return Node( x_ + v.x_, y_ + v.y_ );
 }
 
 /*! \brief Create a new Node by performing vector subtraction.  */
 Node  Node::operator-(const Node &v) const {
-  return Node( x_ - v.x_, y_ - v.y_ );
+    return Node( x_ - v.x_, y_ - v.y_ );
 }
 
 /*! \brief Create a new Node by scaling and existing node by a factor \c f.*/
@@ -119,24 +122,24 @@ double Node::length() const { return sqrt( x_ * x_ + y_ * y_ ); }
  * \todo This needs to be fixed to avoid divide by zero errors
  */
 double Node::gradient(const Node &p) const {
-  double deltaY = p.y_ - y_;
-  double deltaX = p.x_ - x_;
+    double deltaY = p.y_ - y_;
+    double deltaX = p.x_ - x_;
 
-  if (deltaX == 0) {
-    if (deltaY >= 0)
-      return VRP_MAX();
-    else
-      return VRP_MIN();
-  } else {
-    return  deltaY / deltaX;
-  }
+    if (deltaX == 0) {
+        if (deltaY >= 0)
+            return VRP_MAX();
+        else
+            return VRP_MIN();
+    } else {
+        return  deltaY / deltaX;
+    }
 }
 
 /*! \brief Compute the Euclidean distance between to Nodes.
  * \sa Node::length, Node::distance, Node::distanceToSquared
  */
 double Node::distanceTo(const Node &p) const {
-  return sqrt(distanceToSquared(p));
+    return sqrt(distanceToSquared(p));
 }
 
 /*!  \brief Compute the Euclidean distance squared between two Nodes.
@@ -144,87 +147,87 @@ double Node::distanceTo(const Node &p) const {
  * \sa Node::length, Node::distanceTo, Node::distance
  */
 double Node::distanceToSquared(const Node &p) const {
-  const double dX = p.x_ - x_;
-  const double dY = p.y_ - y_;
+    const double dX = p.x_ - x_;
+    const double dY = p.y_ - y_;
 
-  return dX * dX + dY * dY;
+    return dX * dX + dY * dY;
 }
 
 /*!  \brief Calculates the unit vector of the reference Node.  */
 Node Node::unit() const {
-  double scale = 0.0;
-  double len = length();
+    double scale = 0.0;
+    double len = length();
 
-  if ( len != 0.0 )
-    scale = 1.0 / len;
+    if ( len != 0.0 )
+        scale = 1.0 / len;
 
-  return (*this) * scale;
+    return (*this) * scale;
 }
 
 /*! \brief Compute the shortest distance from a Node to a line segment*/
 double Node::distanceToSegment(const Node &v, const Node &w) const {
-  Node q;
-  return distanceToSegment( v, w, q );
+    Node q;
+    return distanceToSegment( v, w, q );
 }
 
 /*! \brief Compute the shortest distance from a Node to a line segment */
 double Node::distanceToSegment(const Node &v, const Node &w, Node &q) const {
-  // i.e. |w-v|^2 ... avoid a sqrt
-  double distSq = v.distanceToSquared(w);
+    // i.e. |w-v|^2 ... avoid a sqrt
+    double distSq = v.distanceToSquared(w);
 
-  if (distSq == 0.0) {  // v == w case
-    q = v;
-    return distanceTo(v);
-  }
+    if (distSq == 0.0) {  // v == w case
+        q = v;
+        return distanceTo(v);
+    }
 
-  // consider the line extending the segment, parameterized as v + t (w - v)
-  // we find projection of point p onto the line
-  // it falls where t = [(p-v) . (w-v)] / |w-v|^2
+    // consider the line extending the segment, parameterized as v + t (w - v)
+    // we find projection of point p onto the line
+    // it falls where t = [(p-v) . (w-v)] / |w-v|^2
 
-  double t = ((*this) - v).dotProduct(w - v) / distSq;
+    double t = ((*this) - v).dotProduct(w - v) / distSq;
 
-  if ( t < 0.0 ) {  // beyond the v end of the segment
-    q = v;
-    return distanceTo(v);
-  }
+    if ( t < 0.0 ) {  // beyond the v end of the segment
+        q = v;
+        return distanceTo(v);
+    }
 
-  if ( t > 1.0 ) {  // beyond the w end of the segment
-    q = w;
-    return distanceTo(w);
-  }
+    if ( t > 1.0 ) {  // beyond the w end of the segment
+        q = w;
+        return distanceTo(w);
+    }
 
-  // projection falls on the segment
-  Node projection = v + ((w - v) * t);
+    // projection falls on the segment
+    Node projection = v + ((w - v) * t);
 
-  q = projection;
+    q = projection;
 
-  return distanceTo(projection);
+    return distanceTo(projection);
 }
 
 
 /*! @brief Compute position along the line segment
- 
-   Check if the node is on the line segment
-   - return -1.0 if distance exceeds tolerance.
-   - return a value between = & 1 representing the
-     faction on the line segment
- 
-    return is position as a percentage. ???
+
+  Check if the node is on the line segment
+  - return -1.0 if distance exceeds tolerance.
+  - return a value between = & 1 representing the
+  faction on the line segment
+
+  return is position as a percentage. ???
 
   @dot digraph G { 
 
-      n [color = lightblue,style=filled];
-      dummy[shape=point width=0];
-      v -> dummy -> w;
-      n -> dummy;
+  n [color = lightblue,style=filled];
+  dummy[shape=point width=0];
+  v -> dummy -> w;
+  n -> dummy;
   }
- 
+
   @param[in] v start of segment
   @param[in] w end of segment
-   @param[in] tolerance for distance test
- 
-   @return position 0.0 to 1.0 along the segment of -1.0 if it is not within tolerance
-*/
+  @param[in] tolerance for distance test
+
+  @return position 0.0 to 1.0 along the segment of -1.0 if it is not within tolerance
+  */
 
 double Node::positionAlongSegment(const Node &v, const Node &w, double tol) const {
     STATS_INC("Node::positionAlongSegment");

@@ -12,6 +12,8 @@
  *
  ********************************************************************VRP*/
 
+#ifdef DOSTATS
+
 #include <iostream>
 
 #include "baseClasses/logger.h"
@@ -48,7 +50,7 @@ std::vector<std::string> Stats::getkeys() const {
     return keys;
 }
 
-
+#ifdef DOVRPLOG
 /*!
  * \brief Print out all the key: value pairs currently in the Stats object.
  * \param[in] title A std::string title that will get printed along with the output.
@@ -62,6 +64,7 @@ void Stats::dump(const std::string title) const {
 
     DLOG(INFO) << "----------------------------------------";
 }
+#endif  // DOVRPLOG
 
 
 /*!
@@ -111,3 +114,4 @@ void Stats::addto(const std::string key, double val) {
 }
 
 
+#endif  // DOSTATS

@@ -18,16 +18,12 @@
 #include <iostream>
 #include <algorithm>
 
-#ifdef DOVRPLOG
-#include "./logger.h"
-#endif
+#include "baseClasses/logger.h"
 
-#include "./node.h"
-#include "./twbucket.h"
+#include "baseClasses/node.h"
+#include "baseClasses/twbucket.h"
 
-#ifdef OSRMCLIENT
-#include "./osrmclient.h"
-#endif
+#include "baseClasses/osrmclient.h"
 
 /*! \class Twpath
  * \brief Twpath class members are auto evaluating.

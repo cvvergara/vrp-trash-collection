@@ -18,7 +18,7 @@
 #include <csignal>
 #include <exception>
 
-#include "vrp_assert.h"
+#include "baseClasses/vrp_assert.h"
 
 class UserQuitException : public std::exception
 {

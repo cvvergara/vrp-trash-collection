@@ -15,13 +15,15 @@
 #define STATS_H
 #pragma once
 
+#ifdef DOSTATS
+
 #include <string>
 #include <vector>
 #include <map>
 
+#include "baseClasses/timer.h"
 #include "baseClasses/singleton.h"
 
-//#include "timer.h"
 
 /*! \class Stats
  * \brief Provides a general purpose statistics collection class.
@@ -67,14 +69,31 @@ public:
 };
 
 typedef Singleton<Stats> VrpStats; // Global declaration
+#endif  // DOSTATS
+
+
+#ifdef DOSTATS
 
 #define STATS VrpStats::Instance()
-#ifdef DOSTATS
+#define SET_TIMER(x) Timer x
 #define STATS_INC(x) VrpStats::Instance()->inc(x)
-#define STATS_PRINT(x) VrpStats::Instance()->dump(x)
-#else
-#define STATS_INC(x) 
-#define STATS_PRINT(x) 
-#endif
+#define STATS_SET(x,y) VrpStats::Instance()->inc(x,y)
+#define STATS_ADDTO(x,y) VrpStats::Instance()->addto(x,y)
 
-#endif
+#ifdef DOVRPLOG
+#define STATS_PRINT(x) VrpStats::Instance()->dump(x)
+#else  //  DOVRPLOG
+#define STATS_PRINT(x) 
+#endif  // DOVRPLOG
+
+#else  // DOSTATS
+
+#define SET_TIMER(x)
+#define STATS_INC(x) 
+#define STATS_SET(x,y) 
+#define STATS_ADDTO(x,y) 
+#define STATS_PRINT(x) 
+
+#endif  // DOSTATS
+
+#endif  // STATS_H

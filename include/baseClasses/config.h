@@ -18,7 +18,7 @@
 #include <vector>
 #include <map>
 
-#include "singleton.h"
+#include "baseClasses/singleton.h"
 
 /*!
  * \class Config

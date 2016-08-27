@@ -14,9 +14,7 @@
 #ifndef SRC_BASECLASSES_TWC_H_
 #define SRC_BASECLASSES_TWC_H_
 
-// #include <iostream>
 #include <fstream>
-// #include <sstream>
 #include <string>
 #include <vector>
 #include <deque>
@@ -24,31 +22,23 @@
 #include <cmath>
 #include <algorithm>
 #include <utility>
-// #include <math.h>
 // #include <limits>
 #include <iomanip>      // std::setprecision
 
-#ifdef DOVRPLOG
 #include "logger.h"
-#endif
-
-#ifdef OSRMCLIENT
-#include "osrmclient.h"
-#include "phantomnode.h"
-#endif
-
-#ifdef DOSTATS
-#include "timer.h"
 #include "stats.h"
-#endif
 
-#include "basictypes.h"
-#include "node.h"
-#include "twnode.h"
-#include "twpath.h"
-#include "singleton.h"
-#include "pg_types_vrp.h"
-#include "signalhandler.h"
+#include "baseClasses/osrmclient.h"
+#include "baseClasses/phantomnode.h"
+
+
+#include "baseClasses/basictypes.h"
+#include "baseClasses/node.h"
+#include "baseClasses/twnode.h"
+#include "baseClasses/twpath.h"
+#include "baseClasses/singleton.h"
+#include "baseClasses/pg_types_vrp.h"
+#include "baseClasses/signalhandler.h"
 
 typedef std::map<UID,PhantomNode> PhantomNodes;   ///< Type definiton for PahntomNodes.
 
@@ -315,6 +305,7 @@ template <class knode> class TWC {
 
 
         typedef TwBucket<knode> Bucket;
+        //TODO change to deque
         TwBucket<knode> original;                                 ///< The nodes. Set in loadAndProcess_distance and setNodes (Not used anywhere!)
         std::map< std::string, int> streetNames;                  ///< Map with street name and id
         mutable std::vector< std::vector<double> > twcij;
@@ -778,6 +769,8 @@ template <class knode> class TWC {
 
 
             compulsory_fill();
+            STATS_PRINT("the end");
+            assert(true==false);
 
             getProcessOrder();
 
@@ -791,6 +784,8 @@ template <class knode> class TWC {
         }
 
         void fill_travel_time_onTrip_work(std::set<id_time, CompareSecond< id_time > >  &process_order) {
+
+
 #ifdef VRPMINTRACE
             DLOG(INFO) << "started fill_travel_time_onTrip_work";
 #endif
@@ -852,33 +847,63 @@ template <class knode> class TWC {
 
 
     private:
+        /*!
+         * precondition: travel_time_onTrip.size() == original.size()
+         */
         void process_pair_onPath(knode from, knode to) const {
             STATS_INC("--> process_pair_onPath(knode from, knode to)");
+            assert(travel_time_onTrip.size() == original.size());
 
             /*
              * nothing to do
              */
-            if (from.nid() == to.nid()) return;
+            if (from.nid() == to.nid()) {
+                assert(fn_travel_time_onTrip(from, to) == 0);
+                return;
+            }
 
-            assert(travel_time_onTrip.size() == original.size());
+
+            /*
+             * from a dumpSite: connot go to dumpSite
+             */
+            if (from.isDump() && to.isDump()) {
+                travel_time_onTrip[from.nid()][to.nid()] = VRP_MAX();
+                assert(nodes_onTrip[from.nid()][to.nid()].empty());
+                return;
+            }
+
+            /*
+             * from a Depot Site: connot go to dumpSite or depot Site
+             */
+            if (from.isDepot() && (to.isDump() || to.isDepot())) {
+                travel_time_onTrip[from.nid()][to.nid()] = VRP_MAX();
+                assert(nodes_onTrip[from.nid()][to.nid()].empty());
+                return;
+            }
+
+            /*
+             * from a pickup Site(container): connot go to depot Site
+             */
+            if (from.isPickup() && to.isDepot()) {
+                travel_time_onTrip[from.nid()][to.nid()] = VRP_MAX();
+                assert(nodes_onTrip[from.nid()][to.nid()].empty());
+                return;
+            }
 
             TwBucket <knode> trip;
-            TwBucket <knode> nodesOnPath;
             if (fn_travel_time_onTrip(from, to) == 0) {
-                trip.clear();
-                nodesOnPath.clear();
 
-                trip.push_back(from);
+                auto nodesOnPath = getNodesOnPathInclusive(from, to, original);
+                travel_time_onTrip[from.nid()][to.nid()] = travel_Time[from.nid()][to.nid()];
 
-                getNodesOnPath(trip, to, original, nodesOnPath);
 
-                if (nodesOnPath.size() == 0 || nodesOnPath.front().nid() != from.nid()) {
-                    nodesOnPath.push_front(from);
+
+                DLOG(INFO) << from.id() << " --> " << to.id() << " distance: " << from.distanceToSquared(to);
+                std::ostringstream os;
+                for (const auto n : nodesOnPath.path) {
+                    os << n.id() << " ";
                 }
-
-                if (nodesOnPath.back().nid() != to.nid()) {
-                    nodesOnPath.push_back(to);
-                }
+                DLOG(INFO) << "path" << os.str();
 
                 fill_times(nodesOnPath);
             }
@@ -893,13 +918,26 @@ template <class knode> class TWC {
 
             assert(!original.empty());
 
+            
+
+            auto destinations = original;
             for (auto &special_node : original.path) {
                 /*
                  * Cycle only on dump start ending and average nodes
                  */
                 if (special_node.isPickup()) continue;
 
-                for (auto &container : original.path) {
+                /*
+                 *  work with ordered original from furthest to closest to special node
+                 */
+
+
+                std::sort(destinations.path.begin(), destinations.path.end(),
+                        [&special_node] (const knode &left, const knode &right) {
+                        return special_node.distanceToSquared(left) > special_node.distanceToSquared(right);
+                        });
+
+                for (auto &container : destinations.path) {
                     /*
                      * Cycle only on pickups (containers)
                      */
@@ -1191,11 +1229,11 @@ template <class knode> class TWC {
                         travel_Time[from][to] = travel_time_onTrip[from][to] = 
                             times[j] - times[i];
 
+                        nodes_onTrip[from][to].clear();
+
                         /*
                          *  update to found sequence of nodes
                          */
-                        nodes_onTrip[from][to].clear();
-
                         for (size_t k = i + 1; k < j; ++k) {
                             /*
                              * Onnly inserting containers
@@ -1220,11 +1258,11 @@ template <class knode> class TWC {
 
           The caller is resposible of the contents of orderedStreetNodes
           */
-        void getNodesOnPath(
+        TwBucket<knode> getNodesOnPath(
                 const TwBucket<knode> &truck,
                 const knode &dumpSite,
-                const TwBucket<knode> &unassigned,
-                TwBucket<knode> &orderedStreetNodes) const {
+                const TwBucket<knode> &unassigned) const {
+            TwBucket<knode> orderedStreetNodes;
 
             STATS_INC("USING getNodesOnPath");
 
@@ -1232,7 +1270,7 @@ template <class knode> class TWC {
             /*
              * Nothing to do
              */
-            if (unassigned.empty()) return;
+            if (unassigned.empty()) return orderedStreetNodes;
 
 
 
@@ -1358,10 +1396,11 @@ template <class knode> class TWC {
             if (!osrmi->getOsrmViaroute()) {
                 DLOG(WARNING) << "getNodesOnPath getOsrmViaroute failed";
                 osrmi->useOsrm(oldStateOsrm);
-                return;
+                return orderedStreetNodes;
             }
 
 
+            travel_Time[call.front().nid()][call.back().nid()] = osrmi->getOsrmTime();
 
             /*
              * getting the geometry
@@ -1370,7 +1409,7 @@ template <class knode> class TWC {
             if (!osrmi->getOsrmGeometry(geometry)) {
                 DLOG(WARNING) << "getNodesOnPath getOsrmGeometry failed";
                 osrmi->useOsrm(oldStateOsrm);
-                return;
+                return orderedStreetNodes;
             }
 
 
@@ -1379,7 +1418,7 @@ template <class knode> class TWC {
              * Nothing to do:
              *   the geometry returns the 2 points entered
              */
-            if (geometry.size() == 2) return;
+            if (geometry.size() == 2) return orderedStreetNodes;
 
 
 
@@ -1494,10 +1533,34 @@ template <class knode> class TWC {
             /************************************************************/
             osrmi->useOsrm(oldStateOsrm);
             osrmi->clear();
+
+            return orderedStreetNodes;
         }
 
 
 
+
+        TwBucket<knode> getNodesOnPathInclusive(
+                const knode &from,
+                const knode &to,
+                const TwBucket<knode> &unassigned
+                ) const {
+
+            TwBucket<knode> trip;
+            trip.push_back(from);
+
+            auto nodesOnPath = getNodesOnPath(trip, to, unassigned);
+
+            if (nodesOnPath.size() == 0 || nodesOnPath.front().nid() != from.nid()) {
+                nodesOnPath.push_front(from);
+            }
+
+            if (nodesOnPath.back().nid() != to.nid()) {
+                nodesOnPath.push_back(to);
+            }
+            assert(nodesOnPath.size() > 1);
+            return nodesOnPath; 
+        }
 
 
 
@@ -2268,28 +2331,26 @@ triplets:
 
             /*! \todo comments   */
     private:
-            void setTravelTimeNonOsrm(UID from, UID to) const {
-                assert(from < original.size() && to < original.size());
-                double time;
-                time = original[from].distance(original[to]) / 250;
 
-                if ( !sameStreet(from, to) ) {
-                    time = time *
-                        (std::abs(std::sin(gradient(from, to)))
-                         + std::abs(std::cos(gradient(from, to))));
+            void
+                setTravelTimeNonOsrm(UID from, UID to) const {
+                    assert(from < original.size() && to < original.size());
+                    double time;
+                    time = original[from].distance(original[to]) / 250;
+
+                    if ( !sameStreet(from, to) ) {
+                        time = time *
+                            (std::abs(std::sin(gradient(from, to)))
+                             + std::abs(std::cos(gradient(from, to))));
+                    }
+
+                    travel_Time[from][to] = time;
+                    setTwcij(from, to);
                 }
-
-                travel_Time[from][to] = time;
-                setTwcij(from, to);
-            }
 
             void setTravelTimeOsrm(UID from, UID to) const {
                 assert(from < original.size() && to < original.size());
-                double time;
-                if (!osrmi->getConnection()) {
-                    setTravelTimeNonOsrm(from, to);
-                    return;
-                }
+                assert(osrmi->getConnection());
 
                 bool oldStateOsrm = osrmi->getUse();
                 osrmi->useOsrm(true);
@@ -2325,19 +2386,12 @@ triplets:
                     return false;
                 }
 
-                if ( !osrmi->getOsrmTime(time) ){
-                    DLOG(INFO) << "getOsrmTime failed";
-                    osrmi->useOsrm(oldStateOsrm);
-                    setTravelTimeNonOsrm(from, to);
-                    return false;
-                }
 
-                osrmi->useOsrm(oldStateOsrm);
-
-                travel_Time[from][to] = time;
+                travel_Time[from][to] = osrmi->getOsrmTime();
 #ifdef VRPMINTRACE
                 DLOG(INFO) << "travel_Time[" << from << "][" << to << "]=" << time;
 #endif
+                osrmi->useOsrm(oldStateOsrm);
                 setTwcij(from, to);
             }
 
@@ -2357,9 +2411,7 @@ triplets:
             double getTravelTime(UID from, UID to) const {
                 assert(from < original.size() && to < original.size());
                 if (travel_Time[from][to] == -1) {
-#ifdef DOSTATS
-                    STATS->inc("TWC::extra process_pair_onPath");
-#endif
+                    STATS_INC("TWC::extra process_pair_onPath");
 
                     process_pair_onPath(original[from],original[to]);
                     process_pair_onPath(original[to],original[from]);
@@ -3311,18 +3363,14 @@ triplets:
               To be used after "original" has being filled with the appropiate values
               */
             void setHints(Bucket &nodes) {
-#ifdef DOSTATS
-                Timer timer;
-#endif
+                SET_TIMER(timer);
 
                 for (size_t i = 0; i < nodes.size(); i++ ) {
                     nodes[i].set_hint(original[nodes[i].nid()].hint());
                     nodes[i].set_streetId(original[nodes[i].nid()].streetId());
                 }
 
-#ifdef DOSTATS
-                STATS->addto("TWC::setHints Cumultaive time:", timer.duration());
-#endif
+                STATS_ADDTO("TWC::setHints Cumultaive time:", timer.duration());
             }
 
 
@@ -3349,9 +3397,7 @@ triplets:
 
     private:
             void getAllHintsAndStreets() {
-#ifdef DOSTATS
-                Timer timer;
-#endif  //DOSTATS
+                SET_TIMER(timer);
 
 #ifdef VRPMAXTRACE
                 DLOG(INFO) << "getAllHintsAndStreets\n";
@@ -3396,9 +3442,7 @@ triplets:
                     }
                 }
 
-#ifdef DOSTATS
-                STATS->addto("TWC::getAllHintsAndStreets Cumultaive time:", timer.duration());
-#endif
+                STATS_ADDTO("TWC::getAllHintsAndStreets Cumultaive time:", timer.duration());
             }
 
 
@@ -3479,9 +3523,7 @@ triplets:
                 assert(check_integrity());
 
                 // If OSRM, need phantom nodes!
-#ifdef OSRMCLIENT
                 setPhantomNodes();
-#endif
             }
 
 

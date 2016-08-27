@@ -20,13 +20,11 @@
 #include <algorithm>
 
 
-#ifdef DOVRPLOG
-#include "./logger.h"
-#endif
+#include "baseClasses/logger.h"
 
-#include "./basictypes.h"
-#include "./vrp_assert.h"
-#include "./node.h"
+#include "baseClasses/basictypes.h"
+#include "baseClasses/vrp_assert.h"
+#include "baseClasses/node.h"
 
 class Prob_trash;
 

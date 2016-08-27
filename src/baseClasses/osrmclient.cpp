@@ -37,22 +37,12 @@
 
 #include "baseClasses/node.h"
 #include "baseClasses/logger.h"
-#include "baseClasses/timer.h"
 #include "baseClasses/stats.h"
 
 OsrmClient *OsrmClient::p_osrm = NULL;
 osrm::OSRM *OsrmClient::routing_machine = NULL;
 bool OsrmClient::connectionAvailable = true;
 
-#if 0
-OsrmClient::OsrmClient(const OsrmClient &other) {
-  connectionAvailable = other.connectionAvailable;
-}
-
-OsrmClient &OsrmClient::operator=(const OsrmClient &other) {
-  connectionAvailable = other.connectionAvailable;
-}
-#endif
 
 /*!  @brief The OsrmClient constructor.  */
 OsrmClient::OsrmClient() {
@@ -116,20 +106,6 @@ void OsrmClient::addViaPoint(const std::deque<Node> &path) {
     STATS_INC("OsrmClient::addViaPoint(std::deque<Node> &)");
 
     for (auto const &p : path) addViaPoint(p);
-#if 0
-=======
-void OsrmClient::addViaPoints(const std::deque<Node> &path )
-{
-  if ( not connectionAvailable ) return;
-
-  if ( not use ) return;
-
-  std::deque<Node>::const_iterator it;
-
-  for ( it = path.begin(); it != path.end(); ++it )
-    addViaPoint( *it );
->>>>>>> origin/right-side-montevideo
-#endif
 }
 
 /*******************************************************************
@@ -139,33 +115,26 @@ void OsrmClient::addViaPoints(const std::deque<Node> &path )
  *
  ******************************************************************/
 
-bool OsrmClient::getOsrmTime(
+double OsrmClient::getOsrmTime(
         const Node &node1,
-        const Node &node2,
-        double &time) {
+        const Node &node2) {
     STATS_INC("OsrmClient::getOsrmTime (2 nodes)");
 
-    time = 0;
-    if (!connectionAvailable || !use) {
-        return false;
-    }
     clear();
     addViaPoint(node1);
     addViaPoint(node2);
 
-    if (getOsrmViaroute()) return  getOsrmTime(time);
-    return false;
+    if (getOsrmViaroute()) return  getOsrmTime();
+    return -1;
 }
 
 
 
-bool OsrmClient::getOsrmTime(double &time) {
+double
+OsrmClient::getOsrmTime() {
     STATS_INC("OsrmClient::getOsrmTime(double &time)");
 
-    time = 0;
-    if (!connectionAvailable || !use) {
-        return false;
-    }
+    if (!connectionAvailable || !use) return VRP_MIN();
 
     /*
      * extracting the duration
@@ -177,9 +146,7 @@ bool OsrmClient::getOsrmTime(double &time) {
     /*
      * setting the value
      */
-    time = route.values["duration"].get<osrm::json::Number>().value;
-
-    return true;
+    return route.values["duration"].get<osrm::json::Number>().value;
 }
 
 
@@ -210,17 +177,6 @@ bool OsrmClient::getOsrmTimes(std::deque<double> &times) {
     return true;
 }
 
-#if 0
-<<<<<<< HEAD
-=======
-bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
-                              const Node &node3, const Node &node4, double &time )
-{
-  if ( not connectionAvailable ) return false;
-
-  if ( not use ) return false;
->>>>>>> origin/right-side-montevideo
-#endif
 
 /*******************************************************************
  *
@@ -234,16 +190,19 @@ bool OsrmClient::getOsrmTime( const Node &node1, const Node &node2,
  */
 bool OsrmClient::getOsrmViaroute() {
     STATS_INC("OsrmClient::getOsrmViaroute()");
+    SET_TIMER(timer);
 
     assert(connectionAvailable);
     assert(use);
     assert(status != -1);
+
     DLOG_IF(WARNING, route_parameters.coordinates.size() < 2)
         << "route_parameters.coordinates.size()"
         << route_parameters.coordinates.size();
 
     if (route_parameters.coordinates.size() < 2) {
         status = -1;
+        STATS_ADDTO("OsrmClient::getOsrmViaroute() time", timer.duration());
         return false;
     }
     route_parameters.geometries = osrm::engine::api::RouteParameters::GeometriesType::GeoJSON;
@@ -259,10 +218,13 @@ bool OsrmClient::getOsrmViaroute() {
 
         DLOG(FATAL) << "OsrmClient::getOsrmViaroute() caught exception:\n" << e.what();
         clear();
+        STATS_ADDTO("OsrmClient::getOsrmViaroute() time", timer.duration());
         return false;
     }
 
     status = jsonResult.values["code"].get<osrm::json::String>().value == "Ok";
+
+    STATS_ADDTO("OsrmClient::getOsrmViaroute() time", timer.duration());
     return true;
 }
 
@@ -436,11 +398,11 @@ bool OsrmClient::testOsrmClient(
             << y2 << "," << x2
             << "?overview=false&alternatives=true&steps=true\"\n";
 
-        if (getOsrmTime(x1, y1, x2, y2, time) == false) {
+        if (getOsrmTime(x1, y1, x2, y2) == -1) {
             DLOG(INFO) << "#4 test time FAIL";
             return false;
         }
-        DLOG(INFO) << "#4 test time:" << time;
+        DLOG(INFO) << "#4 test time:" << getOsrmTime();
     }
 
     // test 5
@@ -457,7 +419,7 @@ bool OsrmClient::testOsrmClient(
 
     // test 6
     {
-        if (getOsrmTime(x1, y1, x2, y2, hints[0], hints[1], time) == false) {
+        if ((time = getOsrmTime(x1, y1, x2, y2, hints[0], hints[1])) == -1) {
             DLOG(INFO) << "#6 getOsrmTime  FAIL";
             return false;
         }
@@ -484,21 +446,6 @@ bool OsrmClient::testOsrmClient(
     addViaPoint(x3, y3);
     addViaPoint(x1, y1);
 
-#if 0
-<<<<<<< HEAD
-=======
-bool OsrmClient::getOsrmLocate(double ilon, double ilat, double &olon, double &olat)
-{
-    std::string oldService; //! backup service
-    std::stringstream tmpSS; //!
-    // std::string rContent; //!
-    std::string errorMsg; //!
-    rapidjson::Document jsonDoc;
-    osrm::json::Object jsonResult; //! json result
-    // TODO: Is backup realy necesary
-    std::vector<FixedPointCoordinate> coordBackup;
->>>>>>> origin/right-side-montevideo
-#endif
 
     // test 7 (with four points)
     if (!getOsrmViaroute()) {
@@ -522,9 +469,11 @@ bool OsrmClient::getOsrmLocate(double ilon, double ilat, double &olon, double &o
             DLOG(INFO) << "time: " << time << std::endl;
             time_agg += time;
         }
-        getOsrmTime(time);
+#ifndef NDEBUG
+        auto time = getOsrmTime();
         DLOG(INFO) << "Total time: " << time << std::endl;
         assert(time == time_agg);
+#endif
     }
 
     //test 9 (hints array)
@@ -565,21 +514,6 @@ bool OsrmClient::getOsrmLocate(double ilon, double ilat, double &olon, double &o
             DLOG(INFO) << "geometry: " << g.x() << ", " << g.y() << std::endl;
         }
     }
-#if 0
-=======
-bool OsrmClient::getOsrmNearest(double ilon, double ilat, double &olon, double &olat,
-    unsigned int &one_way, unsigned int &forward_id, unsigned int &reverse_id, unsigned int &forward_wt, unsigned int &reverse_wt, unsigned int &street_id)
-{
-    std::string oldService; //! backup service
-    std::stringstream tmpSS; //!
-    // std::string rContent; //!
-    std::string errorMsg; //!
-    rapidjson::Document jsonDoc;
-    osrm::json::Object jsonResult; //! json result
-    // TODO: Is backup realy necesary
-    std::vector<FixedPointCoordinate> coordBackup;
->>>>>>> origin/right-side-montevideo
-#endif
 
     do {
         Node v(1.0, 1.0);
@@ -627,13 +561,13 @@ bool OsrmClient::getOsrmNearest(double ilon, double ilat, double &olon, double &
 }
 
 bool OsrmClient::getOsrmNearest(
-        const Node &iNode,
+        const Node &node,
         Node &oNode,
         double &distance,
         std::string street) {
     STATS_INC("OsrmClient::getOsrmNearest");
 
-    oNode = Node(iNode.x(), iNode.y());
+    oNode = Node(node.x(), node.y());
     street ="";
     if (!connectionAvailable || !use) {
         return false;
@@ -645,8 +579,8 @@ bool OsrmClient::getOsrmNearest(
 
         osrm::engine::api::NearestParameters nearest_parameters;
         nearest_parameters.coordinates.push_back({
-                osrm::util::FloatLongitude{iNode.x()},
-                osrm::util::FloatLatitude{iNode.y()} });
+                osrm::util::FloatLongitude{node.x()},
+                osrm::util::FloatLatitude{node.y()} });
         routing_machine->Nearest(nearest_parameters, jsonResult);
 
         if (jsonResult.values["code"].get<osrm::json::String>().value != "Ok") {
@@ -715,30 +649,25 @@ void OsrmClient::addViaPoint(double lat, double lon) {
     route_parameters.coordinates.push_back({osrm::util::FloatLongitude{lon}, osrm::util::FloatLatitude{lat}});
 }
 
-bool OsrmClient::getOsrmTime(
+double OsrmClient::getOsrmTime(
         double lat1, double lon1,
-        double lat2, double lon2,
-        double &time) {
+        double lat2, double lon2) {
     STATS_INC("OsrmClient::getOsrmTime (2 points)");
 
     clear();
     addViaPoint(lat1, lon1);
     addViaPoint(lat2, lon2);
 
-    if (getOsrmViaroute()) return getOsrmTime(time);
+    if (getOsrmViaroute()) return getOsrmTime();
 
-    return false;
+    return -1;
 }
 
-bool OsrmClient::getOsrmTime(
+double OsrmClient::getOsrmTime(
         double lat1, double lon1,
         double lat2, double lon2,
-        const  std::string &hint1, const std::string &hint2,
-        double &time) {
+        const  std::string &hint1, const std::string &hint2) {
     STATS_INC("OsrmClient::getOsrmTime (2 points and giving hints)");
-
-    if (not connectionAvailable) return false;
-    if (not use) return false;
 
     clear();
     addViaPoint(lat1, lon1);
@@ -746,8 +675,8 @@ bool OsrmClient::getOsrmTime(
     route_parameters.hints.push_back(osrm::engine::Hint::FromBase64(hint1));
     route_parameters.hints.push_back(osrm::engine::Hint::FromBase64(hint2));
 
-    if (getOsrmViaroute()) return getOsrmTime(time);
+    if (getOsrmViaroute()) return getOsrmTime();
 
-    return false;
+    return -1;
 }
 

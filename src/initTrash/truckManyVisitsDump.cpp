@@ -627,7 +627,7 @@ void TruckManyVisitsDump::insertNodesOnPath(Trip &trip) {
   invariant();
 
   streetNodes.clear();
-  twc->getNodesOnPath(trip.Path(), trip.getDumpSite(), unassigned, streetNodes);
+  streetNodes = twc->getNodesOnPath(trip.Path(), trip.getDumpSite(), unassigned);
   tmp = streetNodes;
   assert((tmp * assigned).size() == 0);
   Bucket aux;

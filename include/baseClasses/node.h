@@ -15,8 +15,8 @@
 #define SRC_BASECLASSES_NODE_H_
 #pragma once
 
-#include "baseClasses/basictypes.h"
 #include <string>
+#include "baseClasses/basictypes.h"
 
 /*! \class Node
  * \brief The Node class defines a point in 2D space with an id.

@@ -23,17 +23,9 @@
 #include <engine/api/route_parameters.hpp>
 #include <osrm/json_container.hpp>
 
-#ifdef DOVRPLOG
-#include "logger.h"
-#endif
+#include "baseClasses/logger.h"
+//#include "baseClasses/vrp_assert.h"
 
-
-// load our assert to throw macros and tell rapidjson to use them
-#include "vrp_assert.h"
-#define RAPIDJSON_ASSERT assert
-#include <rapidjson/document.h>
-
-#include "timer.h"
 #include "stats.h"
 
 class Node;
@@ -107,8 +99,8 @@ class OsrmClient {
       * \param[out] time The OSRM travel time in decimal minutes.
       * \return True if an error was encountered and err_msg will be set. False if ok.
       */
-     bool getOsrmTime(double &time);
-     bool getOsrmTime(const Node &node1, const Node &node2, double &time);
+     double getOsrmTime();
+     double getOsrmTime(const Node &node1, const Node &node2);
      bool getOsrmTimes(std::deque<double> &times);
 
      /*!
@@ -179,16 +171,14 @@ class OsrmClient {
 
      void addViaPoint(double lat, double lon);
 
-     bool getOsrmTime(
+     double getOsrmTime(
              double lat1, double lon1 ,
              double lat2, double lon2,
-             const std::string &hint1, const std::string &hint2,
-             double &time);
+             const std::string &hint1, const std::string &hint2);
 
-     bool getOsrmTime(
+     double getOsrmTime(
              double lat1, double lon1,
-             double lat2, double lon2,
-             double &time);
+             double lat2, double lon2);
 
 
 public:
