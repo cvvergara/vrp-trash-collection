@@ -23,6 +23,7 @@
 
 #include "baseClasses/move.h"
 #include "baseClasses/twpath.h"
+#include "baseClasses/twbucket.h"
 #include "baseTrash/basevehicle.h"
 
 
@@ -117,8 +118,8 @@ void BaseVehicle::print_short_eval(const std::string& title) const {
 
 
 bool  BaseVehicle::findPairNodesHasMoreNodesOnPath(
-  const TwBucket<Trashnode> &assigned, const TwBucket<Trashnode> &unassigned,
-  UINT &bestFrom, UINT &bestTo, TwBucket<Trashnode> &subPath) {
+  const TwBucket &assigned, const TwBucket &unassigned,
+  UINT &bestFrom, UINT &bestTo, TwBucket &subPath) {
   assert(unassigned.size());
     bool found = twc->findPairNodesHasMoreNodesOnPath(assigned, unassigned,
                        bestFrom, bestTo, subPath);
@@ -127,8 +128,8 @@ bool  BaseVehicle::findPairNodesHasMoreNodesOnPath(
 }
 
 bool  BaseVehicle::findNodeHasMoreNodesOnPath(
-  const TwBucket<Trashnode> &assigned, const TwBucket<Trashnode> &unassigned,
-  UINT &bestNode, UINT &bestPos, TwBucket<Trashnode> &subPath) {
+  const TwBucket &assigned, const TwBucket &unassigned,
+  UINT &bestNode, UINT &bestPos, TwBucket &subPath) {
   assert(unassigned.size());
     bool found = twc->findNodeHasMoreNodesOnPath(path, assigned, unassigned,
                        dumpSite, bestNode, bestPos, subPath);
@@ -164,7 +165,7 @@ double BaseVehicle::getTotTravelTimeOsrm() const {
 };
 #endif
 
-bool BaseVehicle::e_setPath( const Bucket &sol )
+bool BaseVehicle::e_setPath( const TwBucket &sol )
 {
 #ifdef TESTED
   DLOG( INFO ) << "Entering BaseVehicle::e_setPath";
@@ -177,7 +178,7 @@ bool BaseVehicle::e_setPath( const Bucket &sol )
              and ( sol[sol.size() - 2] == dumpSite ) ) )
     return false;
 
-  Bucket tempSol = sol;
+  auto tempSol = sol;
   
   tempSol.pop_back();
   tempSol.pop_back();
@@ -192,6 +193,7 @@ bool BaseVehicle::e_setPath( const Bucket &sol )
   return true;
 }
 
+#ifdef USE
 bool BaseVehicle::findNearestNodeTo(Bucket &unassigned, POS &pos,
                                     Trashnode &bestNode )
 {
@@ -224,8 +226,9 @@ bool BaseVehicle::findNearestNodeTo(Bucket &unassigned, POS &pos,
 
   return flag;
 }
+#endif
 
-bool BaseVehicle::findFastestNodeTo(bool first, Bucket &unassigned, POS &pos,
+bool BaseVehicle::findFastestNodeTo(bool first, TwBucket &unassigned, POS &pos,
                                     Trashnode &bestNode, double &bestTime) {
 
 #ifdef VRPMAXTRACE
@@ -510,7 +513,7 @@ void BaseVehicle::evaluateOsrm() {
 
 BaseVehicle::BaseVehicle( int _vid, int _start_id, int _dump_id, int _end_id,
                           double _capacity, double _dumpservicetime, double _starttime,
-                          double _endtime, const Bucket &otherlocs )
+                          double _endtime, const TwBucket &otherlocs )
   : vid(-1),
     startTime(0), endTime(0),
     maxcapacity(0), cost(0),
@@ -558,7 +561,7 @@ BaseVehicle::BaseVehicle( int _vid, int _start_id, int _dump_id, int _end_id,
     vid = -1; //truck is rejected
 }
 
-BaseVehicle::BaseVehicle(const std::string &line, const Bucket &otherlocs)
+BaseVehicle::BaseVehicle(const std::string &line, const TwBucket &otherlocs)
   : vid(-1),
     startTime(0), endTime(0),
     maxcapacity(0), cost(0),

@@ -67,7 +67,7 @@ bool Basicoperations::safeDeleteNode(Trip &trip, UINT pos) {
   return true;
 }
 
-bool Basicoperations::safeInsertSubpath(Trip &trip, Bucket &subPath, UINT pos){
+bool Basicoperations::safeInsertSubpath(Trip &trip, TwBucket &subPath, UINT pos){
   invariant();
   assert(pos != 0);
   assert(pos <= trip.size());
@@ -97,12 +97,12 @@ bool Basicoperations::safeInsertSubpath(Trip &trip, Bucket &subPath, UINT pos){
   return true;
 }
 
-bool Basicoperations::safePushFrontSubpath(Trip &trip, Bucket &subPath){
+bool Basicoperations::safePushFrontSubpath(Trip &trip, TwBucket &subPath){
   invariant();
   return  safeInsertSubpath(trip, subPath, 1);
 }
 
-bool Basicoperations::safePushBackSubpath(Trip &trip, Bucket &subPath){
+bool Basicoperations::safePushBackSubpath(Trip &trip, TwBucket &subPath){
   invariant();
   return  safeInsertSubpath(trip, subPath, trip.size());
 }

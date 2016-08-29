@@ -21,6 +21,8 @@
 #include "baseTrash/prob_trash.h"
 
 
+using namespace vrptc;
+using namespace vrptc::nodes;
 
 
 Prob_trash::Prob_trash(const char *infile) {
@@ -38,8 +40,8 @@ Prob_trash::Prob_trash(const std::string &infile) {
 void Prob_trash::loadProblem(const std::string &infile)
 {
     datafile = infile;
-    Bucket nodes;
-    Bucket intersection;
+    TwBucket nodes;
+    TwBucket intersection;
     DLOG(INFO) << "Prob_trash LoadProblem -------------- "
         << datafile;
 

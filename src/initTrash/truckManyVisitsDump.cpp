@@ -91,7 +91,7 @@ bool TruckManyVisitsDump::insertBestPairInCleanTrip(Trip &trip) {
 
   UINT bestFrom;
   UINT bestTo;
-  Bucket subPath;
+  TwBucket subPath;
   // subpath includes bestFrom and bestTo
   trip.findPairNodesHasMoreNodesOnPath(assigned, unassigned, bestFrom, bestTo, subPath);
   assert(subPath.size() != 0);
@@ -116,7 +116,7 @@ bool TruckManyVisitsDump::insertBigSubPathAtBegin(Trip &trip) {
   invariant();
   if (unassigned.size() == 0) return false;
   UINT bestNode;
-  Bucket subPath;
+  TwBucket subPath;
   twc->findBestFromNodeHasMoreNodesOnPath(assigned, unassigned, bestNode, trip[1].nid(), subPath);
   assert(subPath.size() != 0);
 #ifdef VRPMAXTRACE
@@ -145,7 +145,7 @@ bool TruckManyVisitsDump::insertBigSubPathAtEnd(Trip &trip) {
   invariant();
   if (unassigned.size() == 0) return false;
   UINT bestNode;
-  Bucket subPath;
+  TwBucket subPath;
   twc->findBestToNodeHasMoreNodesOnPath(assigned, unassigned, trip[trip.size()-1].nid(), bestNode, subPath);
   assert(subPath.size() != 0);
 #ifdef VRPMAXTRACE
@@ -184,7 +184,7 @@ bool TruckManyVisitsDump::insertBestPairSubPath(std::deque<Trip> &trips) {
 
   // DLOG(INFO) << "lessFilledTrip" << lessFilledTrip;
   UINT from, to;
-  Bucket subPath;
+  TwBucket subPath;
   assert(unassigned.size());
   twc->findPairNodesHasMoreNodesOnPath(assigned, unassigned, from, to, subPath);
 
@@ -193,7 +193,7 @@ bool TruckManyVisitsDump::insertBestPairSubPath(std::deque<Trip> &trips) {
   Trashnode bestNode;
   UINT bestPos;
   
-  Bucket aux;  
+  TwBucket aux;  
   trips[lessFilledTrip].findFastestNodeTo(true, subPath, bestPos, bestNode, bestTime);
   for (UINT i = 0; i < subPath.size(); ++i) {
     invariant();
@@ -230,7 +230,7 @@ void TruckManyVisitsDump::fillTrip(Trip &trip) {
   assert(unassigned.size() != 0);
   Trashnode bestNode;
   UINT bestPos;
-  Bucket subPath;
+  TwBucket subPath;
   trip.getCostOsrm();
 #ifdef VRPMINTRACE
   DLOG(INFO) << "trip needs " << trip.getz1() << " nodes";
@@ -240,7 +240,7 @@ void TruckManyVisitsDump::fillTrip(Trip &trip) {
   float8 bestTime, currTime;
 
   
-  Bucket aux;
+  TwBucket aux;
   // bestNode = unassigned[0];
   // instead of this:
   //trip.findFastestNodeTo(true, unassigned, bestPos, bestNode, bestTime);
@@ -623,14 +623,14 @@ void TruckManyVisitsDump::insertNodesOnPath(Trip &trip) {
 #ifdef VRPMINTRACE1
   DLOG(INFO) << "--> TruckManyVisitsDump::insertNodesOnPath";
 #endif
-  Bucket streetNodes, tmp;
+  TwBucket streetNodes, tmp;
   invariant();
 
   streetNodes.clear();
   streetNodes = twc->getNodesOnPath(trip.Path(), trip.getDumpSite(), unassigned);
   tmp = streetNodes;
   assert((tmp * assigned).size() == 0);
-  Bucket aux;
+  TwBucket aux;
   Trashnode bestNode;
   float8 bestTime;
   UINT bestPos;

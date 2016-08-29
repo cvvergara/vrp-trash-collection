@@ -26,6 +26,8 @@
 #include "baseClasses/move.h"
 #include "solverTrash/costvehicle.h"
 
+using namespace vrptc;
+using namespace vrptc::nodes;
 
 
 class Vehicle1: public CostVehicle {
@@ -40,11 +42,11 @@ public:
     : CostVehicle(S, D, E, maxcap) { 
    DLOG(INFO)<< "Vehicle1 constructor";}
 
-  Vehicle1(const std::string &line, const Bucket &otherlocs )
+  Vehicle1(const std::string &line, const TwBucket &otherlocs )
     : CostVehicle(line, otherlocs)   { }
   Vehicle1( int _vid, int _start_id, int _dump_id, int _end_id,
            int _capacity, int _dumpservicetime, int _starttime,
-           int _endtime, const Bucket &otherlocs )
+           int _endtime, const TwBucket &otherlocs )
     : CostVehicle( _vid, _start_id, _dump_id, _end_id,
                    _capacity, _dumpservicetime, _starttime,
                    _endtime, otherlocs ) {}

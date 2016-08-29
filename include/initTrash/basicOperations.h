@@ -22,16 +22,15 @@
 
 class Basicoperations : public Solution {
  protected:
-  typedef  TwBucket<Trashnode> Bucket;
   typedef  unsigned long int UID;
   typedef  unsigned long int POS;
 
 
   std::deque<Vehicle> unusedTrucks;
   std::deque<Vehicle> usedTrucks;
-  Bucket unassigned;
-  Bucket problematic;
-  Bucket assigned;
+  TwBucket unassigned;
+  TwBucket problematic;
+  TwBucket assigned;
 
 
  public:
@@ -52,9 +51,9 @@ class Basicoperations : public Solution {
  protected:
   bool safeInsertNode(Trip &trip, const Trashnode &node, UINT pos);
   bool safeDeleteNode(Trip &trip, UINT pos);
-  bool safeInsertSubpath(Trip &trip, Bucket &subPath, UINT pos);
-  bool safePushFrontSubpath(Trip &trip, Bucket &subPath);
-  bool safePushBackSubpath(Trip &trip, Bucket &subPath);
+  bool safeInsertSubpath(Trip &trip, TwBucket &subPath, UINT pos);
+  bool safePushFrontSubpath(Trip &trip, TwBucket &subPath);
+  bool safePushBackSubpath(Trip &trip, TwBucket &subPath);
   bool safePushBackNode(Trip &trip, Trashnode &node);
   bool safePushFrontNode(Trip &trip, Trashnode &node);
   bool safePopBackNode(Trip &trip); 

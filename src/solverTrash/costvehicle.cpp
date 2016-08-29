@@ -53,7 +53,7 @@ double CostVehicle::arrivalEclosesLast(const Trashnode &last) const {
 
 // for multiple dumps on path
 void CostVehicle::setInitialValues( const Trashnode &node,
-                                    const Bucket &picks ) {
+                                    const TwBucket &picks ) {
 
   C = node;
   ttSC = twc->getAverageTime(depot, picks);

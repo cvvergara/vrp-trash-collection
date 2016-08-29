@@ -14,17 +14,26 @@
 #ifndef TRASHNODE_H
 #define TRASHNODE_H
 
-
 #include "nodes/tweval.h"
 
+
 // TODO not use define
- #if 1
-#define Trashnode Tweval
+#if 1
+#define Trashnode vrptc::nodes::Tweval
 #else
 
-using namespace vrptc::nodes;
 
-class Trashnode : public Tweval {};
+namespace vrptc {
+namespace nodes {
+
+class Tweval;
+
+class Trashnode : public Tweval {
+};
+
+
+}
+}
 
 #endif
 

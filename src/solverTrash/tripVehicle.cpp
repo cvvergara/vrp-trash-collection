@@ -13,9 +13,12 @@
  ********************************************************************VRP*/
 
 #include <algorithm>
+#include "baseClasses/twbucket.h"
 #include "solverTrash/tripVehicle.h"
 
 
+using namespace vrptc;
+using namespace vrptc::nodes;
 
 void Trip::swapBestToDump(Trip &other) {
   // this trips wants to get faster to the dump
@@ -149,7 +152,7 @@ int Vehicle::exchangesWithNotOnPath(Trip &trip, Trip &o_trip) {
   UINT d_node, o_d_node;
   auto count = 0;
   
-  Bucket nodesNotOnTripPath;
+  TwBucket nodesNotOnTripPath;
   trip.getNodesNotOnPath(o_trip, nodesNotOnTripPath);
   if (nodesNotOnTripPath.size() == 0) {
     // DLOG(INFO) << "We cant  exchange: iall the nodes are on path";
@@ -215,7 +218,7 @@ int Vehicle::exchangesWithOnPath(Trip &trip, Trip &o_trip) {
   UINT d_node, o_d_node;
   auto count(0);
   
-  Bucket nodesOnTripPath;
+  TwBucket nodesOnTripPath;
   trip.getNodesOnPath(o_trip, nodesOnTripPath);
   if (nodesOnTripPath.size() == 0) {
     // DLOG(INFO) << "We cant  exchange: o_trip does not have nodes in trip's path" ;
@@ -389,8 +392,8 @@ bool Trip::getRemovalValues(const Trip &other, POS &o_ins_pos, POS &del_pos, dou
 // suppose this nodes from the other trip are on my path
 // nodesOnPath:  B D F
 
-void Trip::getNodesOnPath(const Trip &o_trip, POS o_i_pos, Bucket &nodesOnPath) const {
-  Bucket o_nodes;
+void Trip::getNodesOnPath(const Trip &o_trip, POS o_i_pos, TwBucket &nodesOnPath) const {
+  TwBucket o_nodes;
   nodesOnPath.clear();
   o_nodes = o_trip.path; // choose from this
   if (o_i_pos - 1 < o_nodes.size()) o_nodes.erase(o_i_pos - 1); // this nodes the other cant give
@@ -401,8 +404,8 @@ void Trip::getNodesOnPath(const Trip &o_trip, POS o_i_pos, Bucket &nodesOnPath) 
 
 
 void Trip::getNodesInOrder() {
-  Bucket nodes;
-  Bucket nodesInOrder;
+  TwBucket nodes;
+  TwBucket nodesInOrder;
   nodes = path; 
   nodes.pop_front();  // delete the starting site
   nodesInOrder = twc->getNodesOnPath(path, dumpSite, nodes);
@@ -432,17 +435,15 @@ void Trip::getNodesInOrder() {
 
 
 
-void Trip::getNodesOnPath(const Trip &o_trip, Bucket &nodesOnPath) const {
-  Bucket o_nodes;
+void Trip::getNodesOnPath(const Trip &o_trip, TwBucket &nodesOnPath) const {
   nodesOnPath.clear();
-  o_nodes = o_trip.path; // choose from this
+  auto o_nodes = o_trip.path; // choose from this
   o_nodes.pop_front();  // delete the starting site
   nodesOnPath = twc->getNodesOnPath(path, dumpSite, o_nodes);
 }
 
-void Trip::getNodesNotOnPath(const Trip &o_trip, Bucket &nodesNotOnPath) const {
-  Bucket o_nodes;
-  o_nodes = o_trip.path; // choose from this
+void Trip::getNodesNotOnPath(const Trip &o_trip, TwBucket &nodesNotOnPath) const {
+  auto o_nodes = o_trip.path; // choose from this
   o_nodes.pop_front();  // delete the starting site
   auto nodesOnPath = twc->getNodesOnPath(path, dumpSite, o_nodes);
   nodesNotOnPath = o_nodes - nodesOnPath;  
@@ -451,8 +452,7 @@ void Trip::getNodesNotOnPath(const Trip &o_trip, Bucket &nodesNotOnPath) const {
 
 
 bool Trip::chooseMyBest(const Trip &other, POS o_ins_pos, POS del_pos, POS &ins_pos, POS &o_del_pos, double &o_delta_del, double &i_delta) const {
-  Bucket o_nodes;
-  o_nodes = other.path; // choose from this
+  auto o_nodes = other.path; // choose from this
   if (o_ins_pos-1 < o_nodes.size()) o_nodes.erase(o_ins_pos-1); // this nodes the other cant give
   if (o_ins_pos-1 < o_nodes.size()) o_nodes.erase(o_ins_pos-1);
   o_nodes.pop_front();  // delete the starting site
@@ -472,7 +472,7 @@ bool Trip::chooseMyBest(const Trip &other, POS o_ins_pos, POS del_pos, POS &ins_
     o_delta_del = 999999;
     for(size_t j = 0; j < nodesOnPath.size(); ++j) {
       UINT node = nodesOnPath[j].nid(); // working with node
-      POS pos_o = other.path.pos(node); // located at this postition in the others path
+      auto pos_o = other.path.pos(node); // located at this postition in the others path
       if (o_del_pos == other.path.size()-1) { // its the last node
         time0 = twc->TravelTime(other[pos_o - 1].nid(), other[pos_o].nid(), other.dumpSite.nid());
         time1 = twc->TravelTime(other[pos_o - 1].nid(), other.dumpSite.nid());
@@ -584,11 +584,11 @@ bool Trip::bestInsertion(UINT n_ins, POS &ins_pos, double &i_delta) const {
 
 
 //
-void Trip::removeRestricted(Bucket &nodesOnPath, POS special) const {
+void Trip::removeRestricted(TwBucket &nodesOnPath, POS special) const {
   assert(path.size() > 1); // will never use insert into an empty truck
   UINT ins_pos;
   double i_delta;
-  Bucket ok;
+  TwBucket ok;
   for (POS i = 0; i <= nodesOnPath.size(); ++i) {
     bestInsertion(nodesOnPath[i].nid(), ins_pos, i_delta);
     if (ins_pos != special && ins_pos != (special + 1)) 

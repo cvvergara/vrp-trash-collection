@@ -13,6 +13,7 @@
  ********************************************************************VRP*/
 #ifndef SRC_BASECLASSES_TWBUCKET_H_
 #define SRC_BASECLASSES_TWBUCKET_H_
+#pragma once
 
 #include <deque>
 #include <set>
@@ -24,9 +25,11 @@
 
 #include "baseClasses/basictypes.h"
 #include "baseClasses/vrp_assert.h"
-#include "nodes/node.h"
+#include "nodes/trashnode.h"
+//#include "baseClasses/twc.h"
 
 class Prob_trash;
+
 
 /*! \class TwBucket
  * \brief A template class that provides deque like container with lots of additional functionality.
@@ -43,21 +46,23 @@ class Prob_trash;
  * - other tools
 */
 
-template <class knode>
-class TWC;
 
-template <class knode>
+
+using namespace vrptc ;
+using namespace vrptc::nodes;
+
 class TwBucket {
     friend class Prob_trash;
-    friend class TWC<knode>;
+    friend class TWC;
  protected:
-    typedef typename std::deque<knode>::iterator iterator;
-    typedef typename std::deque<knode>::reverse_iterator reverse_iterator;
+#if 0
+    typedef typename std::deque<Trashnode>::iterator iterator;
+    typedef typename std::deque<Trashnode>::reverse_iterator reverse_iterator;
     typedef typename
-        std::deque<knode>::const_reverse_iterator const_reverse_iterator;
-    typedef typename std::deque<knode>::const_iterator const_iterator;
-
-    std::deque<knode> path;         ///< Defines the bucket container
+        std::deque<Trashnode>::const_reverse_iterator const_reverse_iterator;
+    typedef typename std::deque<Trashnode>::const_iterator const_iterator;
+#endif
+    std::deque<Trashnode> path;         ///< Defines the bucket container
 
 
     /*! \class compNode
@@ -65,7 +70,7 @@ class TwBucket {
      */
     class compNode {
         public:
-            bool operator()(const knode &n1, const knode &n2) const {
+            bool operator()(const Trashnode &n1, const Trashnode &n2) const {
                 return n1.nid() < n2.nid();
             }
     };
@@ -80,8 +85,10 @@ class TwBucket {
      * \param[in] to:     to node
      * \param[in] travelTimePrevFrom:   travel time from "prev" to "from" nodes
      */
-    double  timePCN(const knode &prev, const knode &from, const knode &middle,
-            const knode &to, double travelTimePrevFrom) const {
+    double  timePCN(const Trashnode &prev, const Trashnode &from, const Trashnode &middle,
+            const Trashnode &to, double travelTimePrevFrom) const;
+#if 0
+    {
         if ( from.isNotCompatibleIJ(prev)
                 || middle.isNotCompatibleIJ(prev)
                 || to.isNotCompatibleIJ(prev)
@@ -114,6 +121,7 @@ class TwBucket {
 
         return arrive_to - depart_from;
     }
+#endif
 
     /*! @name timePCN = time previous-current-next 
       simulates the following order of nodes in the path: 
@@ -132,175 +140,12 @@ class TwBucket {
      the other ones are variations on the parameters
      */
     ///@{
-#if 0
-=======
-  /*!
-    \param[in] prev:   prev node
-   * \param[in] from:   from node
-   * \param[in] middle: middle node
-   * \param[in] to:     to node
-   * \param[in] travelTimePrevFrom:   travel time from "prev" to "from" nodes
-  */
-  double  timePCN(const knode &prev, const knode &from, const knode &middle,
-                  const knode &to, double travelTimePrevFrom) const {
-    if ( from.isNotCompatibleIJ(prev)
-         || middle.isNotCompatibleIJ(prev)
-         || to.isNotCompatibleIJ(prev)
-         || middle.isNotCompatibleIJ(from)
-         || to.isNotCompatibleIJ(from)
-         || to.isNotCompatibleIJ(middle))
-       return VRP_MAX();
-
-
-    double travelTimePrevFromMiddle = TravelTime(prev, from , middle);
-    double travelTimeFromMiddle = travelTimePrevFromMiddle - travelTimePrevFrom;
-    double travelTimePrevFromMiddleTo = TravelTime(prev, from , middle, to);
-    double travelTimeMiddleTo  = travelTimePrevFromMiddleTo  - travelTimePrevFromMiddle;
-
-    double arrive_from = prev.departureTime() + travelTimePrevFrom;
-
-    if (from.lateArrival(arrive_from)) return VRP_MAX();
-    if (from.earlyArrival(arrive_from)) arrive_from = from.opens();
-
-    double depart_from = arrive_from + from.serviceTime();
-    double arrive_middle = arrive_from + from.serviceTime() + travelTimeFromMiddle;
-
-    if ( middle.lateArrival(arrive_middle) ) return VRP_MAX();
-    if ( middle.earlyArrival(arrive_middle) ) arrive_middle = middle.opens();
-
-    double arrive_to = arrive_middle + middle.serviceTime() + travelTimeMiddleTo;
-
-    if (to.lateArrival(arrive_to)) return VRP_MAX();
-    if (to.earlyArrival(arrive_to)) arrive_to = to.opens();
-
-    return arrive_to - depart_from;
-  }
-
-  /*! @name timePCN = time previous-current-next
-     simulates the following order of nodes in the path:
-         prev from middle to
-   *
-   * \return  the time that takes to depart from "from" and arrive to "to" passing thru "middle"
-   *
-   * \return  ttfm + serv(m) + ttmt = arrivalTime(next) - departureTime(prev) when passing thru curr
-   * \return infinity              if there is a TWV (time window violation)
-   *
-   * use when:
-       prev from   is a section of the path and "prev" is the previous node of "from"
-       from from   there is no previous container of from
-
-  A private function does all the work
-      the other ones are variations on the parameters
-  */
-  ///@{
- public:
-  /*! \brief  the 3 nodes belong to the path */
-  double  timePCN(POS from, POS middle, POS to) const {
-    assert(from < path.size());
-    assert(middle < path.size());
-    assert(to < path.size());
-    assert(middle != from);
-    assert(middle != to);
-
-    if ( from == 0 )
-      return timePCN(path[from], path[from], path[middle], path[to], 0);
-    else
-      return timePCN(path[from - 1], path[from], path[middle], path[to],
-                     path[from].travelTime());
-  }
-
-  /*! \brief  first 2 nodes belong to the path and the third doesnt */
-  double timePCN(POS from, POS middle, const knode &dump) const {
-    assert(from < path.size());
-    assert(middle < path.size());
-    assert(middle != from);
-
-    if ( from == 0 )
-      return timePCN(path[from], path[from], path[middle], dump, 0);
-    else
-      return timePCN(path[from - 1], path[from], path[middle], dump,
-                     path[from].travelTime());
-  }
-
-  /*! \brief  \from node belong to the path and \middle and \dump dont */
-  double  timePCN(POS from, const knode &middle, const knode &dump) const {
-    assert(from < path.size());
-
-    if ( from == 0 )
-      return timePCN(path[from], path[from], middle, dump, 0);
-    else
-      return timePCN(path[from - 1], path[from], middle , dump,
-                     path[from].travelTime());
-  }
-
-  /*! \brief  simulates a replacement of a node in the bucket
-
-     previous path:
-       from from+1 from+2
-     simulated path:
-       from middle from+2
-  */
-  double timePCN(POS from, const knode &middle) const {
-    assert((from + 2) < path.size());
-
-    if ( from == 0 )
-      return timePCN(path[from], path[from], middle, path[from + 2], 0 );
-    else
-      return timePCN(path[from - 1], path[from], middle , path[from + 2],
-                     path[from].travelTime());
-  }
-  /*! \brief  simulates an insertion of two nodes a node at the end of the bucket
-         namely node and dump
-
-     previous path:
-       last dump
-     simulated path:
-       last node dump
-  */
-  double timePCN(const knode &node, const knode &dump) const{
-    knode last = path[path.size() - 1];
-    return timePCN(path.size()-1, node, dump);
-  }
-  ///@}
-
- private:
-  /*! @name TravelTime inline functions
-    \brief useful inlines to fetch the travel time from Node to Node
-
-   2 flavors:
-      parameters are nodes
-      parameters are node Nid (internal node id)
-   No need to be within the bucket
-  */
-  ///@{
-  inline double TravelTime(const knode &from, const knode &to) const {
-    return TWC<knode>::Instance()->TravelTime( from.nid(), to.nid());
-  }
-  double TravelTime(const knode &from, const knode &middle,
-                    const knode &to) const {
-    return TWC<knode>::Instance()->TravelTime(from.nid(), middle.nid() , to.nid());
-  }
-  double TravelTime(const knode &prev, const knode &from, const knode &middle,
-                    const knode &to) const {
-    return TWC<knode>::Instance()->TravelTime(prev.nid(), from.nid(), middle.nid() , to.nid());
-  }
-
-  double TravelTime(UID i, UID j) const {
-    return TWC<knode>::Instance()->TravelTime(i, j);
-  }
-  double TravelTime(UID i, UID j, UID k) const {
-    return TWC<knode>::Instance()->TravelTime(i, j, k);
-  }
-  double TravelTime(UID i, UID j, UID k, UID l) const {
-    return TWC<knode>::Instance()->TravelTime(i, j, k, l);
-  }
-  ///@}
->>>>>>> origin/right-side-montevideo
-#endif
 
  public:
     /*! \brief  the 3 nodes belong to the path */
-    double  timePCN(POS from, POS middle, POS to) const {
+    double  timePCN(POS from, POS middle, POS to) const;
+#if 0
+    {
         assert(from < path.size());
         assert(middle < path.size());
         assert(to < path.size());
@@ -313,9 +158,12 @@ class TwBucket {
             return timePCN(path[from - 1], path[from], path[middle], path[to],
                     path[from].travelTime());
     }
+#endif // 0
 
     /*! \brief  first 2 nodes belong to the path and the third doesnt */
-    double timePCN(POS from, POS middle, const knode &dump) const {
+    double timePCN(POS from, POS middle, const Trashnode &dump) const;
+#if 0
+    {
         assert(from < path.size());
         assert(middle < path.size());
         assert(middle != from);
@@ -326,9 +174,12 @@ class TwBucket {
             return timePCN(path[from - 1], path[from], path[middle], dump,
                     path[from].travelTime());
     }
+#endif // 0
 
     /*! \brief  \from node belong to the path and \middle and \dump dont */
-    double  timePCN(POS from, const knode &middle, const knode &dump) const {
+    double  timePCN(POS from, const Trashnode &middle, const Trashnode &dump) const;
+#if 0
+    {
         assert(from < path.size());
 
         if ( from == 0 )
@@ -337,6 +188,7 @@ class TwBucket {
             return timePCN(path[from - 1], path[from], middle , dump,
                     path[from].travelTime());
     }
+#endif // 0
 
     /*! \brief  simulates a replacement of a node in the bucket
 
@@ -345,7 +197,9 @@ class TwBucket {
       simulated path:
       from middle from+2
       */
-    double timePCN(POS from, const knode &middle) const {
+    double timePCN(POS from, const Trashnode &middle) const;
+#if 0
+    {
         assert((from + 2) < path.size());
 
         if ( from == 0 )
@@ -354,6 +208,7 @@ class TwBucket {
             return timePCN(path[from - 1], path[from], middle , path[from + 2],
                     path[from].travelTime());
     }
+#endif // 0
     /*! \brief  simulates an insertion of two nodes a node at the end of the bucket
       namely node and dump 
 
@@ -362,10 +217,13 @@ class TwBucket {
       simulated path:
       last node dump
       */
-    double timePCN(const knode &node, const knode &dump) const{
-        knode last = path[path.size() - 1];
+    double timePCN(const Trashnode &node, const Trashnode &dump) const;
+#if 0
+    {
+        Trashnode last = path[path.size() - 1];
         return timePCN(path.size()-1, node, dump);
     }
+#endif // 0
     ///@}
 
     private:
@@ -378,30 +236,48 @@ class TwBucket {
       No need to be within the bucket
       */
     ///@{
-    inline double TravelTime(const knode &from, const knode &to) const {
-        return TWC<knode>::Instance()->TravelTime( from.nid(), to.nid());
+   
+    inline double TravelTime(const Trashnode &from, const Trashnode &to) const;
+#if 0
+    {
+        return twc->TravelTime(from.nid(), to.nid());
     }
-    double TravelTime(const knode &from, const knode &middle,
-            const knode &to) const {
-        return TWC<knode>::Instance()->TravelTime(from.nid(), middle.nid() , to.nid());
+#endif // 0
+    double TravelTime(const Trashnode &from, const Trashnode &middle,
+            const Trashnode &to) const;
+#if 0
+    {
+        return TWC::Instance()->TravelTime(from.nid(), middle.nid() , to.nid());
     }
-    double TravelTime(const knode &prev, const knode &from, const knode &middle,
-            const knode &to) const {
-        return TWC<knode>::Instance()->TravelTime(prev.nid(), from.nid(), middle.nid() , to.nid());
+#endif // 0
+    double TravelTime(const Trashnode &prev, const Trashnode &from, const Trashnode &middle,
+            const Trashnode &to) const;
+#if 0
+    {
+        return TWC::Instance()->TravelTime(prev.nid(), from.nid(), middle.nid() , to.nid());
     }
+#endif // 0
 
-    double TravelTime(UID i, UID j) const {
-        return TWC<knode>::Instance()->TravelTime(i, j);
+    double TravelTime(UID i, UID j) const;
+#if 0
+    {
+        return TWC::Instance()->TravelTime(i, j);
     }
-    double TravelTime(UID i, UID j, UID k) const {
-        return TWC<knode>::Instance()->TravelTime(i, j, k);
+#endif // 0
+    double TravelTime(UID i, UID j, UID k) const;
+#if 0
+    {
+        return TWC::Instance()->TravelTime(i, j, k);
     }
-    double TravelTime(UID i, UID j, UID k, UID l) const {
-        return TWC<knode>::Instance()->TravelTime(i, j, k, l);
+#endif // 0
+    double TravelTime(UID i, UID j, UID k, UID l) const;
+#if 0
+    {
+        return TWC::Instance()->TravelTime(i, j, k, l);
     }
+#endif // 0
     ///@}
 
-#if 0
     public:
     /*! @name getDeltaTime
      * Simulate changes of times within the path
@@ -423,7 +299,9 @@ class TwBucket {
      * \return infinity when there is a TWV
      */
     // NOT USED
-    double getDeltaTimeAfterDump(const knode &dump, const knode &node) const {
+    double getDeltaTimeAfterDump(const Trashnode &dump, const Trashnode &node) const;
+#if 0
+    {
         double nodeArrival = dump.getDepartureTime() + TravelTime(dump, node);
 
         if ( node.lateArrival( nodeArrival) ) return VRP_MAX();
@@ -441,6 +319,7 @@ class TwBucket {
             dump.getDepartureTime();
         return delta;
     }
+#endif // 0
 
 
     /*!
@@ -454,7 +333,9 @@ class TwBucket {
      * \return The delta time or infinity if if creates a path violation.
      */
     // NOT USED
-    double getDeltaTimeSwap(POS pos1, POS pos2) const {
+    double getDeltaTimeSwap(POS pos1, POS pos2) const;
+#if 0
+    {
         assert(pos1 < path.size() - 1 && pos2 < path.size());
 #ifdef TESTED
         DLOG(INFO) << "Entering twBucket::getDeltaTimeSwap()";
@@ -546,6 +427,7 @@ class TwBucket {
 
         return delta1 + delta2;
     }
+#endif // 0
 
 
     /*!
@@ -561,7 +443,9 @@ class TwBucket {
      * \return The change in cost or infinity if a TWV would be generated.
      */
     // NOT USED
-    double getDeltaTime(const knode &node, POS pos , POS pos1) const {
+    double getDeltaTime(const Trashnode &node, POS pos , POS pos1) const;
+#if 0
+    {
         assert(pos1 <= path.size());
         assert(pos > 0 && pos1 == (pos + 1));
 
@@ -589,6 +473,7 @@ class TwBucket {
                     - path[pos - 1].getDepartureTime());
         return delta;
     }
+#endif // 0
 
     /*!
      * \brief Compute the change in time when swapping node into pos in the path and do additional time violation checks.
@@ -602,7 +487,9 @@ class TwBucket {
      * \param[in] pos1 The next node following pos.
      * \return The change in cost or infinity if a TWV would be generated.
      */
-    double getDeltaTimeTVcheck(const knode &node, POS pos, POS pos1) const {
+#if 0
+    double getDeltaTimeTVcheck(const Trashnode &node, POS pos, POS pos1) const;
+    {
         assert(pos1 <= path.size());
         assert(pos > 0 && pos1 == (pos + 1));
 
@@ -618,6 +505,7 @@ class TwBucket {
 
         return delta;
     }
+#endif // 0
 
 
     /*!
@@ -630,7 +518,9 @@ class TwBucket {
      * \param[in] pos The position before which the node will be inserted.
      * \return The change in travel time or infinity if the move is invalid.
      */
-    double  getDeltaTime(const knode &node, POS pos) const {
+    double  getDeltaTime(const Trashnode &node, POS pos) const;
+#if 0
+    {
         assert(pos < path.size());
 
         if ( pos == 0 || path[pos].isDepot() ) return VRP_MAX();
@@ -646,9 +536,9 @@ class TwBucket {
             + TravelTime(node.nid(), nid)
             - TravelTime(prev, nid);
     }
+#endif // 0
 
 
-#if 0
     /*!
      * \brief Compute the change in time of inserting node before pos in the path and check for TW violations..
      *
@@ -660,7 +550,9 @@ class TwBucket {
      * \return The change in travel time or infinity if the move is invalid.
      */
     // NOT USED
-    double  getDeltaTimeTVcheck(const knode &node, POS pos) const {
+#if 0
+    double  getDeltaTimeTVcheck(const Trashnode &node, POS pos) const;
+    {
         assert(pos <= path.size());
         assert(pos > 0);
 
@@ -677,7 +569,6 @@ class TwBucket {
         if ( deltaGeneratesTV( delta, pos ) ) return VRP_MAX();
 
         return delta;
-    }
 
     double delta  =  TravelTime[prev][node.nid()]
                      + node.getServiceTime()
@@ -686,7 +577,7 @@ class TwBucket {
                         - path[pos - 1].getDepartureTime());
     return delta;
   }
-#endif
+#endif // 0
 
   /*!
    * \brief Compute the change in time when swapping node into pos in the path and do additional time violation checks.
@@ -700,7 +591,9 @@ class TwBucket {
    * \param[in] pos1 The next node following pos.
    * \return The change in cost or infinity if a TWV would be generated.
    */
-  double getDeltaTimeTVcheck(const knode &node, POS pos, POS pos1) const {
+  double getDeltaTimeTVcheck(const Trashnode &node, POS pos, POS pos1) const;
+#if 0
+{
     assert(pos1 <= path.size());
     assert(pos > 0 && pos1 == (pos + 1));
 
@@ -716,6 +609,7 @@ class TwBucket {
 
     return delta;
   }
+#endif // 0
 
 
 
@@ -727,7 +621,9 @@ class TwBucket {
      * \param[in] upto The position to stop evaluating.
      * \return true if delta would generate a time violation.
      */
-    bool deltaGeneratesTVupTo(double delta, POS pos, POS upto) const {
+    bool deltaGeneratesTVupTo(double delta, POS pos, POS upto) const;
+#if 0
+{
         assert(pos < path.size() && upto < size() && pos <= upto);
         bool flag = false;
 
@@ -740,6 +636,7 @@ class TwBucket {
 
         return flag;
     }
+#endif // 0
 
     /*!
      * \brief Check all nodes forward from pos if adding delta would cause a violation.
@@ -749,12 +646,15 @@ class TwBucket {
      * \return true if delta would generate a time violation.
      */
     // NOT USED
-    bool deltaGeneratesTV(double delta, POS pos) const {
+    bool deltaGeneratesTV(double delta, POS pos) const;
+#if 0
+{
         if (pos < size())
             return  deltaGeneratesTVupTo(delta, pos, size() - 1);
         else
             return false;
     }
+#endif // 0
     ///@}
 #endif // 0
 
@@ -770,11 +670,14 @@ public:
   \param[in] node The node to compute the distance to.
   \return The shortest distance from node to line segment.
   */
-double segmentDistanceToPoint(POS pos, const knode &node) const {
+double segmentDistanceToPoint(POS pos, const Trashnode &node) const;
+#if 0
+{
     assert(path.size() > 1);
     assert(pos + 1 < path.size());
     return node.distanceToSegment(path[pos], path[pos + 1]);
 }
+#endif // 0
 
 
 #ifdef DOVRPLOG
@@ -790,16 +693,15 @@ void dumpid() const {dumpid("Twbucket");}
 
  * \param[in] title Title to print with the output of the Twbucket.
  */
-void dumpid(const std::string &title) const {
+void dumpid(const std::string &title) const;
+#if 0
+{
     std::stringstream ss;
     ss << title;
-    const_iterator it = path.begin();
-
-    for ( const_iterator it = path.begin(); it != path.end(); it++ )
-        ss << " " << it->id();
-
+    for (const auto e : path) ss << " " << e.id();
     DLOG(INFO) << ss.str();
 }
+#endif // 0
 
 /*! \brief Using nid as node identifiers with title "Twbucket".  */
 void dump() const {dump("Twbucket");}
@@ -807,16 +709,14 @@ void dump() const {dump("Twbucket");}
 /*! \brief Using nid as node identifiers with title "Twbucket".  
  * \param[in] title Title to print with the output of the Twbucket.
  */
-void dump(const std::string &title) const {
-    //std::stringstream ss;
+void dump(const std::string &title) const;
+#if 0
+{
     DLOG(INFO) << title;
-    const_iterator it = path.begin();
-
-    for (const_iterator it = path.begin(); it != path.end(); it++)
-        it->dump();
+    for (const auto e : path) e.dump();
     DLOG(INFO) << " <----- end \n";
-    // DLOG(INFO) << ss.str();
 }
+#endif // 0
 #endif
 ///@}
 
@@ -827,12 +727,17 @@ void dump(const std::string &title) const {
   */
 ///@{
 /*! \brief \param[in] node uses the \b id of the node*/
-bool hasId(const knode &node) const {
-    return hasid(node.id());
+bool hasId(const Trashnode &node) const;
+#if 0
+{
+    return hasId(node.id());
 }
+#endif // 0
 /*! \brief \param[in] id Uses the \b id */
 
-bool hasId(int64_t id) const {
+bool hasId(int64_t id) const;
+#if 0
+{
     return std::find_if(path.begin(), path.end(),
             [&id](const auto &item) {
         return item.id() == id;
@@ -850,6 +755,7 @@ bool hasId(int64_t id) const {
     return false;
 #endif
 }
+#endif // 0
 ///@}
 
 
@@ -859,11 +765,24 @@ bool hasId(int64_t id) const {
   */
 ///@{
 /*! \brief \param[in] node uses the \b nid of the node*/
-bool hasNid(const knode &node) const {
+bool hasNid(const Trashnode &node) const;
+#if 0
+{
     return hasNid(node.nid());
 }
+#endif // 0
 /*! \brief \param[in] id Uses the \b nid */
-bool hasNid(UID nid) const {
+bool hasNid(UID nid) const;
+#if 0
+{
+
+    return !(
+            std::find_if(path.begin(), path.end(),
+                [&nid] (const Trashnode &e) 
+                {return e.nid() == nid;})
+            ==  path.end());
+
+#if 0
     const_reverse_iterator rit = path.rbegin();
 
     for (const_iterator it = path.begin(); it != path.end() ; it++, ++rit) {
@@ -871,14 +790,18 @@ bool hasNid(UID nid) const {
         if ( rit->nid() == nid ) return true;
     }
     return false;
+#endif
 }
+#endif // 0
 ///@}
 
 
 /*! @name Set operations based on the internal node id (nid) */
 ///@{
 /*!  * \brief True when \b this buckets is equal to the \b other bucket. */
-bool operator ==(const TwBucket<knode> &other) const  {
+bool operator ==(const TwBucket &other) const;
+#if 0
+{
     if ( size() != other.size() ) return false;
 
     if ( size() == 0 && other.size() == 0 ) return true;
@@ -889,45 +812,55 @@ bool operator ==(const TwBucket<knode> &other) const  {
 
     return true;
 }
+#endif // 0
 
 
 /*! \brief Returns \b this  UNION \b other .  */
-TwBucket<knode> operator +(const TwBucket<knode> &other) const  {
-    std::set<knode, compNode> a;
+TwBucket  operator +(const TwBucket &other) const;
+#if 0
+{
+    std::set<Trashnode, compNode> a;
     a.insert(path.begin(), path.end());
     a.insert(other.path.begin(), other.path.end());
-    TwBucket<knode> b;
+    TwBucket b;
     b.path.insert(b.path.begin(), a.begin(), a.end());
     return b;
 }
+#endif // 0
 
 /*! \brief Returns \b this INTERSECTION \b other .  */
-TwBucket<knode> operator *(const TwBucket<knode> &other) const  {
-    std::set<knode, compNode> s1;
-    std::set<knode, compNode> s2;
-    std::set<knode, compNode> intersect;
+TwBucket operator *(const TwBucket &other) const;
+#if 0
+{
+    std::set<Trashnode, compNode> s1;
+    std::set<Trashnode, compNode> s2;
+    std::set<Trashnode, compNode> intersect;
     s1.insert(path.begin(), path.end());
     s2.insert(other.path.begin(), other.path.end());
     std::set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(),
             std::inserter(intersect, intersect.begin()));
-    TwBucket<knode> b;
+    TwBucket b;
     b.path.insert(b.path.begin(), intersect.begin(), intersect.end());
     return b;
 }
+#endif // 0
 
 /*! \brief Returns \b this DIFFERENCE \b other .  */
-TwBucket<knode> operator -(const TwBucket<knode> &other) const  {
-    std::set<knode, compNode> s1;
-    std::set<knode, compNode> s2;
-    std::set<knode, compNode> diff;
+TwBucket operator -(const TwBucket &other) const;
+#if 0
+{
+    std::set<Trashnode, compNode> s1;
+    std::set<Trashnode, compNode> s2;
+    std::set<Trashnode, compNode> diff;
     s1.insert(path.begin(), path.end());
     s2.insert(other.path.begin(), other.path.end());
     std::set_difference(s1.begin(), s1.end(), s2.begin(), s2.end(),
             std::inserter(diff, diff.begin()));
-    TwBucket<knode> b;
+    TwBucket b;
     b.path.insert(b.path.begin(), diff.begin(), diff.end());
     return b;
 }
+#endif // 0
 ///@}
 
 
@@ -935,88 +868,130 @@ TwBucket<knode> operator -(const TwBucket<knode> &other) const  {
   The end of the path is the \b last node of the path
   */
 ///@{
-const knode& last() const {
+const Trashnode& last() const;
+#if 0
+{
     assert(size());
     return  path[size() - 1];
 }
+#endif // 0
 
 /*! \brief \returns the total travel time of the path.  */
-double getTotTravelTime() const {
+double getTotTravelTime() const;
+#if 0
+{
     assert(size());
     return last().totTravelTime();
 }
+#endif // 0
 
 /*! \brief \returns the duration of the path.  */
-double duration() const {
+double duration() const;
+#if 0
+{
     assert(size());
     return last().duration();
 }
+#endif // 0
 
 /*! \brief \returns the total wait time of the path.  */
-double totWaitTime() const {
+double totWaitTime() const;
+#if 0
+{
     assert(size());
     return last().totWaitTime();
 }
+#endif // 0
 
 /*! \brief \returns the total service time of the path */
-double totServiceTime() const {
+double totServiceTime() const;
+#if 0
+{
     assert(size());
     return last().totServiceTime();
 }
+#endif // 0
 
 /*! \brief \returns the total number of dump visits of the path. */
-int dumpVisits() const {
+int dumpVisits() const;
+#if 0
+{
     assert(size());
     return last().dumpVisits();
 }
+#endif // 0
 
 /*! \brief \returns the departure time of the last node in the path. */
-double departureTime() const {
+double departureTime() const;
+#if 0
+{
     assert(size());
     return last().departureTime();
 }
+#endif // 0
 
 /*! \brief \returns the total number of time window violations in the path.  */
-int twvTot() const {
+int twvTot() const;
+#if 0
+{
     assert(size());
     return last().twvTot();
 }
+#endif // 0
 
 /*! \brief \returns the total number of capacity violations in the path. */
-int cvTot() const {
+int cvTot() const;
+#if 0
+{
     assert(size());
     return last().cvTot();
 }
+#endif // 0
 
 /*! \brief \returns the total cargo at the end of the path. */
-double cargo() const {
+double cargo() const;
+#if 0
+{
     assert(size());
     return last().cargo();
 }
+#endif // 0
 
 /*! \brief True when \b last node of path is feasable. */
-bool feasable() const {
+bool feasable() const;
+#if 0
+{
     assert(size());
     return last().feasable();
 }
+#endif // 0
 
 /*! \brief True when \b last node of path is feasable. */
-bool feasable(double cargoLimit) const {
+bool feasable(double cargoLimit) const;
+#if 0
+{
     assert(size());
     return last().feasable(cargoLimit);
 }
+#endif // 0
 
 /*! \brief True when \b last node of path has time window violation. */
-bool has_twv() const {
+bool has_twv() const;
+#if 0
+{
     assert(size());
     return last().has_twv();
 }
+#endif // 0
 
 /*! \brief True when \b last node of path has capacity violation. */
-bool has_cv(double cargoLimit) const {
+bool has_cv(double cargoLimit) const;
+#if 0
+{
     assert(size());
     return last().has_cv(cargoLimit);
 }
+#endif // 0
 ///@}
 
 // ---------- ID based tools  to NID tools ---------------------------
@@ -1027,12 +1002,14 @@ bool has_cv(double cargoLimit) const {
  * \return The internal node id or -1 if user id was not found.
  * \todo TODO  put it in twc
  */
-auto getNidFromId(int64_t id) const {
+UID getNidFromId(int64_t id) const;
+#if 0
+{
 
     return std::find_if(path.begin(), path.end(),
             [&id](const auto &item) {
-        return item.id() == id;
-        })->nid();
+            return item.id() == id;
+            })->nid();
 
 #if 0
     const_reverse_iterator rit = path.rbegin();
@@ -1046,6 +1023,7 @@ auto getNidFromId(int64_t id) const {
     return 0;
 #endif
 }
+#endif // 0
 
 
 /*!  * \brief Get the position in the path where id is located.
@@ -1053,12 +1031,13 @@ auto getNidFromId(int64_t id) const {
  * \param[in] id The user id for the node.
  * \return The position in the path or -1 if it is not found.
  */
-auto posFromId(int64_t id) const {
-
+POS posFromId(int64_t id) const;
+#if 0
+{
     return std::find_if(path.begin(), path.end(),
             [&id](const auto &item) {
-        return item.id() == id;
-        }) - path.begin();
+            return item.id() == id;
+            }) - path.begin();
 
 #if 0
     for ( const_iterator it = path.begin(); it != path.end() ; it++ ) {
@@ -1068,31 +1047,45 @@ auto posFromId(int64_t id) const {
     return 0;
 #endif
 }
+#endif // 0
 
 
 /*! @name  position
   Gets the position of node in the bucket
   */
 ///@{
+#if 1
 /*!
  * \brief Get the position of node in the path
  * \param[in] node A node object that we want to locate in the path
  * \return returns the position of node in the path or 0 if it's not found.
  * \warning, if the position is 0, the user has to make sure it belongs to the bucket
  */
-POS pos(const knode &node) const {return position(node.nid());}
+POS pos(const Trashnode &node) const;
+#if 0
+{return pos(node.nid());}
+#endif // 0
 
 /*!
  * \brief Get the position of node id in the path
  * \param[in] nid The node id we want to locate in the path
  * \return The position of node id in the path or -1 if it's not found.
  */
-POS pos(UID nid) const {
+POS pos(UID nid) const;
+#if 0
+{
+    return std::find_if(path.begin(), path.end(),
+            [&nid](const auto &item) {
+            return item.nid() == nid;
+            }) - path.begin();
+#if 0
     for ( const_iterator it = path.begin(); it != path.end() ; it++ ) {
         if ( it->nid() == nid ) return POS( it - path.begin() );
     }
     return 0;
+#endif
 }
+#endif  // USE
 ///@}
 
 
@@ -1123,15 +1116,20 @@ void swap(POS i, POS j) {
  * \param[in] b2_pos Position of node in bucket2
  * \return true
  */
-bool swap(POS b1_pos, TwBucket<knode> &bucket2, POS b2_pos) {
+bool swap(POS b1_pos, TwBucket &bucket2, POS b2_pos);
+#if 0
+{
     assert(b1_pos < size() && b2_pos < bucket2.size());
     std::iter_swap(path.begin() + b1_pos, bucket2.path.begin() + b2_pos);
     return true;
 }
+#endif // 0
 
 
 /*!  \brief Move node fromi to the new position of toj in this TwBucket */
-void move(int fromi, int toj) {
+void move(int fromi, int toj);
+#if 0
+{
     if ( fromi == toj ) return;
 
     if ( fromi < toj ) {
@@ -1142,6 +1140,7 @@ void move(int fromi, int toj) {
         erase(fromi + 1);
     }
 }
+#endif // 0
 ///@}
 
 
@@ -1149,14 +1148,17 @@ void move(int fromi, int toj) {
 
  * \return A deque of the nids in the path.
  */
-std::deque<int> getpath() const {
+std::deque<int> getpath() const;
+#if 0
+{
     std::deque<int> p;
 
-    for ( const_iterator it = path.begin(); it != path.end(); it++ )
-        p.push_back(it->nid());
+    for (const auto e: path)
+        p.push_back(e.nid());
 
     return p;
 }
+#endif // 0
 
 
 /*! @name   deque like functions
@@ -1169,17 +1171,22 @@ std::deque<int> getpath() const {
  * \param[in] atPos The position it should be inserted at
  * \param[in] node The node to insert
  */
-bool insert(const knode &node, POS atPos) {
+bool insert(const Trashnode &node, POS atPos);
+#if 0
+{
     assert(atPos <= path.size());
     path.insert(path.begin() + atPos, node);
     return true;
 }
+#endif // 0
 
 /*! \brief Insert node into deque
  * \param[in] atPos The position it should be inserted at
  * \param[in] node The node to insert
  */
-bool insert(const TwBucket<knode> &nodes, POS atPos) {
+bool insert(const TwBucket &nodes, POS atPos);
+#if 0
+{
     assert(atPos <= path.size());
     for (UINT i = 0; i < nodes.size(); i++) {
         path.insert(path.begin() + atPos + i, nodes[i]);
@@ -1187,21 +1194,27 @@ bool insert(const TwBucket<knode> &nodes, POS atPos) {
     return true;
 }
 
+#endif // 0
 
 /*! \brief Erase the node from deque at location atPos
  * \param[in] atPos The position of the node to be erased.
  */
-bool erase(POS atPos) {
+bool erase(POS atPos);
+#if 0
+{
     assert(atPos < path.size());
     path.erase(path.begin() + atPos);
     return true;
 }
+#endif // 0
 
 
 /* \brief Erase node from within the path.
  * \param[in] node The node to be erased.
  */
-void erase(const knode &node) {
+void erase(const Trashnode &node);
+#if 0
+{
 
     path.erase(
             std::remove_if(
@@ -1220,26 +1233,24 @@ void erase(const knode &node) {
     return true;
 #endif
 }
+#endif // 0
 
 
+#ifdef USE
 /*!  * \brief Erase all nodes between fromPos and toPos.
 
   \param[in] fromPos Position of the start of the range to be erased.
   \param[in] toPos Position of the last in the range to be erased.
 
-  <<<<<<< HEAD
-  \warning Notice that the right side of the range is not included 
-  when  ( fromPos < toPos )  range erased: [fromPos,toPos)
-  when  ( fromPos > toPos )  range erased: [toPos,fromPos)
-  =======
   \warning Notice that the right side of the range is not included
   when  ( fromPos < toPos )  range erased: [fromPos,toPos)
   when  ( fromPos > toPos )  range erased: [toPos,fromPos)
-  >>>>>>> origin/right-side-montevideo
 
   \warning If fromPos and toPos are reversed it will still erase the range.
   */
-bool erase(POS fromPos, POS toPos) {
+bool erase(POS fromPos, POS toPos);
+#if 0
+{
     assert(fromPos < path.size());
     assert(toPos < path.size());
 
@@ -1253,15 +1264,23 @@ bool erase(POS fromPos, POS toPos) {
         }
     }
 }
+#endif // 0
+#endif  //USE
 
-bool push_back(const knode &node) {
+bool push_back(const Trashnode &node);
+#if 0
+{
     path.push_back(node);
     return true;
 }
-bool push_front(const knode &node) {
+#endif // 0
+bool push_front(const Trashnode &node);
+#if 0
+{
     path.push_front(node);
     return true;
 }
+#endif // 0
 auto begin() {return path.begin();}
 auto end() {return path.begin();}
 void pop_back() {path.pop_back();}
@@ -1275,28 +1294,37 @@ void clear() {path.clear();}
 size_t max_size() const {return path.max_size();}
 size_t size() const {return path.size();}
 bool empty() const {return path.empty();}
-std::deque<knode>& Path() {return path;}
-const std::deque<knode>& Path() const  {return path;}
-knode& operator[](POS at) {
+std::deque<Trashnode>& Path() {return path;}
+const std::deque<Trashnode>& Path() const  {return path;}
+Trashnode& operator[](POS at) {
     assert(at < path.size());
     return path[at];
 }
-const knode& operator[] (POS at) const {
+const Trashnode& operator[] (POS at) const;
+#if 0
+{
     assert(at < path.size());
     return path[at];
 }
-knode& at(POS pos) {
+#endif // 0
+Trashnode& at(POS pos);
+#if 0
+{
     assert(pos < path.size());
     return path.at(pos);
 }
-const knode& at(POS pos) const  {
+#endif // 0
+const Trashnode& at(POS pos) const;
+#if 0
+{
     assert(pos < path.size());
     return path.at( pos );
 }
-knode& front() {return path.front();}
-const knode& front() const {return path.front();}
-knode &back() {return path.back();}
-const knode& back() const {return path.back();}
+#endif // 0
+Trashnode& front() {return path.front();}
+const Trashnode& front() const {return path.front();}
+Trashnode &back() {return path.back();}
+const Trashnode& back() const {return path.back();}
 ///@}
 };
 

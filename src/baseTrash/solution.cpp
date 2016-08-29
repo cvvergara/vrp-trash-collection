@@ -633,14 +633,14 @@ Solution::Solution( const std::string &infile,
 
   int nid, vid;
   Vehicle truck;
-  Bucket unassigned = pickups;
-  Bucket assigned;
+  TwBucket unassigned = pickups;
+  TwBucket assigned;
   bool idSol = true;
 
   if ( sol[0] == -2 ) idSol = false;
 
   fleet.clear();
-  Bucket solPath;
+  TwBucket solPath;
 
   UINT i = 1;
 

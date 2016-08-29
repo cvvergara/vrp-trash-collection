@@ -20,20 +20,21 @@
 
 
 #include "baseClasses/basictypes.h"
+#include "baseClasses/twbucket.h"
 #include "baseClasses/twpath.h"
 #include "nodes/trashnode.h"
 #include "baseClasses/twc.h"
 #include "baseClasses/pg_types_vrp.h"
 
+using namespace vrptc;
+using namespace vrptc::nodes;
 
 class BaseVehicle
 {
-public:
-  typedef  TwBucket<Trashnode> Bucket;
 
 protected:
   int vid;
-  Twpath<Trashnode> path;
+  Twpath path;
   Trashnode depot; //just for keeps
   Trashnode dumpSite;
   Trashnode endingSite;
@@ -64,16 +65,16 @@ class Comptrips {
   void e_add_trip(const BaseVehicle &trip);
 
   bool isvalid() const {return vid >= 0;}  // more complicated than this
-  bool findNearestNodeTo(Bucket &unassigned, POS &pos, Trashnode &bestNode);
-  bool findFastestNodeTo(bool first, Bucket &unassigned, POS &pos, Trashnode &bestNode, double &bestTime);
-  bool e_setPath(const Bucket &sol);
+  bool findNearestNodeTo(TwBucket &unassigned, POS &pos, Trashnode &bestNode);
+  bool findFastestNodeTo(bool first, TwBucket &unassigned, POS &pos, Trashnode &bestNode, double &bestTime);
+  bool e_setPath(const TwBucket &sol);
   void setTravelingTimesOfRoute() const;
   bool findPairNodesHasMoreNodesOnPath(
-    const TwBucket<Trashnode> &assigned, const TwBucket<Trashnode> &unassigned,
-    UINT &bestFrom, UINT &bestTo, TwBucket<Trashnode> &subPath);
+    const TwBucket &assigned, const TwBucket &unassigned,
+    UINT &bestFrom, UINT &bestTo, TwBucket &subPath);
   bool findNodeHasMoreNodesOnPath(
-    const TwBucket<Trashnode> &assigned, const TwBucket<Trashnode> &unassigned,
-    UINT &bestNode, UINT &bestPos, TwBucket<Trashnode> &subPath);
+    const TwBucket &assigned, const TwBucket &unassigned,
+    UINT &bestNode, UINT &bestPos, TwBucket &subPath);
   bool e_adjustDumpsToNoCV(int currentPos);
 
   //--------------------------------------------------------------------
@@ -95,16 +96,16 @@ class Comptrips {
 
   BaseVehicle(int vid, int start_id, int dump_id, int _nd_id,
               double capacity, double dumpservicetime, double starttime,
-              double endtime, const Bucket &otherlocs);
-  BaseVehicle(const std::string &line, const Bucket &otherlocs);
+              double endtime, const TwBucket &otherlocs);
+  BaseVehicle(const std::string &line, const TwBucket &otherlocs);
 
 
   //--------------------------------------------------------------------
   // accessors
   //--------------------------------------------------------------------
 
-  Twpath<Trashnode> getvpath() const { return path; }
-  Twpath<Trashnode> &getvpath() { return path; }
+  Twpath getvpath() const { return path; }
+  Twpath &getvpath() { return path; }
   std::deque<int> getpath() const;
   UINT size() const { return path.size(); }
   double getmaxcapacity() const { return maxcapacity; }
@@ -211,7 +212,7 @@ class Comptrips {
   // I really hate these shortcuts & I love them but I'll think about them really hard
   //----------------------------------------------------------------
 
-  Bucket  Path() const { return path; }
+  TwBucket  Path() const { return path; }
   inline int nid(int i) const { return path[i].nid(); }
   inline int id(int i) const { return path[i].id(); }
   inline double x(const int i) const { return path[i].x(); }
@@ -226,7 +227,7 @@ class Comptrips {
   bool isPickup(int i) const { return path[i].isPickup(); }
   bool isDepot(int i) const { return path[i].isDepot(); }
   bool cargo(int i) const { return path[i].cargo(); }
-  bool insert(const TwBucket<Trashnode> &nodes, POS atPos) {
+  bool insert(const TwBucket &nodes, POS atPos) {
     return path.insert(nodes, atPos);
   }
   void e_clean() {

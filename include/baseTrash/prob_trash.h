@@ -28,11 +28,14 @@
 #include "baseClasses/twc.h"
 #include "nodes/phantomnode.h"
 
+using namespace vrptc;
+using namespace vrptc::nodes;
+
+
 class Prob_trash {
 
 // Children class can acces to protected!
 protected:
-  typedef TwBucket<Trashnode> Bucket;
   typedef unsigned long int UID;
   typedef unsigned long int POS;
   typedef unsigned long int UINT;
@@ -40,14 +43,14 @@ protected:
   inline double _MIN() {return (-std::numeric_limits<double>::max()); }
 
   //    Trashnode depot;
-  Twpath<Trashnode> datanodes;              ///< Pickups + otherlocs ()
-  Bucket otherlocs;                         ///< Dumps and depts information.
-  Bucket dumps;                             ///< Dumps sites.
-  Bucket depots;                            ///< PahntomNode information for pickups. UID is the id of pickups nodes.
-  Bucket pickups;                           ///< Clients. Containers.
+  Twpath datanodes;              ///< Pickups + otherlocs ()
+  TwBucket otherlocs;                         ///< Dumps and depts information.
+  TwBucket dumps;                             ///< Dumps sites.
+  TwBucket depots;                            ///< PahntomNode information for pickups. UID is the id of pickups nodes.
+  TwBucket pickups;                           ///< Clients. Containers.
   std::map<UID,PhantomNode> phantomNodes;   ///< PahntomNode information for pickups. UID is the id of pickups nodes.
-  Bucket endings;
-  Bucket invalid;
+  TwBucket endings;
+  TwBucket invalid;
   std::deque<Vehicle> trucks;               ///< Veihcles information
   std::deque<Vehicle> invalidTrucks;
   Trashnode C;                              ///< Nodo que tiene valores medios de coordenadas cargadas

@@ -77,7 +77,7 @@ double serviceE() const;
   };
 
 
-  CostVehicle( std::string line, const Bucket &otherlocs )
+  CostVehicle( std::string line, const TwBucket &otherlocs )
     : BaseVehicle( line, otherlocs ),
       ttSC(0.0), ttDC(0.0), ttCD(0.0), ttDE(0.0), ttCC(0.0),
       realttSC(0.0), realttDC(0.0), realttCD(0.0), realttDE(0.0), realttCC(0.0),
@@ -95,7 +95,7 @@ double serviceE() const;
 
   CostVehicle( int _vid, int _start_id, int _dump_id, int _end_id,
                double _capacity, double _dumpservicetime, double _starttime,
-               double _endtime, const Bucket &otherlocs )
+               double _endtime, const TwBucket &otherlocs )
     : BaseVehicle( _vid, _start_id, _dump_id, _end_id,
                    _capacity, _dumpservicetime, _starttime,
                    _endtime, otherlocs ) {
@@ -128,7 +128,7 @@ double serviceE() const;
   int getz2() const {return realz2;};
   int getn() const {return n;};
 
-  void setInitialValues( const Trashnode &node, const Bucket &picks );
+  void setInitialValues( const Trashnode &node, const TwBucket &picks );
   void setCost(const Trashnode &last);
   double getDeltaCost( double deltaTravelTime, int deltan ) ;
 

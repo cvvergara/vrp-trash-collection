@@ -17,6 +17,8 @@
 
 #include "nodes/tweval.h"
 #include "baseClasses/logger.h"
+#include "baseClasses/vrp_assert.h"
+#include "baseClasses/twc.h"
 
 namespace vrptc {
 namespace nodes {
