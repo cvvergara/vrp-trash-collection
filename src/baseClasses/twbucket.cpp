@@ -29,21 +29,6 @@
 class Prob_trash;
 
 
-/*! \class TwBucket
- * \brief A template class that provides deque like container with lots of additional functionality.
- *
- * TwBucket provides a set like container. It is used by \ref Twpath for
- * storage. It also provides several un-evaluated path operations. None of
- * the manipulation at this level is evaluated.
- *
- * The class provides:
- * - basic deque container like operations
- * - set operations
- * - node id based tools of the bucket/path
- * - position based tools of the bucket/path
- * - other tools
-*/
-
 
 
 using namespace vrptc ;
@@ -51,13 +36,6 @@ using namespace vrptc::nodes;
 
 
 
-/*!
-  \param[in] prev:   prev node
- * \param[in] from:   from node
- * \param[in] middle: middle node
- * \param[in] to:     to node
- * \param[in] travelTimePrevFrom:   travel time from "prev" to "from" nodes
- */
 double  
 TwBucket::timePCN(const Trashnode &prev, const Trashnode &from, const Trashnode &middle,
         const Trashnode &to, double travelTimePrevFrom) const
@@ -95,25 +73,6 @@ TwBucket::timePCN(const Trashnode &prev, const Trashnode &from, const Trashnode 
     return arrive_to - depart_from;
 }
 
-/*! @name timePCN = time previous-current-next 
-  simulates the following order of nodes in the path: 
-  prev from middle to
- *
- * \return  the time that takes to depart from "from" and arrive to "to" passing thru "middle"
- *
- * \return  ttfm + serv(m) + ttmt = arrivalTime(next) - departureTime(prev) when passing thru curr
- * \return infinity              if there is a TWV (time window violation)
- *
- * use when:
- prev from   is a section of the path and "prev" is the previous node of "from"
- from from   there is no previous container of from
-
- A private function does all the work
- the other ones are variations on the parameters
- */
-///@{
-
-/*! \brief  the 3 nodes belong to the path */
 double  
 TwBucket::timePCN(POS from, POS middle, POS to) const
 {
@@ -130,7 +89,6 @@ TwBucket::timePCN(POS from, POS middle, POS to) const
                 path[from].travelTime());
 }
 
-/*! \brief  first 2 nodes belong to the path and the third doesnt */
 double 
 TwBucket::timePCN(POS from, POS middle, const Trashnode &dump) const
 {
@@ -145,7 +103,6 @@ TwBucket::timePCN(POS from, POS middle, const Trashnode &dump) const
                 path[from].travelTime());
 }
 
-/*! \brief  \from node belong to the path and \middle and \dump dont */
 double  
 TwBucket::timePCN(POS from, const Trashnode &middle, const Trashnode &dump) const
 {
@@ -158,13 +115,6 @@ TwBucket::timePCN(POS from, const Trashnode &middle, const Trashnode &dump) cons
                 path[from].travelTime());
 }
 
-/*! \brief  simulates a replacement of a node in the bucket
-
-  previous path:
-  from from+1 from+2
-  simulated path:
-  from middle from+2
-  */
 double 
 TwBucket::timePCN(POS from, const Trashnode &middle) const
 {
@@ -176,31 +126,13 @@ TwBucket::timePCN(POS from, const Trashnode &middle) const
         return timePCN(path[from - 1], path[from], middle , path[from + 2],
                 path[from].travelTime());
 }
-/*! \brief  simulates an insertion of two nodes a node at the end of the bucket
-  namely node and dump 
 
-  previous path:
-  last dump
-  simulated path:
-  last node dump
-  */
 double 
 TwBucket::timePCN(const Trashnode &node, const Trashnode &dump) const
 {
     Trashnode last = path[path.size() - 1];
     return timePCN(path.size()-1, node, dump);
 }
-///@}
-
-/*! @name TravelTime inline functions
-  \brief useful inlines to fetch the travel time from Node to Node
-
-  2 flavors:
-  parameters are nodes
-  parameters are node Nid (internal node id)
-  No need to be within the bucket
-  */
-///@{
 
 inline double 
 TwBucket::TravelTime(const Trashnode &from, const Trashnode &to) const
@@ -235,392 +167,7 @@ TwBucket::TravelTime(UID i, UID j, UID k, UID l) const
 {
     return twc.TravelTime(i, j, k, l);
 }
-///@}
 
-/*! @name getDeltaTime
- * Simulate changes of times within the path
- \todo TODO check it returns a delta
- */
-
-/*!
- * \brief Simulate changes in travel times within the path
- *
- * Simulates the following change of travelTimes within the path
- * - dump
- * - dump node dump2
- *
- * and checks for TWV and returns infinity if the occur at:
- * - node
- * - dump2
- *
- * \return \f$ tt_dump,node + service(node) + tt_node,dump + service(dump) \f$
- * \return infinity when there is a TWV
- */
-// NOT USED
-#if 0
-double 
-TwBucket::getDeltaTimeAfterDump(const Trashnode &dump, const Trashnode &node) const
-{
-    double nodeArrival = dump.getDepartureTime() + TravelTime(dump, node);
-
-    if ( node.lateArrival( nodeArrival) ) return VRP_MAX();
-
-    if ( node.earlyArrival(nodeArrival) ) nodeArrival = node.opens();
-
-    double dumpArrival =  nodeArrival + node.getServiceTime() +
-        TravelTime(node, dump);
-
-    if ( dump.lateArrival(dumpArrival) ) return VRP_MAX();
-
-    if ( dump.earlyArrival(dumpArrival) ) dumpArrival = dump.opens();
-
-    double delta = dumpArrival + dump.getServiceTime() -
-        dump.getDepartureTime();
-    return delta;
-}
-#endif
-
-/*!
- * \brief Compute the change in time when swapping nodes in pos1 and pos2
- *
- * Simulate swapping nodes in pos1 and pos2 in the path and compute
- * the delta time impact that would have on the path.
- *
- * \param[in] pos1 Position of the node to be swapped.
- * \param[in] pos2 Position of the other node to be swapped.
- * \return The delta time or infinity if if creates a path violation.
- */
-// NOT USED
-#if 0
-double 
-TwBucket::getDeltaTimeSwap(POS pos1, POS pos2) const
-{
-    assert(pos1 < path.size() - 1 && pos2 < path.size());
-#ifdef TESTED
-    DLOG(INFO) << "Entering twBucket::getDeltaTimeSwap()";
-#endif
-
-    double delta, oldTime, newTime;
-
-    // pos1 is the lowest
-    if ( pos1 > pos2 ) {int tmp = pos1; pos1 = pos2; pos2 = tmp;}
-
-    // special case nidPrev nid1 nid2 nidNext
-    if ( pos2 == pos1 + 1 ) {
-        // nids invloved
-        // in the same order the nodes are in the path
-        int nidPrev, nid1, nid2, nidNext;
-        nidPrev = path[pos1 - 1].nid();
-        nid1 = path[pos1].nid();
-        nid2 = path[pos2].nid();
-
-        if ( pos2 != size() ) nidNext = path[pos2 + 1].nid();
-
-        //                pos1-1  pos1  pos2  pos2+1
-        // newpath looks: nidPrev nid2 nid1, nidNext
-
-        // check for TWV
-        if ( path[pos1 - 1].getDepartureTime()
-                + TravelTime[nidPrev][nid2] > path[pos2].closes() )
-            return VRP_MAX();
-
-        if ( path[pos1 - 1].getDepartureTime()
-                + TravelTime[nidPrev][nid2] + path[pos1].getServiceTime()
-                + TravelTime[nid2][nid1] > path[pos1].closes() )
-            return VRP_MAX();
-
-        // locally we are ok...  no capacity Violations
-        // sum (services) remains constant
-        if ( pos2 + 1 == size() ) {
-            // newpath looks: nidPrev nid1 nid2,  DUMP in V
-            //                pos1-1  pos1  pos2  pos2+1
-            // newpath looks: nidPrev nid2 nid1,  DUMP in V
-            // delta = new - old
-            oldTime = path[pos2].getDepartureTime();
-            newTime = path[pos1 - 1].getDepartureTime()
-                + TravelTime[nidPrev][nid2] + TravelTime[nid2][nid1];
-            delta = oldTime - newTime;
-        } else {
-            // oldpath looks: nidPrev nid1 nid2,  nidNext
-            //                pos1-1  pos1  pos2  pos2+1
-            // newpath looks: nidPrev nid2 nid1,  nidNext
-
-            oldTime = path[pos2 + 1].getArrivalTime();
-            newTime = path[pos1 - 1].getDepartureTime()
-                + TravelTime[nidPrev][nid2]
-                + TravelTime[nid2][nid1]
-                + TravelTime[nid1][nidNext];
-            delta   =  oldTime - newTime;;
-        }
-
-        // check for TWV
-        if ( pos2 + 1 < size() && deltaGeneratesTV( delta, pos2 + 1 ) )
-            return VRP_MAX();
-
-        return delta;
-        // end of case when one node is after the other
-    }
-
-    // oldpath looks: nidPrev1 nid1 nidnext1    nidPrev2    nid2,  nidNext2
-    //                pos1-1  pos1  pos1+1      pos2-1      pos2    pos2+1
-    // newpath looks: nidPrev1 nid2 nidnext1    nidPrev2,   nid1,  nidNext2
-    double delta1 = getDeltaTime(path[pos2], pos1, pos1 + 1);
-    double delta2 = getDeltaTime(path[pos1], pos2, pos2 + 1);
-
-    // check if TWV is generated
-    if ((delta1 == VRP_MAX()) || (delta2 == VRP_MAX())) return VRP_MAX();
-
-    if ( deltaGeneratesTVupTo(delta1, pos1, pos2 - 1) ) return VRP_MAX();
-
-    if ( deltaGeneratesTV(delta1 + delta2, pos2 + 1) ) return VRP_MAX();
-
-    // simple checks for cargo Violation
-    if ((path[pos1].getdemand() == path[pos2].getdemand())
-            && !path[size() - 1].hascv())
-        return delta1 + delta2;
-
-    // check for cargo Violation Missing
-    // if there is no dump  on the path: return  delta1 + delta2
-
-    // if the share the same dump  return delta1 +delta2
-
-    return delta1 + delta2;
-}
-
-
-/*!
- * \brief Compute the change in time when swapping node with the node at pos
- *
- * If the current path looks like prev -\> pos -\> pos1 then compute the
- * the change in time of swapping node for the node at pos, so the new
- * path would look like prev -\> node -\> pos1
- *
- * \param[in] node The node to evaluate if swapped with node at pos.
- * \param[in] pos The position of the node to be swapped.
- * \param[in] pos1 The next node following pos.
- * \return The change in cost or infinity if a TWV would be generated.
- */
-// NOT USED
-double 
-TwBucket::getDeltaTime(const Trashnode &node, POS pos , POS pos1) const
-{
-    assert(pos1 <= path.size());
-    assert(pos > 0 && pos1 == (pos + 1));
-
-    if ( pos == 0 && path[pos].isdepot() ) return VRP_MAX();
-
-    int nid = path[pos].nid();
-    int prev = path[pos - 1].nid();
-
-    if ( path[pos - 1].getDepartureTime()
-            + TravelTime[prev][node.nid()] > node.closes() )
-        return VRP_MAX();
-
-    if ( pos1 == size() )
-        return  TravelTime[prev][node.nid()]
-            + node.getServiceTime()
-            - (path[pos].getDepartureTime()
-                    - path[pos - 1].getDepartureTime());
-
-    int next = path[pos1].nid();
-
-    double delta  =  TravelTime[prev][node.nid()]
-        + node.getServiceTime()
-        + TravelTime[node.nid()][next]
-        - (path[pos1].getArrivalTime()
-                - path[pos - 1].getDepartureTime());
-    return delta;
-}
-
-/*!
- * \brief Compute the change in time when swapping node into pos in the path and do additional time violation checks.
- *
- * If the current path looks like prev -\> pos -\> pos1 then compute the
- * the change in time of swapping node for the node at pos, so the new
- * path would look like prev -\> node -\> pos1
- *
- * \param[in] node The node to evaluate if swapped with node at pos.
- * \param[in] pos The position of the node to be swapped.
- * \param[in] pos1 The next node following pos.
- * \return The change in cost or infinity if a TWV would be generated.
- */
-double 
-TwBucket::getDeltaTimeTVcheck(const Trashnode &node, POS pos, POS pos1) const
-{
-    assert(pos1 <= path.size());
-    assert(pos > 0 && pos1 == (pos + 1));
-
-    double delta = getDeltaTime(node, pos, pos1);
-
-    if ((path[pos - 1].getDepartureTime() + TravelTime[ path[pos - 1].nid() ] [node.nid() ])
-            > node.closes()) 
-        return VRP_MAX();
-
-    if (pos == size()) return delta;
-
-    if (deltaGeneratesTV( delta, pos1 )) return VRP_MAX();
-
-    return delta;
-}
-
-
-/*!
- * \brief Compute the change in time of inserting node before pos in the path.
- *
- * Simulate inserting node before pos in the path and compute the resulting
- * change in time. No TW violations are checked.
- *
- * \param[in] node The node to be inserted in the simulation.
- * \param[in] pos The position before which the node will be inserted.
- * \return The change in travel time or infinity if the move is invalid.
- */
-double  
-TwBucket::getDeltaTime(const Trashnode &node, POS pos) const
-{
-    assert(pos < path.size());
-
-    if ( pos == 0 || path[pos].isDepot() ) return VRP_MAX();
-
-    int nid = path[pos].nid();
-    int prev = path[pos - 1].nid();
-
-    if ( pos == size() )
-        return  TravelTime(prev, node.nid()) + node.getServiceTime();
-
-    return TravelTime(prev, node.nid())
-        + node.getServiceTime()
-        + TravelTime(node.nid(), nid)
-        - TravelTime(prev, nid);
-}
-#endif
-
-
-/*!
- * \brief Compute the change in time of inserting node before pos in the path and check for TW violations..
- *
- * Simulate inserting node before pos in the path and compute the resulting
- * change in time and check for TW violations.
- *
- * \param[in] node The node to be inserted in the simulation.
- * \param[in] pos The position before which the node will be inserted.
- * \return The change in travel time or infinity if the move is invalid.
- */
-// NOT USED
-#if 0
-double  getDeltaTimeTVcheck(const Trashnode &node, POS pos) const;
-{
-    assert(pos <= path.size());
-    assert(pos > 0);
-
-    double delta = getDeltaTime(node, pos);
-
-    // check for TWV
-    if ( path[pos - 1].getDepartureTime()
-            + TravelTime[ path[pos - 1].nid() ][ node.nid()]
-            > node.closes() ) return VRP_MAX();
-
-    if ( pos == size() ) return delta;
-
-    // check for TWV
-    if ( deltaGeneratesTV( delta, pos ) ) return VRP_MAX();
-
-    return delta;
-
-    double delta  =  TravelTime[prev][node.nid()]
-        + node.getServiceTime()
-        + TravelTime[node.nid()][next]
-        - (path[pos1].getArrivalTime()
-                - path[pos - 1].getDepartureTime());
-    return delta;
-}
-
-/*!
- * \brief Compute the change in time when swapping node into pos in the path and do additional time violation checks.
- *
- * If the current path looks like prev -\> pos -\> pos1 then compute the
- * the change in time of swapping node for the node at pos, so the new
- * path would look like prev -\> node -\> pos1
- *
- * \param[in] node The node to evaluate if swapped with node at pos.
- * \param[in] pos The position of the node to be swapped.
- * \param[in] pos1 The next node following pos.
- * \return The change in cost or infinity if a TWV would be generated.
- */
-double 
-TwBucket::getDeltaTimeTVcheck(const Trashnode &node, POS pos, POS pos1) const
-{
-    assert(pos1 <= path.size());
-    assert(pos > 0 && pos1 == (pos + 1));
-
-    double delta = getDeltaTime(node, pos, pos1);
-
-    if ((path[pos - 1].getDepartureTime() + TravelTime[ path[pos - 1].nid() ] [node.nid() ])
-            > node.closes())
-        return VRP_MAX();
-
-    if (pos == size()) return delta;
-
-    if (deltaGeneratesTV( delta, pos1 )) return VRP_MAX();
-
-    return delta;
-}
-
-
-
-/*!
- * \brief Check all nodes from pos to upto if adding delta would cause a violation.
- *
- * \param[in] delta The change in time to evaluate.
- * \param[in] pos The position to start evaluating.
- * \param[in] upto The position to stop evaluating.
- * \return true if delta would generate a time violation.
- */
-bool 
-TwBucket::deltaGeneratesTVupTo(double delta, POS pos, POS upto) const
-{
-    assert(pos < path.size() && upto < size() && pos <= upto);
-    bool flag = false;
-
-    // checking if the delta affects any node after it
-    for ( POS i = pos; i <= upto; i++ )
-        if ( path[i].getArrivalTime() + delta > path[i].closes() ) {
-            flag = true;
-            break;
-        }
-
-    return flag;
-}
-
-/*!
- * \brief Check all nodes forward from pos if adding delta would cause a violation.
- *
- * \param[in] delta The change in time to evaluate.
- * \param[in] pos The position to start evaluating.
- * \return true if delta would generate a time violation.
- */
-// NOT USED
-bool 
-TwBucket::deltaGeneratesTV(double delta, POS pos) const
-{
-    if (pos < size())
-        return  deltaGeneratesTVupTo(delta, pos, size() - 1);
-    else
-        return false;
-}
-#endif // 0
-///@}
-
-// ---------------- other tools ----------------------------------
-
-/*! \brief \returns the distance from a point to the segmnet (\b pos, \b pos+1)
-
-  \warning assert(pos + 1 < path.size());
-  \warning assert(path.size() > 1);
-
-  \param[in] pos Position of start of segment.
-  \param[in] node The node to compute the distance to.
-  \return The shortest distance from node to line segment.
-  */
 double 
 TwBucket::segmentDistanceToPoint(POS pos, const Trashnode &node) const
 {
@@ -631,21 +178,6 @@ TwBucket::segmentDistanceToPoint(POS pos, const Trashnode &node) const
 
 
 #ifdef DOVRPLOG
-/*! @name Dumping
-  \brief Print the contents of the Twbucket
-  */
-///@{
-/*! \brief Using id as node identifiers with title "Twbucket". */
-#if 0
-void 
-TwBucket::dumpid() const {dumpid("Twbucket");}
-#endif
-
-
-/*! \brief Using id as node identifiers with user defined title.
-
- * \param[in] title Title to print with the output of the Twbucket.
- */
 void 
 TwBucket::dumpid(const std::string &title) const
 {
@@ -655,15 +187,7 @@ TwBucket::dumpid(const std::string &title) const
     DLOG(INFO) << ss.str();
 }
 
-#if 0
-/*! \brief Using nid as node identifiers with title "Twbucket".  */
-void 
-TwBucket::dump() const {dump("Twbucket");}
-#endif
 
-/*! \brief Using nid as node identifiers with title "Twbucket".  
- * \param[in] title Title to print with the output of the Twbucket.
- */
 void 
 TwBucket::dump(const std::string &title) const
 {
@@ -675,18 +199,11 @@ TwBucket::dump(const std::string &title) const
 ///@}
 
 
-/*! @name hasId
-
-  \return true if a node with the same id is in the bucket.
-  */
-///@{
-/*! \brief \param[in] node uses the \b id of the node*/
 bool 
 TwBucket::hasId(const Trashnode &node) const
 {
     return hasId(node.id());
 }
-/*! \brief \param[in] id Uses the \b id */
 
 bool 
 TwBucket::hasId(int64_t id) const
@@ -696,33 +213,12 @@ TwBucket::hasId(int64_t id) const
             return item.id() == id;
             }) != path.end();
 
-
-#if 0
-    const_reverse_iterator rit = path.rbegin();
-
-    for (const_iterator it = path.begin(); it != path.end() ; it++, ++rit) {
-        if ( it->id() == id ) return true;
-        if ( rit->id() == id ) return true;
-    }
-
-    return false;
-#endif
 }
-///@}
-
-
-/*! @name hasNId
-
-  \return true if a node with the same nid was found in the bucket.
-  */
-///@{
-/*! \brief \param[in] node uses the \b nid of the node*/
 bool 
 TwBucket::hasNid(const Trashnode &node) const
 {
     return hasNid(node.nid());
 }
-/*! \brief \param[in] id Uses the \b nid */
 bool 
 TwBucket::hasNid(UID nid) const
 {
@@ -733,22 +229,7 @@ TwBucket::hasNid(UID nid) const
                 {return e.nid() == nid;})
             ==  path.end());
 
-#if 0
-    const_reverse_iterator rit = path.rbegin();
-
-    for (const_iterator it = path.begin(); it != path.end() ; it++, ++rit) {
-        if ( it->nid() == nid ) return true;
-        if ( rit->nid() == nid ) return true;
-    }
-    return false;
-#endif
 }
-///@}
-
-
-/*! @name Set operations based on the internal node id (nid) */
-///@{
-/*!  * \brief True when \b this buckets is equal to the \b other bucket. */
 bool 
 TwBucket::operator ==(const TwBucket &other) const
 {
@@ -764,7 +245,6 @@ TwBucket::operator ==(const TwBucket &other) const
 }
 
 
-/*! \brief Returns \b this  UNION \b other .  */
 TwBucket  
 TwBucket::operator +(const TwBucket &other) const
 {
@@ -776,9 +256,7 @@ TwBucket::operator +(const TwBucket &other) const
     return b;
 }
 
-/*! \brief Returns \b this INTERSECTION \b other .  */
 TwBucket 
-TwBucket::
 TwBucket::operator *(const TwBucket &other) const
 {
     std::set<Trashnode, compNode> s1;
@@ -793,7 +271,6 @@ TwBucket::operator *(const TwBucket &other) const
     return b;
 }
 
-/*! \brief Returns \b this DIFFERENCE \b other .  */
 TwBucket 
 TwBucket::operator -(const TwBucket &other) const
 {
@@ -808,13 +285,6 @@ TwBucket::operator -(const TwBucket &other) const
     b.path.insert(b.path.begin(), diff.begin(), diff.end());
     return b;
 }
-///@}
-
-
-/*! @name End of Path tools
-  The end of the path is the \b last node of the path
-  */
-///@{
 const Trashnode& 
 TwBucket::last() const
 {
@@ -822,7 +292,6 @@ TwBucket::last() const
     return  path[size() - 1];
 }
 
-/*! \brief \returns the total travel time of the path.  */
 double 
 TwBucket::getTotTravelTime() const
 {
@@ -830,7 +299,6 @@ TwBucket::getTotTravelTime() const
     return last().totTravelTime();
 }
 
-/*! \brief \returns the duration of the path.  */
 double 
 TwBucket::duration() const
 {
@@ -838,7 +306,6 @@ TwBucket::duration() const
     return last().duration();
 }
 
-/*! \brief \returns the total wait time of the path.  */
 double 
 TwBucket::totWaitTime() const
 {
@@ -846,7 +313,6 @@ TwBucket::totWaitTime() const
     return last().totWaitTime();
 }
 
-/*! \brief \returns the total service time of the path */
 double 
 TwBucket::totServiceTime() const
 {
@@ -854,7 +320,6 @@ TwBucket::totServiceTime() const
     return last().totServiceTime();
 }
 
-/*! \brief \returns the total number of dump visits of the path. */
 int 
 TwBucket::dumpVisits() const
 {
@@ -862,7 +327,6 @@ TwBucket::dumpVisits() const
     return last().dumpVisits();
 }
 
-/*! \brief \returns the departure time of the last node in the path. */
 double 
 TwBucket::departureTime() const
 {
@@ -870,7 +334,6 @@ TwBucket::departureTime() const
     return last().departureTime();
 }
 
-/*! \brief \returns the total number of time window violations in the path.  */
 int 
 TwBucket::twvTot() const
 {
@@ -878,7 +341,6 @@ TwBucket::twvTot() const
     return last().twvTot();
 }
 
-/*! \brief \returns the total number of capacity violations in the path. */
 int 
 TwBucket::cvTot() const
 {
@@ -886,7 +348,6 @@ TwBucket::cvTot() const
     return last().cvTot();
 }
 
-/*! \brief \returns the total cargo at the end of the path. */
 double 
 TwBucket::cargo() const
 {
@@ -894,7 +355,6 @@ TwBucket::cargo() const
     return last().cargo();
 }
 
-/*! \brief True when \b last node of path is feasable. */
 bool 
 TwBucket::feasable() const
 {
@@ -902,7 +362,6 @@ TwBucket::feasable() const
     return last().feasable();
 }
 
-/*! \brief True when \b last node of path is feasable. */
 bool 
 TwBucket::feasable(double cargoLimit) const
 {
@@ -910,7 +369,6 @@ TwBucket::feasable(double cargoLimit) const
     return last().feasable(cargoLimit);
 }
 
-/*! \brief True when \b last node of path has time window violation. */
 bool
 TwBucket::has_twv() const
 {
@@ -918,23 +376,12 @@ TwBucket::has_twv() const
     return last().has_twv();
 }
 
-/*! \brief True when \b last node of path has capacity violation. */
 bool 
 TwBucket::has_cv(double cargoLimit) const
 {
     assert(size());
     return last().has_cv(cargoLimit);
 }
-///@}
-
-// ---------- ID based tools  to NID tools ---------------------------
-
-/*!
- * \brief Get the internal node id associated with the user id.
- * \param[in] id The user id for the node.
- * \return The internal node id or -1 if user id was not found.
- * \todo TODO  put it in twc
- */
 UID 
 TwBucket::getNidFromId(int64_t id) const
 {
@@ -944,25 +391,8 @@ TwBucket::getNidFromId(int64_t id) const
             return item.id() == id;
             })->nid();
 
-#if 0
-    const_reverse_iterator rit = path.rbegin();
-
-    for (const_iterator it = path.begin(); it != path.end() ; it++, ++rit) {
-        if ( it->id() == id ) return it->nid();
-
-        if ( rit->id() == id ) return rit->nid();
-    }
-
-    return 0;
-#endif
 }
 
-
-/*!  * \brief Get the position in the path where id is located.
-
- * \param[in] id The user id for the node.
- * \return The position in the path or -1 if it is not found.
- */
 POS 
 TwBucket::posFromId(int64_t id) const
 {
@@ -971,36 +401,13 @@ TwBucket::posFromId(int64_t id) const
             return item.id() == id;
             }) - path.begin();
 
-#if 0
-    for ( const_iterator it = path.begin(); it != path.end() ; it++ ) {
-        if ( it->id() == id ) return POS(it - path.begin());
-    }
-
-    return 0;
-#endif
 }
 
 
-/*! @name  position
-  Gets the position of node in the bucket
-  */
-///@{
-#if 1
-/*!
- * \brief Get the position of node in the path
- * \param[in] node A node object that we want to locate in the path
- * \return returns the position of node in the path or 0 if it's not found.
- * \warning, if the position is 0, the user has to make sure it belongs to the bucket
- */
 POS 
 TwBucket::pos(const Trashnode &node) const
 {return pos(node.nid());}
 
-/*!
- * \brief Get the position of node id in the path
- * \param[in] nid The node id we want to locate in the path
- * \return The position of node id in the path or -1 if it's not found.
- */
 POS 
 TwBucket::pos(UID nid) const
 {
@@ -1008,45 +415,14 @@ TwBucket::pos(UID nid) const
             [&nid](const auto &item) {
             return item.nid() == nid;
             }) - path.begin();
-#if 0
-    for ( const_iterator it = path.begin(); it != path.end() ; it++ ) {
-        if ( it->nid() == nid ) return POS( it - path.begin() );
-    }
-    return 0;
-#endif
 }
-#endif  // USE
-///@}
 
 
-/*! @name  mutators
-
-  \warning No evaluation is done
-  */
-///@{
-/*! \brief  Both nodes are in the bucket
-
- * \param[in] i First node position to swap.
- * \param[in] j Second node position to swap.
- */
 void 
 TwBucket::swap(POS i, POS j) {
     std::iter_swap(this->path.begin() + i, this->path.begin() + j);
 }
 
-/*! \brief  other node is in other bucket
- *
- * Swap nodes nodes between two buckets
- * - bucket1.swap( b1_pos, bucket2, b2_pos );
- *
- * The node in position b1_pos of bucket1 will be swapped with the node
- * in position b2_pos of bucket2.
- *
- * \param[in] b1_pos Position of node in bucket1
- * \param[in] bucket2 other bucket
- * \param[in] b2_pos Position of node in bucket2
- * \return true
- */
 bool 
 TwBucket::swap(POS b1_pos, TwBucket &bucket2, POS b2_pos)
 {
@@ -1056,7 +432,6 @@ TwBucket::swap(POS b1_pos, TwBucket &bucket2, POS b2_pos)
 }
 
 
-/*!  \brief Move node fromi to the new position of toj in this TwBucket */
 void 
 TwBucket::move(int fromi, int toj)
 {
@@ -1070,13 +445,7 @@ TwBucket::move(int fromi, int toj)
         erase(fromi + 1);
     }
 }
-///@}
 
-
-/*! \brief Get a deque of nids that are in the path.
-
- * \return A deque of the nids in the path.
- */
 std::deque<int> 
 TwBucket::getpath() const
 {
@@ -1089,16 +458,6 @@ TwBucket::getpath() const
 }
 
 
-/*! @name   deque like functions
-  assertions added
-  Please refer to cpp deque documentation
-  \returns True when the operation was completed
-  */
-///@{
-/*! \brief Insert node into deque
- * \param[in] atPos The position it should be inserted at
- * \param[in] node The node to insert
- */
 bool 
 TwBucket::insert(const Trashnode &node, POS atPos)
 {
@@ -1107,10 +466,6 @@ TwBucket::insert(const Trashnode &node, POS atPos)
     return true;
 }
 
-/*! \brief Insert node into deque
- * \param[in] atPos The position it should be inserted at
- * \param[in] node The node to insert
- */
 bool 
 TwBucket::insert(const TwBucket &nodes, POS atPos)
 {
@@ -1122,9 +477,6 @@ TwBucket::insert(const TwBucket &nodes, POS atPos)
 }
 
 
-/*! \brief Erase the node from deque at location atPos
- * \param[in] atPos The position of the node to be erased.
- */
 bool 
 TwBucket::erase(POS atPos)
 {
@@ -1134,9 +486,6 @@ TwBucket::erase(POS atPos)
 }
 
 
-/* \brief Erase node from within the path.
- * \param[in] node The node to be erased.
- */
 void 
 TwBucket::erase(const Trashnode &node)
 {
@@ -1150,28 +499,10 @@ TwBucket::erase(const Trashnode &node)
                 }),
             path.end()
             );
-#if 0
-    if (!hasNid(node)) return false;
-    int atPos = pos(node.nid());
-    assert(atPos < path.size());
-    path.erase(path.begin() + atPos);
-    return true;
-#endif
 }
 
 
 #ifdef USE
-/*!  * \brief Erase all nodes between fromPos and toPos.
-
-  \param[in] fromPos Position of the start of the range to be erased.
-  \param[in] toPos Position of the last in the range to be erased.
-
-  \warning Notice that the right side of the range is not included
-  when  ( fromPos < toPos )  range erased: [fromPos,toPos)
-  when  ( fromPos > toPos )  range erased: [toPos,fromPos)
-
-  \warning If fromPos and toPos are reversed it will still erase the range.
-  */
 bool 
 TwBucket::erase(POS fromPos, POS toPos)
 {
@@ -1225,8 +556,3 @@ TwBucket::at(POS pos) const
     assert(pos < path.size());
     return path.at( pos );
 }
-///@}
-
-
-
-

@@ -610,6 +610,16 @@ TWC::process_pair_onPath(Trashnode from, Trashnode to) const
 
 
 #if 0
+        /* 
+         * a_du_rm_cl_1533
+         *
+         * real    5m50.977s
+         * user    5m48.698s
+         * sys     0m1.178s
+         *
+         * without this:
+         *
+         */
         DLOG(INFO) << from.id() << " --> " << to.id() << " distance: " << from.distanceToSquared(to);
         std::ostringstream os;
         for (const auto n : nodesOnPath.path) {
