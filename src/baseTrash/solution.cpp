@@ -165,7 +165,7 @@ void Solution::dumpSolutionForPg () const
               "\t" << results[i].deltatime <<
               "\t" << results[i].cargo << std::endl;
               */
-  auto mapPhantomNodes = twc->getPhantomNodes();
+  auto mapPhantomNodes = twc.getPhantomNodes();
 
   for ( UINT i = 0; i < fleet.size(); ++i ) {
     if ( fleet[i].size() <= 1 ) continue;

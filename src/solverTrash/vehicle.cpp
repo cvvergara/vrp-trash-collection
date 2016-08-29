@@ -53,7 +53,7 @@ double Vehicle1::timePCN( POS from, POS middle, POS to ) const
                path[from].departureTime();
 
     if ( dumpSite.lateArrival(path[from].departureTime()
-                              + twc->TravelTime(path[from], path[middle], dumpSite)))
+                              + twc.TravelTime(path[from], path[middle], dumpSite)))
       return VRP_MAX();
     else
       return path.timePCN(from, middle, dumpSite);
@@ -62,7 +62,7 @@ double Vehicle1::timePCN( POS from, POS middle, POS to ) const
       return path[to].arrivalTime() - path[from].departureTime();
 
     if ( path[to].lateArrival(path[from].departureTime()
-                              + twc->TravelTime(path[from], path[middle], path[to])) )
+                              + twc.TravelTime(path[from], path[middle], path[to])) )
       return VRP_MAX();
     else
       return path.timePCN( from, middle, to );
@@ -80,12 +80,12 @@ double Vehicle1::timePCN( POS from, Trashnode &middle ) const
 
   if ( (from + 2) == size() )
     if ( dumpSite.lateArrival(path[from].departureTime()
-                              + twc->TravelTime(path[from], middle, dumpSite)) )
+                              + twc.TravelTime(path[from], middle, dumpSite)) )
       return VRP_MAX();
     else
       return path.timePCN(from, middle, dumpSite);
   else if ( path[from + 2].lateArrival( path[from].departureTime() +
-                                        twc->TravelTime(path[from], middle, path[from + 2])) )
+                                        twc.TravelTime(path[from], middle, path[from + 2])) )
     return VRP_MAX();
   else
     return path.timePCN( from, middle );
@@ -103,7 +103,7 @@ void Vehicle1::intraTripOptimizationNoOsrm() {
 #if 0
   Bucket inPath, notInPath;
   for (UINT i = 1; i < trip.size()-1; ++i) {
-    if (twc->isInPath(trip[i-1], trip[i], trip[i+1])) {
+    if (twc.isInPath(trip[i-1], trip[i], trip[i+1])) {
       inPath.push_back(trip[i]);
     } else {
       notInPath.push_back(trip[i]);
@@ -123,9 +123,9 @@ void Vehicle1::intraTripOptimizationNoOsrm() {
     bestDelta = 9999999;
     int bestI=pos-1;
 
-    removeTime = twc->TravelTime(from, to) - twc->TravelTime(from, middle, to);
-    // DLOG(INFO) << trip[pos-1].id() << " " << node.id() << " " << trip[pos+1].id() << " from " << twc->TravelTime(from, middle, to);
-    // DLOG(INFO) << trip[pos].id() << " " << trip[pos+1].id() << "to" << twc->TravelTime(from, to);
+    removeTime = twc.TravelTime(from, to) - twc.TravelTime(from, middle, to);
+    // DLOG(INFO) << trip[pos-1].id() << " " << node.id() << " " << trip[pos+1].id() << " from " << twc.TravelTime(from, middle, to);
+    // DLOG(INFO) << trip[pos].id() << " " << trip[pos+1].id() << "to" << twc.TravelTime(from, to);
 
     // trip.tau("before erasing the last node");
     trip.e_remove(pos);
@@ -134,9 +134,9 @@ void Vehicle1::intraTripOptimizationNoOsrm() {
       UINT i_nid = trip[i].nid();
       UINT j_nid = trip[i+1].nid();
 
-      insertTime = twc->TravelTime(i_nid, middle, j_nid) - twc->TravelTime(i_nid, j_nid);
-      // DLOG(INFO) << trip[i].id() << " " << trip[i+1].id() << " from " << twc->TravelTime(i_nid, j_nid);
-      // DLOG(INFO) << trip[i].id() << " " << node.id() << " " << trip[i+1].id() << "  to" << twc->TravelTime(i_nid, middle, j_nid);
+      insertTime = twc.TravelTime(i_nid, middle, j_nid) - twc.TravelTime(i_nid, j_nid);
+      // DLOG(INFO) << trip[i].id() << " " << trip[i+1].id() << " from " << twc.TravelTime(i_nid, j_nid);
+      // DLOG(INFO) << trip[i].id() << " " << node.id() << " " << trip[i+1].id() << "  to" << twc.TravelTime(i_nid, middle, j_nid);
       // DLOG(INFO) << "remove " <<  removeTime << " insert: " << insertTime << " delta: "<< removeTime+insertTime;
       deltaTime = removeTime + insertTime;
       if (deltaTime < bestDelta) {

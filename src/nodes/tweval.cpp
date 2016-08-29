@@ -49,7 +49,7 @@ void Tweval::evaluate(double cargoLimit) {
   \param[in] cargoLimit The cargo limit of the vehicle.
  */
 void Tweval::evaluate(const Tweval &pred, double cargoLimit) {
-  travelTime_    = twc->TravelTime(pred.nid(), nid());
+  travelTime_    = twc.TravelTime(pred.nid(), nid());
   totTravelTime_ = pred.totTravelTime_ + travelTime_;
   arrivalTime_   = pred.departureTime_ + travelTime_;
   waitTime_      = earlyArrival(arrivalTime_) ? opens() - arrivalTime_ : 0;
@@ -92,7 +92,7 @@ void Tweval::evaluateOsrm(const Tweval &pred, double cargoLimit) {
 #endif
   // forcing a change on the matrix values so next evaluation without OSRM
   // gives the same result
-  twc->set_TravelTime(pred.nid(),nid(), (osrmi->getOsrmTime() - pred.totTravelTime_));
+  twc.set_TravelTime(pred.nid(),nid(), (osrmi->getOsrmTime() - pred.totTravelTime_));
   evaluate(pred, cargoLimit);
 }
 #endif
@@ -165,7 +165,7 @@ double Tweval::deltaGeneratesTWV(double deltaTime) const {
         and that the actual arrival time at \b other node was opens(other)
 */
 double Tweval::arrival_i_opens_j(const Tweval &other) const{
-  return  other.opens() + other.serviceTime() + twc->TravelTime(other.nid(), nid());
+  return  other.opens() + other.serviceTime() + twc.TravelTime(other.nid(), nid());
 }
 /*!
   The actual arrival time at \b This node,  given that:
@@ -173,7 +173,7 @@ double Tweval::arrival_i_opens_j(const Tweval &other) const{
       and that the actual arrival time at \b other node was opens(other)
 */
 double Tweval::arrival_i_closes_j(const Tweval &other) const {
-  return  other.closes() + other.serviceTime() + twc->TravelTime(other.nid(), nid());
+  return  other.closes() + other.serviceTime() + twc.TravelTime(other.nid(), nid());
 }
 
 /*! \todo \TODO
@@ -182,7 +182,7 @@ double Tweval::arrival_i_closes_j(const Tweval &other) const {
       and that the actual arrival time at \b other node is \b arrival
 */
 double Tweval::arrival_i_arrives_j(const Tweval &other, double arrival) const {
-  return  arrival + other.serviceTime() + twc->TravelTime(other.nid(), nid());
+  return  arrival + other.serviceTime() + twc.TravelTime(other.nid(), nid());
 }
 
 

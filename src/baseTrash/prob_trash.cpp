@@ -46,7 +46,7 @@ void Prob_trash::loadProblem(const std::string &infile)
         << datafile;
 
 
-    twc->emptiedTruck = false;
+    twc.emptiedTruck = false;
 
     load_pickups(datafile + ".containers.txt");
     load_otherlocs(datafile + ".otherlocs.txt");
@@ -89,7 +89,7 @@ void Prob_trash::loadProblem(const std::string &infile)
     datanodes = nodes;
 
 
-    twc->loadAndProcess_travelTimes(
+    twc.loadAndProcess_travelTimes(
             datafile + ".dmatrix-time.txt",
             datanodes,
             invalid);
@@ -97,14 +97,14 @@ void Prob_trash::loadProblem(const std::string &infile)
     load_trucks(datafile + ".vehicles.txt");
     
 
-    twc->setHints(dumps);
-    twc->setHints(nodes);
-    twc->setHints(depots);
-    twc->setHints(pickups);
-    twc->setHints(endings);
+    twc.setHints(dumps);
+    twc.setHints(nodes);
+    twc.setHints(depots);
+    twc.setHints(pickups);
+    twc.setHints(endings);
 
-    // twc->fill_travel_time_onTrip();
-    twc->settCC(C, pickups);
+    // twc.fill_travel_time_onTrip();
+    twc.settCC(C, pickups);
 
 
     assert(!trucks.empty() && !depots.empty() && !dumps.empty() && !endings.empty());
@@ -131,7 +131,7 @@ void Prob_trash::loadProblem(const std::string &infile)
     for (int i = 0; i < invalidTrucks.size(); i++) invalidTrucks[i].tau();
 
 
-    // twc->dump();
+    // twc.dump();
 #endif
 
     DLOG(INFO) << "-------- Leaving Prob_trash::LoadProblem --------------";

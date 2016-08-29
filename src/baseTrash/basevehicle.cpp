@@ -121,7 +121,7 @@ bool  BaseVehicle::findPairNodesHasMoreNodesOnPath(
   const TwBucket &assigned, const TwBucket &unassigned,
   UINT &bestFrom, UINT &bestTo, TwBucket &subPath) {
   assert(unassigned.size());
-    bool found = twc->findPairNodesHasMoreNodesOnPath(assigned, unassigned,
+    bool found = twc.findPairNodesHasMoreNodesOnPath(assigned, unassigned,
                        bestFrom, bestTo, subPath);
   assert(found);
   return found;
@@ -131,7 +131,7 @@ bool  BaseVehicle::findNodeHasMoreNodesOnPath(
   const TwBucket &assigned, const TwBucket &unassigned,
   UINT &bestNode, UINT &bestPos, TwBucket &subPath) {
   assert(unassigned.size());
-    bool found = twc->findNodeHasMoreNodesOnPath(path, assigned, unassigned,
+    bool found = twc.findNodeHasMoreNodesOnPath(path, assigned, unassigned,
                        dumpSite, bestNode, bestPos, subPath);
   assert(found);
   return found;
@@ -139,7 +139,7 @@ bool  BaseVehicle::findNodeHasMoreNodesOnPath(
 
 
 void  BaseVehicle::setTravelingTimesOfRoute() const {
-    twc->setTravelingTimesOfRoute(path,dumpSite);
+    twc.setTravelingTimesOfRoute(path,dumpSite);
 }
 
 
@@ -242,7 +242,7 @@ bool BaseVehicle::findFastestNodeTo(bool first, TwBucket &unassigned, POS &pos,
   bestTime = VRP_MAX();
   bool oldStateOsrm = osrmi->getUse();
   osrmi->useOsrm(true);
-  flag = twc->findFastestNodeTo(first, path, unassigned, dumpSite,
+  flag = twc.findFastestNodeTo(first, path, unassigned, dumpSite,
          pos, bestNode, bestTime);
 
 #ifdef VRPMAXTRACE 

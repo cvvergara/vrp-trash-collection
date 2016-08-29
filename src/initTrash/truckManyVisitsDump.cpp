@@ -117,7 +117,7 @@ bool TruckManyVisitsDump::insertBigSubPathAtBegin(Trip &trip) {
   if (unassigned.size() == 0) return false;
   UINT bestNode;
   TwBucket subPath;
-  twc->findBestFromNodeHasMoreNodesOnPath(assigned, unassigned, bestNode, trip[1].nid(), subPath);
+  twc.findBestFromNodeHasMoreNodesOnPath(assigned, unassigned, bestNode, trip[1].nid(), subPath);
   assert(subPath.size() != 0);
 #ifdef VRPMAXTRACE
   trip.tau();
@@ -146,7 +146,7 @@ bool TruckManyVisitsDump::insertBigSubPathAtEnd(Trip &trip) {
   if (unassigned.size() == 0) return false;
   UINT bestNode;
   TwBucket subPath;
-  twc->findBestToNodeHasMoreNodesOnPath(assigned, unassigned, trip[trip.size()-1].nid(), bestNode, subPath);
+  twc.findBestToNodeHasMoreNodesOnPath(assigned, unassigned, trip[trip.size()-1].nid(), bestNode, subPath);
   assert(subPath.size() != 0);
 #ifdef VRPMAXTRACE
   trip.tau();
@@ -186,7 +186,7 @@ bool TruckManyVisitsDump::insertBestPairSubPath(std::deque<Trip> &trips) {
   UINT from, to;
   TwBucket subPath;
   assert(unassigned.size());
-  twc->findPairNodesHasMoreNodesOnPath(assigned, unassigned, from, to, subPath);
+  twc.findPairNodesHasMoreNodesOnPath(assigned, unassigned, from, to, subPath);
 
   if (subPath.size() < 3) return false;
   float8 bestTime; 
@@ -244,7 +244,7 @@ void TruckManyVisitsDump::fillTrip(Trip &trip) {
   // bestNode = unassigned[0];
   // instead of this:
   //trip.findFastestNodeTo(true, unassigned, bestPos, bestNode, bestTime);
-  // use twc->getTimeOnTrip(from, middle, to)
+  // use twc.getTimeOnTrip(from, middle, to)
   while (!trip.has_cv()) {
     bestTime = 99999;
     oldSize = trip.size();
@@ -252,9 +252,9 @@ void TruckManyVisitsDump::fillTrip(Trip &trip) {
     for (UINT i = 0; i < trip.size(); i++) {
       for (UINT j = 0; j < unassigned.size(); j++) {
         if (i < trip.size() - 1) {
-          currTime = twc->getTimeOnTrip(trip[i], unassigned[j], trip[i+1]);
+          currTime = twc.getTimeOnTrip(trip[i], unassigned[j], trip[i+1]);
         } else {
-          currTime = twc->getTimeOnTrip(trip[i], unassigned[j], trip.getDumpSite());
+          currTime = twc.getTimeOnTrip(trip[i], unassigned[j], trip.getDumpSite());
         }
         if (currTime < bestTime) {
           bestTime = currTime;
@@ -627,7 +627,7 @@ void TruckManyVisitsDump::insertNodesOnPath(Trip &trip) {
   invariant();
 
   streetNodes.clear();
-  streetNodes = twc->getNodesOnPath(trip.Path(), trip.getDumpSite(), unassigned);
+  streetNodes = twc.getNodesOnPath(trip.Path(), trip.getDumpSite(), unassigned);
   tmp = streetNodes;
   assert((tmp * assigned).size() == 0);
   TwBucket aux;
@@ -671,7 +671,7 @@ void TruckManyVisitsDump::process(int pcase)
   usedTrucks.clear();
   assigned.clear();
   unassigned = pickups;
-  twc->initializeTravelTime();
+  twc.initializeTravelTime();
   invariant();
 
   fleet.clear();

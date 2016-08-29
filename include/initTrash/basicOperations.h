@@ -44,7 +44,7 @@ class Basicoperations : public Solution {
     unusedTrucks = trucks;
     unassigned = pickups;
     fleet.clear();
-    twc->fill_travel_time_onTrip();
+    twc.fill_travel_time_onTrip();
   };
 
 

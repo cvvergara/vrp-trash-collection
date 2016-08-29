@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
 #endif
 
    best_sol.dumpSolutionForPg();
-   twc->cleanUp();
+   twc.cleanUp();
 
   } catch (const std::exception &e) {
       std::cerr << e.what() << std::endl;

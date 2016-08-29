@@ -23,8 +23,8 @@ using namespace vrptc::nodes;
 void Trip::swapBestToDump(Trip &other) {
   // this trips wants to get faster to the dump
   // this is common bewtween all trips
-  if (twc->TravelTime(other.last(),other.dumpSite)
-      < twc->TravelTime(this->last(),this->dumpSite)) { 
+  if (twc.TravelTime(other.last(),other.dumpSite)
+      < twc.TravelTime(this->last(),this->dumpSite)) { 
      std::swap(other.path[other.size()-1], path[this->size()-1]);
   }
 }
@@ -399,7 +399,7 @@ void Trip::getNodesOnPath(const Trip &o_trip, POS o_i_pos, TwBucket &nodesOnPath
   if (o_i_pos - 1 < o_nodes.size()) o_nodes.erase(o_i_pos - 1); // this nodes the other cant give
   if (o_i_pos - 1 < o_nodes.size()) o_nodes.erase(o_i_pos - 1);
   o_nodes.pop_front();  // delete the starting site
-  nodesOnPath = twc->getNodesOnPath(path, dumpSite, o_nodes);
+  nodesOnPath = twc.getNodesOnPath(path, dumpSite, o_nodes);
 }
 
 
@@ -408,7 +408,7 @@ void Trip::getNodesInOrder() {
   TwBucket nodesInOrder;
   nodes = path; 
   nodes.pop_front();  // delete the starting site
-  nodesInOrder = twc->getNodesOnPath(path, dumpSite, nodes);
+  nodesInOrder = twc.getNodesOnPath(path, dumpSite, nodes);
   // nodesInOrder.dumpid("nodesInOrder");
   Trip test = *this;
   test.path.clear();
@@ -439,13 +439,13 @@ void Trip::getNodesOnPath(const Trip &o_trip, TwBucket &nodesOnPath) const {
   nodesOnPath.clear();
   auto o_nodes = o_trip.path; // choose from this
   o_nodes.pop_front();  // delete the starting site
-  nodesOnPath = twc->getNodesOnPath(path, dumpSite, o_nodes);
+  nodesOnPath = twc.getNodesOnPath(path, dumpSite, o_nodes);
 }
 
 void Trip::getNodesNotOnPath(const Trip &o_trip, TwBucket &nodesNotOnPath) const {
   auto o_nodes = o_trip.path; // choose from this
   o_nodes.pop_front();  // delete the starting site
-  auto nodesOnPath = twc->getNodesOnPath(path, dumpSite, o_nodes);
+  auto nodesOnPath = twc.getNodesOnPath(path, dumpSite, o_nodes);
   nodesNotOnPath = o_nodes - nodesOnPath;  
 }
 
@@ -456,7 +456,7 @@ bool Trip::chooseMyBest(const Trip &other, POS o_ins_pos, POS del_pos, POS &ins_
   if (o_ins_pos-1 < o_nodes.size()) o_nodes.erase(o_ins_pos-1); // this nodes the other cant give
   if (o_ins_pos-1 < o_nodes.size()) o_nodes.erase(o_ins_pos-1);
   o_nodes.pop_front();  // delete the starting site
-  auto nodesOnPath = twc->getNodesOnPath(path, dumpSite, o_nodes);
+  auto nodesOnPath = twc.getNodesOnPath(path, dumpSite, o_nodes);
   o_nodes = o_nodes - nodesOnPath;
   // o_nodes.dumpid("nodes not in my path");
   // nodesOnPath.dumpid("nodes in my path");
@@ -474,11 +474,11 @@ bool Trip::chooseMyBest(const Trip &other, POS o_ins_pos, POS del_pos, POS &ins_
       UINT node = nodesOnPath[j].nid(); // working with node
       auto pos_o = other.path.pos(node); // located at this postition in the others path
       if (o_del_pos == other.path.size()-1) { // its the last node
-        time0 = twc->TravelTime(other[pos_o - 1].nid(), other[pos_o].nid(), other.dumpSite.nid());
-        time1 = twc->TravelTime(other[pos_o - 1].nid(), other.dumpSite.nid());
+        time0 = twc.TravelTime(other[pos_o - 1].nid(), other[pos_o].nid(), other.dumpSite.nid());
+        time1 = twc.TravelTime(other[pos_o - 1].nid(), other.dumpSite.nid());
       } else {
-        time0 = twc->TravelTime(other[pos_o - 1].nid(), other[pos_o].nid(), other[pos_o + 1].nid());
-        time1 = twc->TravelTime(other[pos_o - 1].nid(), other[pos_o+ 1].nid());
+        time0 = twc.TravelTime(other[pos_o - 1].nid(), other[pos_o].nid(), other[pos_o + 1].nid());
+        time1 = twc.TravelTime(other[pos_o - 1].nid(), other[pos_o+ 1].nid());
       } 
       deltaTime = time1 - time0; 
       if (deltaTime < o_delta_del) {
@@ -505,13 +505,13 @@ double Trip::delta_del(POS del_pos) const {
   double time0, time1;
   if (del_pos == path.size()-1) { // its the last node
     //TODO quitar el .nid();
-    if (twc->isInPath(path[del_pos - 1], path[del_pos], dumpSite)) return 0; 
-    time0 = twc->TravelTime(path[del_pos - 1].nid(), path[del_pos].nid(), dumpSite.nid());
-    time1 = twc->TravelTime(path[del_pos - 1].nid(), dumpSite.nid());
+    if (twc.isInPath(path[del_pos - 1], path[del_pos], dumpSite)) return 0; 
+    time0 = twc.TravelTime(path[del_pos - 1].nid(), path[del_pos].nid(), dumpSite.nid());
+    time1 = twc.TravelTime(path[del_pos - 1].nid(), dumpSite.nid());
   } else {
-    if (twc->isInPath(path[del_pos - 1], path[del_pos], path[del_pos + 1])) return 0;
-    time0 = twc->TravelTime(path[del_pos - 1].nid(), path[del_pos].nid(), path[del_pos + 1].nid());
-    time1 = twc->TravelTime(path[del_pos - 1].nid(), path[del_pos+ 1].nid());
+    if (twc.isInPath(path[del_pos - 1], path[del_pos], path[del_pos + 1])) return 0;
+    time0 = twc.TravelTime(path[del_pos - 1].nid(), path[del_pos].nid(), path[del_pos + 1].nid());
+    time1 = twc.TravelTime(path[del_pos - 1].nid(), path[del_pos+ 1].nid());
   } 
   return time1 - time0;
 }
@@ -521,13 +521,13 @@ double Trip::delta_ins(UINT n_ins, POS ins_pos) const {
   assert(ins_pos > 0 && ins_pos <= path.size());
   double time0, time1;
     if (ins_pos == path.size()) {
-      if (twc->isInPath(path[ins_pos - 1].nid(), n_ins, dumpSite.nid())) return 0;
-      time1 = twc->TravelTime(path[ins_pos - 1].nid(), n_ins, dumpSite.nid());
-      time0 = twc->TravelTime(path[ins_pos - 1].nid(), dumpSite.nid());
+      if (twc.isInPath(path[ins_pos - 1].nid(), n_ins, dumpSite.nid())) return 0;
+      time1 = twc.TravelTime(path[ins_pos - 1].nid(), n_ins, dumpSite.nid());
+      time0 = twc.TravelTime(path[ins_pos - 1].nid(), dumpSite.nid());
     } else {
-      if (twc->isInPath(path[ins_pos - 1].nid(), n_ins, path[ins_pos].nid()))  return 0;
-      time1 = twc->TravelTime(path[ins_pos - 1].nid(), n_ins, path[ins_pos].nid());
-      time0 = twc->TravelTime(path[ins_pos - 1].nid(), path[ins_pos].nid());
+      if (twc.isInPath(path[ins_pos - 1].nid(), n_ins, path[ins_pos].nid()))  return 0;
+      time1 = twc.TravelTime(path[ins_pos - 1].nid(), n_ins, path[ins_pos].nid());
+      time0 = twc.TravelTime(path[ins_pos - 1].nid(), path[ins_pos].nid());
     }
     return time1 - time0;
 }

@@ -46,8 +46,8 @@ int CostVehicle::estimatedN() const {return  N;}
   time of the nodes*/
 double CostVehicle::arrivalEclosesLast(const Trashnode &last) const {
    double value = last.closes() + last.serviceTime()
-                  + twc->TravelTime(last, dumpSite) + dumpSite.serviceTime()
-                  + twc->TravelTime(dumpSite, endingSite); 
+                  + twc.TravelTime(last, dumpSite) + dumpSite.serviceTime()
+                  + twc.TravelTime(dumpSite, endingSite); 
    return value > endTime? endTime : value;
 }
 
@@ -56,12 +56,12 @@ void CostVehicle::setInitialValues( const Trashnode &node,
                                     const TwBucket &picks ) {
 
   C = node;
-  ttSC = twc->getAverageTime(depot, picks);
+  ttSC = twc.getAverageTime(depot, picks);
   // assert(ttSC > 0);
-  ttDC = twc->getAverageTime(dumpSite, picks);
-  ttCD = twc->getAverageTime(picks, dumpSite);
-  ttDE = twc->TravelTime(dumpSite.nid(), endingSite.nid());
-  ttCC = twc->TravelTime(C.nid(), C.nid());
+  ttDC = twc.getAverageTime(dumpSite, picks);
+  ttCD = twc.getAverageTime(picks, dumpSite);
+  ttDE = twc.TravelTime(dumpSite.nid(), endingSite.nid());
+  ttCC = twc.TravelTime(C.nid(), C.nid());
 
   //double serviceE = endingSite.serviceTime();
   //shiftLength = endTime - startTime;
@@ -138,15 +138,15 @@ void CostVehicle::setCost(const Trashnode &last) {
     for (UINT i = 1; i < path.size() - 1; i++) {
 
       if ( path[i - 1].isDump() )
-        realttCD += twc->TravelTime(path[i - 1], path[i]);
+        realttCD += twc.TravelTime(path[i - 1], path[i]);
 
       if ( path[i].isDump() )
-        realttDC += twc->TravelTime(path[i], path[i + 1]);
+        realttDC += twc.TravelTime(path[i], path[i + 1]);
     }
   } else realttDC = ttDC; //without moving dumps this is 0
 
-  // without moving dumps this is  twc->TravelTime(last, dumpSite)
-  realttCD = (realttCD + twc->TravelTime(last, dumpSite)) / (path.dumpVisits() + 1.0);
+  // without moving dumps this is  twc.TravelTime(last, dumpSite)
+  realttCD = (realttCD + twc.TravelTime(last, dumpSite)) / (path.dumpVisits() + 1.0);
 
   ttCD = std::min( realttCD, ttCD );
   ttDC = std::min( realttDC, ttDC );

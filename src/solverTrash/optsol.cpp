@@ -127,7 +127,7 @@ void OptSol::optimizeTruckNumber()
     emptiedTruck = emptyAtruck( allTrucks, allTrucks );
 
   if (emptiedTruck == true) {
-    twc->emptiedTruck = true;
+    twc.emptiedTruck = true;
     optimizeTruckNumber();
   }
 
@@ -137,12 +137,12 @@ void OptSol::optimizeTruckNumber()
 
 void OptSol::setFreeSpaces()
 {
-  twc->z1Tot = 0;
-  twc->z2Tot = 0;
+  twc.z1Tot = 0;
+  twc.z2Tot = 0;
 
   for (UINT i = 0; i < fleet.size(); i++ ) {
-    twc->z1Tot += fleet[i].getz1();
-    twc->z2Tot += fleet[i].getz2();
+    twc.z1Tot += fleet[i].getz1();
+    twc.z2Tot += fleet[i].getz2();
   }
 }
 
