@@ -196,40 +196,32 @@ TwBucket::dump(const std::string &title) const
     DLOG(INFO) << " <----- end \n";
 }
 #endif
-///@}
 
 
+
+/*
+ * To have or not to have
+ */
 bool 
-TwBucket::hasId(const Trashnode &node) const
-{
-    return hasId(node.id());
-}
-
-bool 
-TwBucket::hasId(int64_t id) const
-{
+TwBucket::hasId(int64_t id) const {
     return std::find_if(path.begin(), path.end(),
             [&id](const auto &item) {
             return item.id() == id;
             }) != path.end();
 
 }
-bool 
-TwBucket::hasNid(const Trashnode &node) const
-{
-    return hasNid(node.nid());
-}
-bool 
-TwBucket::hasNid(UID nid) const
-{
 
-    return !(
-            std::find_if(path.begin(), path.end(),
-                [&nid] (const Trashnode &e) 
-                {return e.nid() == nid;})
-            ==  path.end());
-
+bool 
+TwBucket::hasNode(const Trashnode &node) const { return !(
+        std::find_if(path.begin(), path.end(),
+            [&node] (const Trashnode &e) 
+            {return e.nid() == node.nid();})
+        ==  path.end());
 }
+
+/*
+*/
+
 bool 
 TwBucket::operator ==(const TwBucket &other) const
 {
@@ -363,28 +355,25 @@ TwBucket::feasable() const
 }
 
 bool 
-TwBucket::feasable(double cargoLimit) const
-{
+TwBucket::feasable(double cargoLimit) const {
     assert(size());
     return last().feasable(cargoLimit);
 }
 
 bool
-TwBucket::has_twv() const
-{
+TwBucket::has_twv() const {
     assert(size());
     return last().has_twv();
 }
 
 bool 
-TwBucket::has_cv(double cargoLimit) const
-{
+TwBucket::has_cv(double cargoLimit) const {
     assert(size());
     return last().has_cv(cargoLimit);
 }
-UID 
-TwBucket::getNidFromId(int64_t id) const
-{
+
+size_t 
+TwBucket::getNidFromId(int64_t id) const {
 
     return std::find_if(path.begin(), path.end(),
             [&id](const auto &item) {
@@ -423,7 +412,7 @@ TwBucket::swap(POS i, POS j) {
     std::iter_swap(this->path.begin() + i, this->path.begin() + j);
 }
 
-bool 
+    bool 
 TwBucket::swap(POS b1_pos, TwBucket &bucket2, POS b2_pos)
 {
     assert(b1_pos < size() && b2_pos < bucket2.size());
@@ -432,7 +421,7 @@ TwBucket::swap(POS b1_pos, TwBucket &bucket2, POS b2_pos)
 }
 
 
-void 
+    void 
 TwBucket::move(int fromi, int toj)
 {
     if ( fromi == toj ) return;
@@ -458,7 +447,7 @@ TwBucket::getpath() const
 }
 
 
-bool 
+    bool 
 TwBucket::insert(const Trashnode &node, POS atPos)
 {
     assert(atPos <= path.size());
@@ -466,7 +455,7 @@ TwBucket::insert(const Trashnode &node, POS atPos)
     return true;
 }
 
-bool 
+    bool 
 TwBucket::insert(const TwBucket &nodes, POS atPos)
 {
     assert(atPos <= path.size());
@@ -477,7 +466,7 @@ TwBucket::insert(const TwBucket &nodes, POS atPos)
 }
 
 
-bool 
+    bool 
 TwBucket::erase(POS atPos)
 {
     assert(atPos < path.size());
@@ -486,7 +475,7 @@ TwBucket::erase(POS atPos)
 }
 
 
-void 
+    void 
 TwBucket::erase(const Trashnode &node)
 {
 
@@ -503,7 +492,7 @@ TwBucket::erase(const Trashnode &node)
 
 
 #ifdef USE
-bool 
+    bool 
 TwBucket::erase(POS fromPos, POS toPos)
 {
     assert(fromPos < path.size());
@@ -521,13 +510,13 @@ TwBucket::erase(POS fromPos, POS toPos)
 }
 #endif  //USE
 
-bool 
+    bool 
 TwBucket::push_back(const Trashnode &node)
 {
     path.push_back(node);
     return true;
 }
-bool 
+    bool 
 TwBucket::push_front(const Trashnode &node)
 {
     path.push_front(node);
@@ -544,7 +533,7 @@ TwBucket::operator[] (POS at) const
     assert(at < path.size());
     return path[at];
 }
-Trashnode& 
+    Trashnode& 
 TwBucket::at(POS pos)
 {
     assert(pos < path.size());

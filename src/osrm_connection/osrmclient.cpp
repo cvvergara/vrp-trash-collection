@@ -36,6 +36,7 @@
 
 
 #include "nodes/node.h"
+#include "nodes/trashnode.h"
 #include "baseClasses/logger.h"
 #include "baseClasses/stats.h"
 
@@ -90,8 +91,8 @@ void OsrmClient::clear() {
  * OsrmClient::getOsrmTimes (times of each leg of the path)
  *
  ******************************************************************/
-void OsrmClient::addViaPoint(const nodes::Node &node) {
-    STATS_INC("OsrmClient::addViaPoint(const Node &node)");
+void OsrmClient::addViaPoint(const Trashnode &node) {
+    STATS_INC("OsrmClient::addViaPoint(const Trahsnode &node)");
 
     route_parameters.coordinates.push_back({
             osrm::util::FloatLongitude{node.x()},
@@ -105,8 +106,8 @@ void OsrmClient::addViaPoint(const nodes::Node &node) {
  * \brief Add a path of \ref Node as locations to a the OSRM request.
  * \param[in] path A std::deque<Node> that you want to add.
  */
-void OsrmClient::addViaPoint(const std::deque<nodes::Node> &path) {
-    STATS_INC("OsrmClient::addViaPoint(std::deque<Node> &)");
+void OsrmClient::addViaPoint(const std::deque<Trashnode> &path) {
+    STATS_INC("OsrmClient::addViaPoint(std::deque<Trahsnode> &)");
 
     for (auto const &p : path) addViaPoint(p);
 }
@@ -119,8 +120,8 @@ void OsrmClient::addViaPoint(const std::deque<nodes::Node> &path) {
  ******************************************************************/
 
 double OsrmClient::getOsrmTime(
-        const nodes::Node &node1,
-        const nodes::Node &node2) {
+        const Trashnode &node1,
+        const Trashnode &node2) {
     STATS_INC("OsrmClient::getOsrmTime (2 nodes)");
 
     clear();
@@ -137,8 +138,9 @@ double
 OsrmClient::getOsrmTime() {
     STATS_INC("OsrmClient::getOsrmTime(double &time)");
 
-    if (!connectionAvailable || !use) return VRP_MIN();
 
+    // TODO check lst operation was viaroute
+    
     /*
      * extracting the duration
      */
@@ -149,18 +151,17 @@ OsrmClient::getOsrmTime() {
     /*
      * setting the value
      */
-    return route.values["duration"].get<osrm::json::Number>().value;
+    return route.values["duration"].get<osrm::json::Number>().value / 60;
 }
 
 
-bool OsrmClient::getOsrmTimes(std::deque<double> &times) {
+std::deque<double>
+OsrmClient::getOsrmTimes() {
     STATS_INC("OsrmClient::getOsrmTimes(td::deque<double> &times");
+    std::deque<double> times;
 
-    times.clear();
-    if (!connectionAvailable || !use) {
-        return false;
-    }
-
+    // TODO check lst operation was viaroute
+    
     /*
      * extracting the durations of each leg
      */
@@ -173,11 +174,11 @@ bool OsrmClient::getOsrmTimes(std::deque<double> &times) {
      */
     for (const auto & leg_element: leg.values) {
         auto leg_object = leg_element.get<osrm::json::Object>();
-        times.push_back(leg_object.values["duration"].get<osrm::json::Number>().value);
+        times.push_back(leg_object.values["duration"].get<osrm::json::Number>().value / 60);
     }
 
     assert(leg.values.size() == times.size());
-    return true;
+    return times;
 }
 
 
@@ -460,8 +461,8 @@ bool OsrmClient::testOsrmClient(
 
     //test 8 (times array)
     {
-        std::deque<double> times;
-        if (getOsrmTimes(times) == false) {
+        auto times = getOsrmTimes();
+        if (times.empty()) {
             DLOG(INFO) << "#8 getOsrmTimes Failed!\n";
             return false;
         }

@@ -25,6 +25,7 @@
 
 #include "baseClasses/logger.h"
 #include "baseClasses/stats.h"
+#include "nodes/trashnode.h"
 
 namespace vrptc {
 
@@ -90,10 +91,10 @@ class OsrmClient {
 
      /*!
       * \brief Add a location in WGS84 to the OSRM request.
-      * \param[in] node of type @ref Twnode
+      * \param[in] node 
       */
-     void addViaPoint(const nodes::Node &node);
-     void addViaPoint(const std::deque<nodes::Node> &path);
+     void addViaPoint(const Trashnode &node);
+     void addViaPoint(const std::deque<Trashnode> &path);
 
 
      /*!
@@ -102,8 +103,8 @@ class OsrmClient {
       * \return True if an error was encountered and err_msg will be set. False if ok.
       */
      double getOsrmTime();
-     double getOsrmTime(const nodes::Node &node1, const nodes::Node &node2);
-     bool getOsrmTimes(std::deque<double> &times);
+     double getOsrmTime(const Trashnode &node1, const Trashnode &node2);
+     std::deque<double> getOsrmTimes();
 
      /*!
       * \brief Extract the geometry from the OSRM response.

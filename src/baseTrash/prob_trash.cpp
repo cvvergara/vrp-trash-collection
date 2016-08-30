@@ -122,13 +122,13 @@ void Prob_trash::loadProblem(const std::string &infile)
     endings.dump("------------- endings --------------------- ");
     datanodes.dump("------------- ALL data nodes --------------");
     DLOG(INFO) << "TRUCKS";
-    for (int i = 0; i < trucks.size(); i++) trucks[i].tau();
+    for (const auto truck : trucks) truck.tau();
 
 #ifdef VRPMINTRACE
     DLOG(INFO) << "INVALID TRUCKS";
 #endif
     if (invalidTrucks.size()==0) DLOG(INFO) << " NONE\n";
-    for (int i = 0; i < invalidTrucks.size(); i++) invalidTrucks[i].tau();
+    for (const auto truck : invalidTrucks) truck.tau();
 
 
     // twc.dump();

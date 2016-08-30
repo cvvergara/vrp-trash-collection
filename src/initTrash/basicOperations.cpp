@@ -34,16 +34,16 @@ void Basicoperations::invariant() {
 // inserts node if only if node is not being in assigned set
 bool Basicoperations::safeInsertNode(Trip &trip, const Trashnode &node, UINT pos) {
   invariant();
-  if (unassigned.hasNid(node.nid()) == false) return false;
-  assert(assigned.hasNid(node.nid()) == false);
-  assert(trip.Path().hasNid(node.nid()) == false);
+  if (!unassigned.hasNode(node)) return false;
+  assert(!assigned.hasNode(node));
+  assert(!trip.Path().hasNode(node));
 
     trip.e_insert(node,pos);
     assigned.push_back(node);
     unassigned.erase(node);
 
-  assert(unassigned.hasNid(node.nid()) == false);
-  assert(assigned.hasNid(node.nid()) == true);
+  assert(!unassigned.hasNode(node));
+  assert(assigned.hasNode(node));
   invariant();
   return true;
 }
@@ -52,17 +52,17 @@ bool Basicoperations::safeDeleteNode(Trip &trip, UINT pos) {
   invariant();
   assert(pos < trip.size());
   Trashnode node = trip[pos];
-  if (assigned.hasNid(node.nid()) == false) return false;
-  assert(unassigned.hasNid(node.nid()) == false);
-  assert(trip.Path().hasNid(node.nid()) == true);
+  if (!assigned.hasNode(node)) return false;
+  assert(!unassigned.hasNode(node));
+  assert(trip.Path().hasNode(node));
 
     trip.e_remove(pos);
     unassigned.push_back(node);
     assigned.erase(node);
 
-  assert(assigned.hasNid(node.nid()) == false);
-  assert(unassigned.hasNid(node.nid()) == true);
-  assert(trip.Path().hasNid(node.nid()) == false);
+  assert(!assigned.hasNode(node));
+  assert(unassigned.hasNode(node));
+  assert(!trip.Path().hasNode(node));
   invariant();
   return true;
 }
@@ -80,8 +80,8 @@ bool Basicoperations::safeInsertSubpath(Trip &trip, TwBucket &subPath, UINT pos)
   
   for (UINT i = 0; i < subPath.size(); ++i) { 
     node = subPath[i];
-    assert(assigned.hasNid(node.nid()) == false);
-    assert(unassigned.hasNid(node.nid()) == true);
+    assert(!assigned.hasNode(node));
+    assert(unassigned.hasNode(node));
   }
 
   trip.insert(subPath, pos);
@@ -90,8 +90,8 @@ bool Basicoperations::safeInsertSubpath(Trip &trip, TwBucket &subPath, UINT pos)
 
   for (UINT i = 0; i < subPath.size(); ++i) { 
     node = subPath[i];
-    assert(assigned.hasNid(node.nid()) == true);
-    assert(unassigned.hasNid(node.nid()) == false);
+    assert(assigned.hasNode(node));
+    assert(!unassigned.hasNode(node));
   }
   invariant();
   return true;
